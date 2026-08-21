@@ -1,110 +1,96 @@
-# [POD NAME] — STATUS LOG
+# Pod C (AI/ML) � STATUS LOG
 
-<!--
-  ╔══════════════════════════════════════════════════════════════════════╗
-  ║  🤖 AI AGENTS: YOU MUST READ THIS ENTIRE FILE BEFORE MAKING       ║
-  ║     ANY CHANGES TO CODE IN THIS FOLDER.                            ║
-  ║                                                                    ║
-  ║  This file is the coordination protocol between two humans         ║
-  ║  and their AI agents working in the same codebase folder.          ║
-  ║  Ignoring this file WILL cause conflicts and reverted work.        ║
-  ╚══════════════════════════════════════════════════════════════════════╝
--->
-
-> **Last updated:** [YYYY-MM-DD HH:MM] by [Person Name]
+> **Last updated:** 2026-08-21 17:05 by Shreyashi
 
 ---
 
-## 🟢 COMPLETED
-
-List every completed feature/task with the files it touched, so the other person's AI knows what exists and should NOT be rewritten or restructured.
+## ?? COMPLETED
 
 | # | Feature / Task | Files Created/Modified | Done By | Date | Notes |
 |---|---------------|----------------------|---------|------|-------|
-| 1 | _Example: Auth middleware_ | `src/middleware/auth.ts`, `src/guards/roles.guard.ts` | Ayush | Aug 21 | Uses JWT + RBAC, tokens expire in 24h |
+| 1 | Pydantic v2 schemas & shared config | `shared/schemas.py`, `shared/config.py` | Shreyashi | Aug 21 | All Pydantic v2 schemas from MASTER.md Section 10 & 11 |
+| 2 | Crowd forecasting model & training pipeline | `forecast/model.py`, `forecast/train.py`, `forecast/predict.py` | Shreyashi | Aug 21 | Prophet model with holiday/festival regressors & sinusoidal heuristic fallback |
+| 3 | Synthetic crowd dataset generator | `forecast/data/generate_sample.py`, `forecast/data/sample_crowd.csv` | Shreyashi | Aug 21 | 21-day hourly dataset with temple peak curves (504 observations) |
+| 4 | IMD weather client & hazard scoring logic | `weather/imd_client.py`, `weather/hazard_overlay.py` | Shreyashi | Aug 21 | Multi-hazard overlay (flood, landslide, lightning, heat) with cache & realistic fallback |
+| 5 | FastAPI app & routers setup | `api/main.py`, `api/forecast_routes.py`, `api/weather_routes.py` | Shreyashi | Aug 21 | Port 8000, prefix `/ml`, CORS configured for port 3000 & 3001 |
+| 6 | Integration test suite | `tests/test_service.py` | Shreyashi | Aug 21 | Full validation of health, forecast, weather current, and hazard assessment endpoints |
 
 ---
 
-## 🟡 IN PROGRESS
-
-List what is currently being worked on, so the other person's AI does NOT touch these files.
+## ?? IN PROGRESS
 
 | # | Feature / Task | Files Being Touched | Being Done By | Approach / Notes |
-|---|---------------|--------------------|--------------|-----------------| 
-| 1 | _Example: Alert engine_ | `src/services/alert.service.ts` | Akshat | Using event-driven pattern with Redis pub/sub |
-
-> ⚠️ **AI RULE:** If a file is listed here as "in progress" by the other person, DO NOT modify it. Work on something else or wait for it to move to COMPLETED.
+|---|---------------|--------------------|--------------|-----------------|
+| 1 | Anomaly Detection (Crush Precursor) | `anomaly/detector.py`, `anomaly/patterns.py` | Diya | Isolation Forest + Flow Velocity analysis |
+| 2 | Bhashini Translation & Voice Services | `bhashini/translate.py`, `bhashini/tts.py`, `bhashini/stt.py` | Diya | Bhashini ULCA API integration |
 
 ---
 
-## 🔴 PENDING / TODO
-
-Tasks that haven't been started yet. Either person can pick these up.
+## ?? PENDING / TODO
 
 | # | Feature / Task | Priority | Assigned To | Dependencies |
 |---|---------------|----------|-------------|-------------|
-| 1 | _Example: WebSocket setup_ | HIGH | Unassigned | Needs auth middleware (COMPLETED #1) |
+| 1 | Register Anomaly & Bhashini routes in `api/main.py` | HIGH | Diya | Anomaly detector & Bhashini client complete |
+| 2 | Dockerfile for AI/ML service | MEDIUM | Shreyashi | Endpoints finalized |
+| 3 | Cross-pod backend integration test | HIGH | Shreyashi & Ayush | Backend zones & weather proxy live |
 
 ---
 
-## 📐 ARCHITECTURE DECISIONS
-
-Record every significant decision so the other person's AI doesn't undo it or choose a conflicting approach.
+## ?? ARCHITECTURE DECISIONS
 
 | # | Decision | Why | Decided By | Date |
 |---|---------|-----|-----------|------|
-| 1 | _Example: Using NestJS Guards for RBAC instead of middleware_ | Cleaner decorator pattern, built-in NestJS support | Ayush | Aug 21 |
-
-> ⚠️ **AI RULE:** Do NOT change or refactor patterns listed here without explicit human approval. These are deliberate choices.
+| 1 | Prophet as primary forecaster with sinusoidal heuristic fallback | Ensures robust API responses (<10 data points or fitting issues gracefully handled) | Shreyashi | Aug 21 |
+| 2 | Rule-based hazard assessment matrix | Fast, deterministic, explainable multi-hazard scoring (flood, landslide, lightning, heat) without requiring external training datasets | Shreyashi | Aug 21 |
+| 3 | In-memory 10-min cache on weather data | Prevents hitting external IMD rate limits while maintaining freshness | Shreyashi | Aug 21 |
 
 ---
 
-## 🔌 INTERFACE CHANGES (CROSS-POD IMPACT)
-
-If you changed anything that affects another pod (API endpoint shape, WebSocket event name, shared type, DB schema), log it here AND notify the team chat.
+## ?? INTERFACE CHANGES (CROSS-POD IMPACT)
 
 | # | What Changed | Old | New | Affects | Notified? |
 |---|-------------|-----|-----|---------|----------|
-| 1 | _Example: `/api/incidents` response now includes `zoneId`_ | `{ id, type, severity }` | `{ id, type, severity, zoneId }` | Frontend (Pod A) | ✅ Yes |
+| 1 | Implemented `POST /ml/forecast`, `GET /ml/weather/current`, `POST /ml/weather/hazards` | None (Unimplemented) | Live & Tested against MASTER.md contracts | Backend (Ayush / Pod B) | ? Yes |
 
 ---
 
-## 📁 FILE MAP
-
-Brief description of what each key file/module does. Update this as new files are created.
+## ?? FILE MAP
 
 ```
-src/
-├── main.ts                  — App entry point
-├── app.module.ts            — Root module
-├── middleware/
-│   └── ...
-├── modules/
-│   ├── zones/               — Zone CRUD + density endpoints
-│   ├── incidents/           — Incident detection + management
-│   ├── alerts/              — Alert composition + dispatch
-│   └── ...
-└── ...
+ai-ml/
++-- api/
+�   +-- __init__.py
+�   +-- main.py                  � FastAPI app entry point & router aggregation
+�   +-- forecast_routes.py       � POST /ml/forecast endpoint
+�   +-- weather_routes.py        � GET /ml/weather/current & POST /ml/weather/hazards
++-- forecast/
+�   +-- __init__.py
+�   +-- model.py                 � Prophet forecasting model with fallback
+�   +-- predict.py               � Inference handler and color-coded status mapping
+�   +-- train.py                 � Model fitting & cross-validation script
+�   +-- data/
+�       +-- generate_sample.py   � Synthetic pilgrimage crowd dataset generator
+�       +-- sample_crowd.csv     � 21-day hourly crowd dataset (504 rows)
++-- weather/
+�   +-- __init__.py
+�   +-- imd_client.py            � IMD weather client with simulation & caching
+�   +-- hazard_overlay.py        � Multi-hazard scoring (flood, landslide, lightning, heat)
++-- shared/
+�   +-- __init__.py
+�   +-- config.py                � Configuration & environment variable access
+�   +-- schemas.py               � Pydantic v2 data contracts
++-- tests/
+�   +-- __init__.py
+�   +-- test_service.py          � Full integration test suite
++-- requirements.txt             � Pinned dependencies
++-- .env                         � Local environment variables
++-- STATUS.md                    � Pod C status log
 ```
 
 ---
 
-## 🐛 KNOWN ISSUES
+## ?? KNOWN ISSUES
 
 | # | Issue | Severity | Workaround | Filed By |
 |---|-------|----------|-----------|----------|
-| 1 | _Example: WebSocket disconnects after 60s idle_ | Low | Client sends ping every 30s | Akshat |
-
----
-
-## 📝 HOW TO UPDATE THIS FILE
-
-After finishing any work session:
-
-1. Move your task from **IN PROGRESS** → **COMPLETED** (with files list)
-2. Add any new tasks you discovered to **PENDING**
-3. Update the **FILE MAP** if you created new files
-4. If you changed any shared interface, add to **INTERFACE CHANGES** and tell the group chat
-5. Log any significant decisions in **ARCHITECTURE DECISIONS**
-6. Update the **"Last updated"** timestamp at the top
-7. **Commit this file** in the same PR as your code changes
+| 1 | IMD public REST API URL is placeholder | Low | Client automatically uses realistic monsoon weather generator fallback | Shreyashi |
