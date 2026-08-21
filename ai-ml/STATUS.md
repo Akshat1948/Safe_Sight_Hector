@@ -1,6 +1,6 @@
 # Pod C (AI/ML) — STATUS LOG
 
-> **Last updated:** 2026-08-21 17:05 by Shreyashi
+> **Last updated:** 2026-08-21 19:05 by Shreyashi
 
 ---
 
@@ -17,12 +17,24 @@
 
 ---
 
-## ?? IN PROGRESS
+## ?? IN PROGRESS / UPCOMING ACTION ITEMS FOR TEAMMATES
 
-| # | Feature / Task | Files Being Touched | Being Done By | Approach / Notes |
-|---|---------------|--------------------|--------------|-----------------|
-| 1 | Anomaly Detection (Crush Precursor) | `anomaly/detector.py`, `anomaly/patterns.py` | Diya | Isolation Forest + Flow Velocity analysis |
-| 2 | Bhashini Translation & Voice Services | `bhashini/translate.py`, `bhashini/tts.py`, `bhashini/stt.py` | Diya | Bhashini ULCA API integration |
+### ?? For Diya (Pod C — AI/ML Partner)
+| # | Task | Files to Create / Touch | Target Date | Notes |
+|---|------|------------------------|-------------|-------|
+| 1 | Build Crush Precursor / Anomaly Detection | `ai-ml/anomaly/detector.py`, `ai-ml/anomaly/patterns.py` | Aug 22 (Day 3) | Use Isolation Forest / flow velocity thresholds against `shared/schemas.py` |
+| 2 | Build Bhashini Voice & Translation Integration | `ai-ml/bhashini/translate.py`, `ai-ml/bhashini/tts.py`, `ai-ml/bhashini/stt.py` | Aug 22 (Day 3) | Integration with Bhashini ULCA API for Indic languages |
+| 3 | Create Anomaly & Bhashini API Routes | `ai-ml/api/anomaly_routes.py`, `ai-ml/api/bhashini_routes.py` | Aug 22 (Day 3) | Expose `POST /ml/anomaly/detect` and `POST /ml/bhashini/*` |
+| 4 | Register Routers in FastAPI Entrypoint | `ai-ml/api/main.py` | Aug 22 (Day 3) | Uncomment Diya's router imports and `app.include_router(...)` lines |
+| 5 | Review Shreyashi's PR & open own PR | GitHub PR `pod-c/forecast-model` ? `develop` | Aug 22 (Day 3) | Cross-review Pod C code |
+
+### ?? For Ayush (Pod B — Backend Lead)
+| # | Task | Target Date | Notes / Integration Contract |
+|---|------|-------------|------------------------------|
+| 1 | Connect Backend Weather Proxy to AI/ML | Aug 22–23 | Call `GET http://localhost:8000/ml/weather/current?site_lat={lat}&site_lon={lon}` from NestJS backend |
+| 2 | Connect Zone Forecast Service to AI/ML | Aug 22–23 | Call `POST http://localhost:8000/ml/forecast` passing historical density readings to receive 6h forecasts |
+| 3 | Connect Site Hazard Evaluation to AI/ML | Aug 22–23 | Call `POST http://localhost:8000/ml/weather/hazards` to evaluate live environmental risks |
+| 4 | Finalize Zone & Geofence CRUD | Aug 22 (Day 3) | Needed for Frontend map rendering and AI/ML zone ID matching |
 
 ---
 
@@ -30,9 +42,8 @@
 
 | # | Feature / Task | Priority | Assigned To | Dependencies |
 |---|---------------|----------|-------------|-------------|
-| 1 | Register Anomaly & Bhashini routes in `api/main.py` | HIGH | Diya | Anomaly detector & Bhashini client complete |
-| 2 | Dockerfile for AI/ML service | MEDIUM | Shreyashi | Endpoints finalized |
-| 3 | Cross-pod backend integration test | HIGH | Shreyashi & Ayush | Backend zones & weather proxy live |
+| 1 | Dockerfile for AI/ML service | MEDIUM | Shreyashi | Service tested |
+| 2 | Cross-pod end-to-end integration testing | HIGH | Shreyashi, Ayush, Diya | Backend proxies live on Day 4 |
 
 ---
 
@@ -50,7 +61,7 @@
 
 | # | What Changed | Old | New | Affects | Notified? |
 |---|-------------|-----|-----|---------|----------|
-| 1 | Implemented `POST /ml/forecast`, `GET /ml/weather/current`, `POST /ml/weather/hazards` | None (Unimplemented) | Live & Tested against MASTER.md contracts | Backend (Ayush / Pod B) | ? Yes |
+| 1 | Implemented `POST /ml/forecast`, `GET /ml/weather/current`, `POST /ml/weather/hazards` | None (Unimplemented) | Live & Tested against MASTER.md contracts on port 8000 | Backend (Ayush / Pod B) | ? Yes |
 
 ---
 
@@ -61,20 +72,24 @@ ai-ml/
 +-- api/
 ¦   +-- __init__.py
 ¦   +-- main.py                  — FastAPI app entry point & router aggregation
-¦   +-- forecast_routes.py       — POST /ml/forecast endpoint
-¦   +-- weather_routes.py        — GET /ml/weather/current & POST /ml/weather/hazards
+¦   +-- forecast_routes.py       — POST /ml/forecast endpoint (Shreyashi)
+¦   +-- weather_routes.py        — GET /ml/weather/current & POST /ml/weather/hazards (Shreyashi)
+¦   +-- anomaly_routes.py        — (Reserved for Diya)
+¦   +-- bhashini_routes.py       — (Reserved for Diya)
 +-- forecast/
 ¦   +-- __init__.py
-¦   +-- model.py                 — Prophet forecasting model with fallback
-¦   +-- predict.py               — Inference handler and color-coded status mapping
-¦   +-- train.py                 — Model fitting & cross-validation script
+¦   +-- model.py                 — Prophet forecasting model with fallback (Shreyashi)
+¦   +-- predict.py               — Inference handler and color-coded status mapping (Shreyashi)
+¦   +-- train.py                 — Model fitting & cross-validation script (Shreyashi)
 ¦   +-- data/
 ¦       +-- generate_sample.py   — Synthetic pilgrimage crowd dataset generator
 ¦       +-- sample_crowd.csv     — 21-day hourly crowd dataset (504 rows)
 +-- weather/
 ¦   +-- __init__.py
-¦   +-- imd_client.py            — IMD weather client with simulation & caching
-¦   +-- hazard_overlay.py        — Multi-hazard scoring (flood, landslide, lightning, heat)
+¦   +-- imd_client.py            — IMD weather client with simulation & caching (Shreyashi)
+¦   +-- hazard_overlay.py        — Multi-hazard scoring (flood, landslide, lightning, heat) (Shreyashi)
++-- anomaly/                     — (Reserved for Diya)
++-- bhashini/                    — (Reserved for Diya)
 +-- shared/
 ¦   +-- __init__.py
 ¦   +-- config.py                — Configuration & environment variable access
