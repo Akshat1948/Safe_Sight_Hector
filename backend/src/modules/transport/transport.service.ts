@@ -14,12 +14,13 @@ export class TransportService {
     private readonly transportRepository: Repository<TransportStatusEntity>,
   ) {}
 
-  async getParkingStatus(siteId: string) {
+  async getParkingStatus(siteId?: string) {
+    const where: any = { transportType: TransportType.PARKING };
+    if (siteId && siteId.trim().length > 0) {
+      where.siteId = siteId.trim();
+    }
     const records = await this.transportRepository.find({
-      where: {
-        siteId,
-        transportType: TransportType.PARKING,
-      },
+      where,
       order: { name: 'ASC' },
     });
 
@@ -33,12 +34,13 @@ export class TransportService {
     }));
   }
 
-  async getShuttleStatus(siteId: string) {
+  async getShuttleStatus(siteId?: string) {
+    const where: any = { transportType: In([TransportType.SHUTTLE, TransportType.BUS]) };
+    if (siteId && siteId.trim().length > 0) {
+      where.siteId = siteId.trim();
+    }
     const records = await this.transportRepository.find({
-      where: {
-        siteId,
-        transportType: In([TransportType.SHUTTLE, TransportType.BUS]),
-      },
+      where,
       order: { name: 'ASC' },
     });
 

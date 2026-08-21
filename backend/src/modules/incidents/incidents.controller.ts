@@ -11,12 +11,15 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { IncidentsService } from './incidents.service';
 import { CreateIncidentDto, VerifyIncidentDto, UpdateIncidentStatusDto } from '../../common/dto';
 import { JwtAuthGuard, RolesGuard } from '../../common/guards';
 import { Roles, CurrentUser } from '../../common/decorators';
 import { UserRole, IUser } from '../../common/interfaces';
 
+@ApiTags('incidents')
+@ApiBearerAuth()
 @Controller('incidents')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class IncidentsController {

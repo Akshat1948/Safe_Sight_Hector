@@ -18,7 +18,7 @@ export class IncidentsService {
   ) {}
 
   async getIncidents(
-    siteId: string,
+    siteId?: string,
     status?: string,
     severity?: string,
     limit: number = 50,
@@ -26,8 +26,11 @@ export class IncidentsService {
   ) {
     const query = this.incidentRepository
       .createQueryBuilder('incident')
-      .leftJoinAndSelect('incident.zone', 'zone')
-      .where('incident.siteId = :siteId', { siteId });
+      .leftJoinAndSelect('incident.zone', 'zone');
+
+    if (siteId && siteId.trim().length > 0) {
+      query.andWhere('incident.siteId = :siteId', { siteId: siteId.trim() });
+    }
 
     if (status) {
       query.andWhere('incident.status = :status', { status });

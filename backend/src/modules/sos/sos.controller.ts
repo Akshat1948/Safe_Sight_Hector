@@ -11,12 +11,14 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { SosService } from './sos.service';
 import { CreateSosDto, UpdateSosStatusDto } from '../../common/dto';
 import { JwtAuthGuard, RolesGuard } from '../../common/guards';
 import { Roles, CurrentUser } from '../../common/decorators';
 import { UserRole, IUser } from '../../common/interfaces';
 
+@ApiTags('sos')
 @Controller('sos')
 export class SosController {
   constructor(private readonly sosService: SosService) {}
@@ -33,6 +35,7 @@ export class SosController {
   }
 
   @Get()
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.MANAGER, UserRole.RESPONDER)
   async getSosRequests(
@@ -48,6 +51,7 @@ export class SosController {
   }
 
   @Patch(':id/status')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.RESPONDER, UserRole.MANAGER)
   async updateSosStatus(
