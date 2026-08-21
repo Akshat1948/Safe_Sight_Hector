@@ -1,90 +1,92 @@
-# [POD NAME] — STATUS LOG
+# Pod B (Backend) — STATUS LOG
 
-<!--
-  ╔══════════════════════════════════════════════════════════════════════╗
-  ║  🤖 AI AGENTS: YOU MUST READ THIS ENTIRE FILE BEFORE MAKING       ║
-  ║     ANY CHANGES TO CODE IN THIS FOLDER.                            ║
-  ║                                                                    ║
-  ║  This file is the coordination protocol between two humans         ║
-  ║  and their AI agents working in the same codebase folder.          ║
-  ║  Ignoring this file WILL cause conflicts and reverted work.        ║
-  ╚══════════════════════════════════════════════════════════════════════╝
--->
-
-> **Last updated:** [YYYY-MM-DD HH:MM] by [Person Name]
+> **Last updated:** 2026-08-21 15:50 by Ayush (Pod B Lead)
 
 ---
 
 ## 🟢 COMPLETED
 
-List every completed feature/task with the files it touched, so the other person's AI knows what exists and should NOT be rewritten or restructured.
-
 | # | Feature / Task | Files Created/Modified | Done By | Date | Notes |
 |---|---------------|----------------------|---------|------|-------|
-| 1 | _Example: Auth middleware_ | `src/middleware/auth.ts`, `src/guards/roles.guard.ts` | Ayush | Aug 21 | Uses JWT + RBAC, tokens expire in 24h |
+| 1 | Docker Infrastructure | `docker-compose.yml` | Ayush | Aug 21 | PostgreSQL 15 (PostGIS 3.4) + Redis 7 |
+| 2 | Backend Project Scaffolding | `package.json`, `tsconfig.json`, `nest-cli.json`, `.env` | Ayush | Aug 21 | NestJS 10 + TypeORM setup |
+| 3 | Shared Contracts & Common DTOs | `src/common/` (constants, interfaces, DTOs, guards, decorators) | Ayush | Aug 21 | All DTOs, interfaces, and enums from MASTER.md defined and locked |
+| 4 | Database Entities | `src/database/entities/` (10 entities), `src/database/database.module.ts` | Ayush | Aug 21 | TypeORM entities for all tables matching MASTER.md schema |
+| 5 | Auth Module (JWT + RBAC) | `src/modules/auth/` (`auth.service.ts`, `auth.controller.ts`, `auth.module.ts`, `jwt.strategy.ts`) | Ayush | Aug 21 | Login, Refresh, Me endpoints + demo user seeder |
+| 6 | Zones Module | `src/modules/zones/` (`zones.service.ts`, `zones.controller.ts`, `zones.module.ts`) | Ayush | Aug 21 | Zone CRUD, density status calculator, time-series history, demo site seeder |
+| 7 | Geofences Module | `src/modules/geofences/` (`geofences.service.ts`, `geofences.controller.ts`, `geofences.module.ts`) | Ayush | Aug 21 | Geofence CRUD + zone boundaries |
+| 8 | Weather Module | `src/modules/weather/` (`weather.service.ts`, `weather.controller.ts`, `weather.module.ts`) | Ayush | Aug 21 | IMD weather proxy + hazard assessments |
+| 9 | Application Bootstrap | `src/app.module.ts`, `src/main.ts` | Ayush | Aug 21 | Global /api prefix, CORS, ValidationPipe, Swagger at `/api/docs` |
 
 ---
 
 ## 🟡 IN PROGRESS
 
-List what is currently being worked on, so the other person's AI does NOT touch these files.
-
 | # | Feature / Task | Files Being Touched | Being Done By | Approach / Notes |
-|---|---------------|--------------------|--------------|-----------------| 
-| 1 | _Example: Alert engine_ | `src/services/alert.service.ts` | Akshat | Using event-driven pattern with Redis pub/sub |
-
-> ⚠️ **AI RULE:** If a file is listed here as "in progress" by the other person, DO NOT modify it. Work on something else or wait for it to move to COMPLETED.
+|---|---------------|--------------------|--------------|-----------------|
+| 1 | Dependency installation & compilation verification | `backend/package.json` | Ayush | Running npm install and verifying build |
 
 ---
 
 ## 🔴 PENDING / TODO
 
-Tasks that haven't been started yet. Either person can pick these up.
-
 | # | Feature / Task | Priority | Assigned To | Dependencies |
 |---|---------------|----------|-------------|-------------|
-| 1 | _Example: WebSocket setup_ | HIGH | Unassigned | Needs auth middleware (COMPLETED #1) |
+| 1 | Incidents Module | HIGH | Akshat | TypeORM entities & DTOs ready |
+| 2 | Alerts Module | HIGH | Akshat | TypeORM entities & DTOs ready |
+| 3 | SOS Module | HIGH | Akshat | TypeORM entities & DTOs ready |
+| 4 | Transport Module | MEDIUM | Akshat | TypeORM entities & DTOs ready |
+| 5 | WebSocket Gateway (Socket.io) | HIGH | Akshat | Event shapes defined in MASTER.md |
 
 ---
 
 ## 📐 ARCHITECTURE DECISIONS
 
-Record every significant decision so the other person's AI doesn't undo it or choose a conflicting approach.
-
 | # | Decision | Why | Decided By | Date |
 |---|---------|-----|-----------|------|
-| 1 | _Example: Using NestJS Guards for RBAC instead of middleware_ | Cleaner decorator pattern, built-in NestJS support | Ayush | Aug 21 |
-
-> ⚠️ **AI RULE:** Do NOT change or refactor patterns listed here without explicit human approval. These are deliberate choices.
+| 1 | Used NestJS built-in ValidationPipe with `class-validator` | Enforces request validation across all endpoints automatically | Ayush | Aug 21 |
+| 2 | Implemented demo data auto-seeder in `AuthService` and `ZonesService` | Enables immediate zero-config testing for demo flows and frontend integration | Ayush | Aug 21 |
+| 3 | Added Swagger at `/api/docs` | Live interactive UI for testing all backend endpoints | Ayush | Aug 21 |
 
 ---
 
 ## 🔌 INTERFACE CHANGES (CROSS-POD IMPACT)
 
-If you changed anything that affects another pod (API endpoint shape, WebSocket event name, shared type, DB schema), log it here AND notify the team chat.
-
 | # | What Changed | Old | New | Affects | Notified? |
 |---|-------------|-----|-----|---------|----------|
-| 1 | _Example: `/api/incidents` response now includes `zoneId`_ | `{ id, type, severity }` | `{ id, type, severity, zoneId }` | Frontend (Pod A) | ✅ Yes |
+| - | No breaking changes from MASTER.md | — | — | All | ✅ Yes |
 
 ---
 
 ## 📁 FILE MAP
 
-Brief description of what each key file/module does. Update this as new files are created.
-
 ```
-src/
-├── main.ts                  — App entry point
-├── app.module.ts            — Root module
-├── middleware/
-│   └── ...
-├── modules/
-│   ├── zones/               — Zone CRUD + density endpoints
-│   ├── incidents/           — Incident detection + management
-│   ├── alerts/              — Alert composition + dispatch
-│   └── ...
-└── ...
+backend/
+├── docker-compose.yml       — PostgreSQL 15 + PostGIS & Redis
+├── package.json             — Dependencies
+├── tsconfig.json            — TypeScript config & path aliases
+├── .env                     — Environment variables
+├── src/
+│   ├── main.ts              — Bootstrap, Swagger, CORS, Validation
+│   ├── app.module.ts        — Root module
+│   ├── common/
+│   │   ├── constants.ts     — Shared thresholds, timeouts, languages
+│   │   ├── interfaces/      — API responses, User, Zone, Incident, Alert, SOS, Weather, Transport
+│   │   ├── dto/             — All validated DTO request classes
+│   │   ├── decorators/      — @Roles, @CurrentUser
+│   │   └── guards/          — JwtAuthGuard, RolesGuard
+│   ├── database/
+│   │   ├── database.module.ts
+│   │   └── entities/        — TypeORM entities (User, Site, Zone, Geofence, DensityReading, Incident, Alert, SosRequest, WeatherData, TransportStatus)
+│   └── modules/
+│       ├── auth/            — JWT auth, login, refresh, me (AYUSH)
+│       ├── zones/           — Zone CRUD & density (AYUSH)
+│       ├── geofences/       — Geofence management (AYUSH)
+│       ├── weather/         — Weather proxy & hazard alerts (AYUSH)
+│       ├── incidents/       — (AKSHAT)
+│       ├── alerts/          — (AKSHAT)
+│       ├── sos/             — (AKSHAT)
+│       └── transport/       — (AKSHAT)
 ```
 
 ---
@@ -93,18 +95,4 @@ src/
 
 | # | Issue | Severity | Workaround | Filed By |
 |---|-------|----------|-----------|----------|
-| 1 | _Example: WebSocket disconnects after 60s idle_ | Low | Client sends ping every 30s | Akshat |
-
----
-
-## 📝 HOW TO UPDATE THIS FILE
-
-After finishing any work session:
-
-1. Move your task from **IN PROGRESS** → **COMPLETED** (with files list)
-2. Add any new tasks you discovered to **PENDING**
-3. Update the **FILE MAP** if you created new files
-4. If you changed any shared interface, add to **INTERFACE CHANGES** and tell the group chat
-5. Log any significant decisions in **ARCHITECTURE DECISIONS**
-6. Update the **"Last updated"** timestamp at the top
-7. **Commit this file** in the same PR as your code changes
+| - | None | — | — | — |
