@@ -66,8 +66,11 @@ export class SosService {
     };
   }
 
-  async getSosRequests(siteId: string, status?: string) {
-    const where: any = { siteId };
+  async getSosRequests(siteId?: string, status?: string) {
+    const where: any = {};
+    if (siteId && siteId.trim().length > 0) {
+      where.siteId = siteId.trim();
+    }
     if (status) {
       where.status = status;
     }
