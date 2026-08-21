@@ -1,6 +1,6 @@
 # Pod B (Backend) — STATUS LOG
 
-> **Last updated:** 2026-08-21 15:50 by Ayush (Pod B Lead)
+> **Last updated:** 2026-08-21 16:32 by Akshat
 
 ---
 
@@ -17,6 +17,11 @@
 | 7 | Geofences Module | `src/modules/geofences/` (`geofences.service.ts`, `geofences.controller.ts`, `geofences.module.ts`) | Ayush | Aug 21 | Geofence CRUD + zone boundaries |
 | 8 | Weather Module | `src/modules/weather/` (`weather.service.ts`, `weather.controller.ts`, `weather.module.ts`) | Ayush | Aug 21 | IMD weather proxy + hazard assessments |
 | 9 | Application Bootstrap | `src/app.module.ts`, `src/main.ts` | Ayush | Aug 21 | Global /api prefix, CORS, ValidationPipe, Swagger at `/api/docs` |
+| 10 | WebSocket Gateway (Socket.io) | `src/gateway/` (`safesight.gateway.ts`, `gateway.module.ts`) | Akshat | Aug 21 | Room subscription (`siteId`), real-time event broadcasting |
+| 11 | Incidents Module | `src/modules/incidents/` (`incidents.service.ts`, `incidents.controller.ts`, `incidents.module.ts`) | Akshat | Aug 21 | Incidents CRUD, verification flow, status updates, WebSocket triggers |
+| 12 | Alerts Module | `src/modules/alerts/` (`alerts.service.ts`, `alerts.controller.ts`, `alerts.module.ts`) | Akshat | Aug 21 | Alert composition, Bhashini translation call, auto-escalation timer, WebSocket dispatch |
+| 13 | SOS Module | `src/modules/sos/` (`sos.service.ts`, `sos.controller.ts`, `sos.module.ts`) | Akshat | Aug 21 | Public SOS creation, automatic incident generation, WebSocket alert |
+| 14 | Transport Module | `src/modules/transport/` (`transport.service.ts`, `transport.controller.ts`, `transport.module.ts`) | Akshat | Aug 21 | Parking & shuttle status queries (public) and updates (manager) |
 
 ---
 
@@ -24,7 +29,7 @@
 
 | # | Feature / Task | Files Being Touched | Being Done By | Approach / Notes |
 |---|---------------|--------------------|--------------|-----------------|
-| 1 | Dependency installation & compilation verification | `backend/package.json` | Ayush | Running npm install and verifying build |
+| - | None | — | — | All assigned modules implemented and built |
 
 ---
 
@@ -32,11 +37,8 @@
 
 | # | Feature / Task | Priority | Assigned To | Dependencies |
 |---|---------------|----------|-------------|-------------|
-| 1 | Incidents Module | HIGH | Akshat | TypeORM entities & DTOs ready |
-| 2 | Alerts Module | HIGH | Akshat | TypeORM entities & DTOs ready |
-| 3 | SOS Module | HIGH | Akshat | TypeORM entities & DTOs ready |
-| 4 | Transport Module | MEDIUM | Akshat | TypeORM entities & DTOs ready |
-| 5 | WebSocket Gateway (Socket.io) | HIGH | Akshat | Event shapes defined in MASTER.md |
+| 1 | Register Akshat's modules in `app.module.ts` | HIGH | Ayush | `app.module.ts` ownership belongs to Ayush |
+| 2 | End-to-end integration test with database | HIGH | Ayush / Akshat | Requires running DB & Redis containers |
 
 ---
 
@@ -47,6 +49,9 @@
 | 1 | Used NestJS built-in ValidationPipe with `class-validator` | Enforces request validation across all endpoints automatically | Ayush | Aug 21 |
 | 2 | Implemented demo data auto-seeder in `AuthService` and `ZonesService` | Enables immediate zero-config testing for demo flows and frontend integration | Ayush | Aug 21 |
 | 3 | Added Swagger at `/api/docs` | Live interactive UI for testing all backend endpoints | Ayush | Aug 21 |
+| 4 | Auto-incident creation on SOS request | Guarantees every SOS is immediately tracked in the manager/responder incident queue | Akshat | Aug 21 |
+| 5 | Non-blocking Bhashini translation with timeout | Ensures alert creation succeeds even if translation service is unavailable | Akshat | Aug 21 |
+| 6 | Background timeout for alert auto-escalation | Automatically escalates unacknowledged alerts after 60s without blocking request thread | Akshat | Aug 21 |
 
 ---
 
@@ -78,15 +83,18 @@ backend/
 │   ├── database/
 │   │   ├── database.module.ts
 │   │   └── entities/        — TypeORM entities (User, Site, Zone, Geofence, DensityReading, Incident, Alert, SosRequest, WeatherData, TransportStatus)
+│   ├── gateway/             — WebSocket Gateway & Module (AKSHAT)
+│   │   ├── safesight.gateway.ts
+│   │   └── gateway.module.ts
 │   └── modules/
 │       ├── auth/            — JWT auth, login, refresh, me (AYUSH)
 │       ├── zones/           — Zone CRUD & density (AYUSH)
 │       ├── geofences/       — Geofence management (AYUSH)
 │       ├── weather/         — Weather proxy & hazard alerts (AYUSH)
-│       ├── incidents/       — (AKSHAT)
-│       ├── alerts/          — (AKSHAT)
-│       ├── sos/             — (AKSHAT)
-│       └── transport/       — (AKSHAT)
+│       ├── incidents/       — Incident CRUD, verification & status updates (AKSHAT)
+│       ├── alerts/          — Alert composition, auto-translate & escalation (AKSHAT)
+│       ├── sos/             — Public SOS handling & auto-incident creation (AKSHAT)
+│       └── transport/       — Parking & shuttle status (AKSHAT)
 ```
 
 ---
