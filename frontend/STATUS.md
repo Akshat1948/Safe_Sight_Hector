@@ -22,17 +22,18 @@
 ## 📋 CROSS-POD CONTRACT AUDIT & ACTION ITEMS FOR OTHER PODS
 
 ### 1. Pod B (Backend — Akshat & Ayush)
-* **Akshat (Incidents & Alerts)**:
-  * ⚠️ **Action Needed**: Add `image_urls text[]` / `imageUrls?: string[]` to `IncidentEntity` and `CreateIncidentDto` so visitor-uploaded evidence photos are stored in PostgreSQL and returned in `GET /api/incidents`.
 * **Ayush (Auth & Zones)**:
-  * ℹ️ **Action Needed**: Ensure database seed scripts populate realistic GeoJSON polygon boundaries for Prayagraj and Kedarnath zones (`GET /api/zones`).
+  * 🟢 **100% COMPLETE & LIVE**: Auth (JWT login/refresh/me), Zones CRUD, PostGIS polygon boundary seeding for Prayagraj & Kedarnath, Geofences, Weather proxy, and Docker/Swagger infrastructure.
+* **Akshat (Incidents & Alerts)**:
+  * 🟢 **100% COMPLETE & LIVE**: Incidents CRUD, verification flow, Alerts & 60s auto-escalation timer, SOS public handling & auto-incident generation, Transport, and WebSocket Gateway (:3001).
+  * ℹ️ Note: Optional `image_urls text[]` / `imageUrls?: string[]` on `IncidentEntity` for future persistent visitor photo uploads.
 
 ### 2. Pod C (AI/ML — Shreyashi & Diya)
 * **Shreyashi (Forecast & Weather)**:
-  * 🟢 Density forecast and weather hazard endpoints (`/ml/forecast`, `/ml/weather/*`) are ready.
+  * 🟢 **100% COMPLETE & LIVE**: Prophet crowd forecasting (`POST /ml/forecast`), 21-day synthetic crowd dataset, live IMD weather client (`GET /ml/weather/current`), multi-hazard scoring matrix (`POST /ml/weather/hazards`), and FastAPI test suite.
 * **Diya (Crush Detection & Bhashini)**:
-  * 🔴 `POST /ml/anomaly/detect` (Isolation Forest crowd crush detection) pending.
-  * 🔴 `POST /ml/bhashini/translate` and `POST /ml/bhashini/tts` pending.
+  * 🔴 `POST /ml/anomaly/detect` (Isolation Forest crowd crush detection) in progress.
+  * 🔴 `POST /ml/bhashini/translate` and `POST /ml/bhashini/tts` in progress.
 
 ### 3. Pod A (Frontend — Yashasvi)
 * **Yashasvi (Visitor UI & Maps)**:
