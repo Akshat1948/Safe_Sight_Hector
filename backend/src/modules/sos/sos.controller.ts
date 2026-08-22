@@ -11,7 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { SosService } from './sos.service';
 import { CreateSosDto, UpdateSosStatusDto } from '../../common/dto';
 import { JwtAuthGuard, RolesGuard } from '../../common/guards';
