@@ -63,7 +63,7 @@
 | Item | Priority | Owner | Status | Notes |
 |------|----------|-------|--------|-------|
 | Add `@ApiQuery({ required: false })` decorators | Low/Medium | Akshat | 🟢 RESOLVED | Merged & verified across all controllers. |
-| Build Demo Simulation Script (`scripts/simulate-demo.ts`) | Medium | Ayush | 🔴 NEXT | Automated density spike injection into Zone C for SIH presentation. |
+| Build Demo Simulation Script (`scripts/simulate-demo.ts`) | Medium | Ayush | 🟢 COMPLETED | Automated 45s live crush simulation script ready (`npm run simulate:crush`). |
 
 ---
 

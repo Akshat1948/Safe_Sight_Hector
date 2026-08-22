@@ -26,6 +26,7 @@
 | 15 | Swagger ApiQuery Fixes | `src/modules/` (incidents, alerts, sos, transport controllers) | Akshat | Aug 22 | Explicit `@ApiQuery({ required: false })` added to fix Swagger UI param rendering |
 | 16 | Transport Demo Seeder | `src/modules/transport/transport.service.ts` | Akshat | Aug 22 | Auto-seeder for parking lots and shuttle bus schedules |
 | 17 | End-to-End Manual & Integration Testing | All 18 endpoints + WebSocket Gateway | Ayush | Aug 22 | 100% verified in Swagger: Auth, Zones, Geofences, Weather, Incidents, Alerts, SOS, Transport |
+| 18 | SIH Demo Simulation Script | `scripts/simulate-demo.ts`, `package.json` | Ayush | Aug 22 | Automated 45s crush simulation with step-by-step (`--step`), fast (`--fast`), and reset (`--reset`) modes |
 
 ---
 
@@ -33,7 +34,7 @@
 
 | # | Feature / Task | Files Being Touched | Being Done By | Approach / Notes |
 |---|---------------|--------------------|--------------|-----------------|
-| - | None | — | — | All assigned modules implemented, tested, and verified |
+| - | None | — | — | All assigned modules & demo tools implemented and verified |
 
 ---
 
@@ -41,7 +42,7 @@
 
 | # | Feature / Task | Priority | Assigned To | Dependencies / Notes |
 |---|---------------|----------|-------------|---------------------|
-| 1 | Demo Simulation Script (`scripts/simulate-demo.ts`) | MEDIUM | Ayush | Pumping automated density spikes into Zone C for live SIH judges demo |
+| - | None | — | — | Backend 100% complete for MVP & Demo |
 
 ---
 

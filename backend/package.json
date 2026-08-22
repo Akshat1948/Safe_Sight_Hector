@@ -15,7 +15,11 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "typeorm": "typeorm-ts-node-commonjs"
+    "typeorm": "typeorm-ts-node-commonjs",
+    "simulate:crush": "ts-node scripts/simulate-demo.ts",
+    "simulate:step": "ts-node scripts/simulate-demo.ts --step",
+    "simulate:fast": "ts-node scripts/simulate-demo.ts --fast",
+    "simulate:reset": "ts-node scripts/simulate-demo.ts --reset"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.8",
