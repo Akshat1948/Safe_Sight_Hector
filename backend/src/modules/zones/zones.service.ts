@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { ZoneEntity } from '../../database/entities/zone.entity';
 import { DensityReadingEntity } from '../../database/entities/density-reading.entity';
 import { SiteEntity } from '../../database/entities/site.entity';
@@ -19,6 +20,7 @@ export class ZonesService implements OnModuleInit {
     private densityRepository: Repository<DensityReadingEntity>,
     @InjectRepository(SiteEntity)
     private siteRepository: Repository<SiteEntity>,
+    private configService: ConfigService,
   ) {}
 
   async onModuleInit() {
@@ -26,7 +28,7 @@ export class ZonesService implements OnModuleInit {
   }
 
   /**
-   * Seed default demo site (e.g., Prayag Sangam / Temple Ghat) and zones for SIH Demo
+   * Seed default demo site (Prayagraj Sangam) and zones for SIH Demo
    */
   private async seedDefaultSiteAndZones() {
     const siteCount = await this.siteRepository.count();
@@ -236,6 +238,100 @@ export class ZonesService implements OnModuleInit {
     });
 
     return this.zoneRepository.save(zone);
+  }
+
+  /**
+   * Get crowd density forecast from AI/ML service (FastAPI Prophet model)
+   * Falls back gracefully to heuristic projections if AI/ML service is offline
+   */
+  async getZoneForecast(zoneId: string, hoursAhead = 6) {
+    const zone = await this.getZoneById(zoneId);
+    const mlBaseUrl = this.configService.get<string>('AI_ML_SERVICE_URL', 'http://localhost:8000/ml');
+
+    const recentReadings = await this.densityRepository.find({
+      where: { zoneId },
+      order: { recordedAt: 'ASC' },
+      take: 48,
+    });
+
+    const historicalData = recentReadings.map((r) => ({
+      timestamp: r.recordedAt.toISOString(),
+      headcount: r.headcount,
+    }));
+
+    try {
+      const response = await fetch(`${mlBaseUrl}/forecast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          zone_id: zone.id,
+          site_id: zone.siteId,
+          current_density: zone.currentDensity,
+          max_capacity: zone.maxCapacity,
+          hours_ahead: Math.min(Math.max(hoursAhead, 1), 24),
+          weather_condition: 'partly_cloudy',
+          is_festival_day: false,
+          historical_data: historicalData,
+        }),
+      });
+
+      if (response.ok) {
+        const payload = await response.json();
+        if (payload.success && payload.data) {
+          return payload.data;
+        }
+      }
+    } catch (err) {
+      this.logger.warn(`AI/ML service unreachable at ${mlBaseUrl}/forecast, using heuristic forecast: ${err.message}`);
+    }
+
+    // Heuristic fallback forecast
+    return this.generateHeuristicForecast(zone, hoursAhead);
+  }
+
+  private generateHeuristicForecast(zone: ZoneEntity, hoursAhead: number) {
+    const points = [];
+    const now = new Date();
+    let peakDensity = zone.currentDensity;
+    let peakTime = now.toISOString();
+
+    for (let h = 1; h <= hoursAhead; h++) {
+      const forecastTime = new Date(now.getTime() + h * 60 * 60 * 1000);
+      const hourOfDay = forecastTime.getHours();
+      // Pilgrimage diurnal curve peaks around 7-9 AM and 5-7 PM
+      const diurnalMultiplier = 0.8 + 0.4 * Math.sin(((hourOfDay - 6) / 24) * 2 * Math.PI);
+      const predictedDensity = Math.round(
+        Math.min(zone.maxCapacity * 1.1, Math.max(50, zone.currentDensity * diurnalMultiplier + h * 12)),
+      );
+
+      const capacityPct = (predictedDensity / zone.maxCapacity) * 100;
+      const status = this.calculateDensityStatus(predictedDensity, zone.maxCapacity);
+
+      if (predictedDensity > peakDensity) {
+        peakDensity = predictedDensity;
+        peakTime = forecastTime.toISOString();
+      }
+
+      points.push({
+        timestamp: forecastTime.toISOString(),
+        predicted_density: predictedDensity,
+        confidence_lower: Math.round(predictedDensity * 0.88),
+        confidence_upper: Math.round(predictedDensity * 1.12),
+        predicted_status: status,
+        risk_level: status === DensityStatus.RED ? 'critical' : status === DensityStatus.ORANGE ? 'high' : status === DensityStatus.YELLOW ? 'medium' : 'low',
+        capacity_percentage: Math.round(capacityPct * 10) / 10,
+      });
+    }
+
+    return {
+      zone_id: zone.id,
+      site_id: zone.siteId,
+      forecast: points,
+      model_used: 'heuristic_sinusoidal_fallback',
+      generated_at: now.toISOString(),
+      peak_expected_at: peakTime,
+      peak_density: peakDensity,
+    };
   }
 
   calculateDensityStatus(headcount: number, maxCapacity: number): DensityStatus {
