@@ -1,4 +1,4 @@
-﻿# SafeSight — Project Status
+# SafeSight — Project Status
 
 > **Last updated:** 2026-08-21 17:15 by Ayush (Pod B Lead)
 
@@ -59,11 +59,19 @@
 
 ---
 
+## 🚧 BLOCKERS & ACTION ITEMS
+| Item | Priority | Owner | Notes |
+|------|----------|-------|-------|
+| Add `@ApiQuery({ required: false })` decorators | Low/Medium | Akshat | Optional query parameters in `incidents`, `alerts`, `sos`, and `transport` controllers appear as required in Swagger UI. |
+| Build Demo Simulation Script (`scripts/simulate-demo.ts`) | Medium | Ayush | Automated density spike injection into Zone C for SIH presentation. |
+
+---
+
 ## 🏗️ SHARED INFRA STATUS
 | Item | Status | Notes |
 |------|--------|-------|
 | GitHub Repository | 🟢 READY | develop branch up to date with Pod B & C |
 | Docker Containers | 🟢 RUNNING | PostgreSQL 15 (PostGIS 3.4) on :5432, Redis on :6379 |
-| Backend API Gateway | 🟢 100% READY | All 18 endpoints + WebSocket Gateway compiled & verified |
+| Backend API Gateway | 🟢 100% READY | All 18 endpoints + WebSocket Gateway verified & tested |
 | AI/ML Forecast & Weather | 🟢 100% READY | Prophet model + IMD hazard evaluation ready |
 | Swagger API Docs | 🟢 LIVE | Available at http://localhost:3001/api/docs |

@@ -33,12 +33,12 @@
 
 ---
 
-## 🔴 PENDING / TODO
+## 🔴 PENDING / TODO / ACTION ITEMS
 
-| # | Feature / Task | Priority | Assigned To | Dependencies |
-|---|---------------|----------|-------------|-------------|
-| 1 | Register Akshat's modules in `app.module.ts` | HIGH | Ayush | `app.module.ts` ownership belongs to Ayush |
-| 2 | End-to-end integration test with database | HIGH | Ayush / Akshat | Requires running DB & Redis containers |
+| # | Feature / Task | Priority | Assigned To | Dependencies / Notes |
+|---|---------------|----------|-------------|---------------------|
+| 1 | Add `@ApiQuery({ required: false })` annotations | MEDIUM | Akshat | In `incidents`, `alerts`, `sos`, and `transport` controllers, optional `@Query()` parameters (`status`, `severity`, `limit`, `offset`) currently render as mandatory (red starred) in Swagger UI. Adding explicit `@ApiQuery({ name: 'param', required: false })` decorators will fix this. |
+| 2 | Demo Simulation Script (`scripts/simulate-demo.ts`) | MEDIUM | Ayush | Pumping automated density spikes into Zone C for SIH judges demo |
 
 ---
 
@@ -103,4 +103,5 @@ backend/
 
 | # | Issue | Severity | Workaround | Filed By |
 |---|-------|----------|-----------|----------|
-| - | None | — | — | — |
+| 1 | Swagger UI marks optional query parameters as required in Akshat's controllers | Low | Provide default non-empty query values in Swagger test execution or let Akshat add `@ApiQuery({ required: false })` | Ayush |
+
