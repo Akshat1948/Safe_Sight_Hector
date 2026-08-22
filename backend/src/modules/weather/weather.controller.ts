@@ -1,17 +1,20 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WeatherService } from './weather.service';
-import { ApiResponse } from '../../common/interfaces';
+import { ApiResponse, IWeatherData } from '../../common/interfaces';
 
+@ApiTags('Weather')
 @Controller('weather')
 export class WeatherController {
   constructor(private readonly weatherService: WeatherService) {}
 
   @Get(':siteId')
-  async getWeather(@Param('siteId') siteId: string): Promise<ApiResponse<any>> {
-    const data = await this.weatherService.getWeatherForSite(siteId);
+  @ApiOperation({ summary: 'Get current weather, 24h forecast and hazard advisory for a site' })
+  async getWeather(@Param('siteId') siteId: string): Promise<ApiResponse<IWeatherData>> {
+    const weather = await this.weatherService.getWeatherForSite(siteId);
     return {
       success: true,
-      data,
+      data: weather,
       message: 'Weather data retrieved',
     };
   }

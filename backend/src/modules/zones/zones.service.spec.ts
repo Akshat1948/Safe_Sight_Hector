@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { ZonesService } from './zones.service';
 import { ZoneEntity } from '../../database/entities/zone.entity';
 import { DensityReadingEntity } from '../../database/entities/density-reading.entity';
@@ -11,6 +12,7 @@ describe('ZonesService (Ayush Module)', () => {
   let zoneRepository: any;
   let densityRepository: any;
   let siteRepository: any;
+  let configService: any;
 
   beforeEach(async () => {
     zoneRepository = {
@@ -36,6 +38,10 @@ describe('ZonesService (Ayush Module)', () => {
       save: jest.fn(),
     };
 
+    configService = {
+      get: jest.fn().mockReturnValue('http://localhost:8000/ml'),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ZonesService,
@@ -50,6 +56,10 @@ describe('ZonesService (Ayush Module)', () => {
         {
           provide: getRepositoryToken(SiteEntity),
           useValue: siteRepository,
+        },
+        {
+          provide: ConfigService,
+          useValue: configService,
         },
       ],
     }).compile();
@@ -105,6 +115,27 @@ describe('ZonesService (Ayush Module)', () => {
       expect(mockZone.currentDensity).toBe(460);
       expect(mockZone.densityStatus).toBe(DensityStatus.RED);
       expect(densityRepository.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('getZoneForecast', () => {
+    it('should return a forecast with prediction points', async () => {
+      const mockZone = {
+        id: 'zone-1',
+        siteId: 'site-1',
+        name: 'Zone C — Staircase',
+        maxCapacity: 500,
+        currentDensity: 300,
+        densityStatus: DensityStatus.YELLOW,
+      };
+
+      zoneRepository.findOne.mockResolvedValue(mockZone);
+
+      const forecast = await service.getZoneForecast('zone-1', 6);
+      expect(forecast).toBeDefined();
+      expect(forecast.zone_id).toBe('zone-1');
+      expect(forecast.forecast).toBeInstanceOf(Array);
+      expect(forecast.forecast.length).toBe(6);
     });
   });
 });
