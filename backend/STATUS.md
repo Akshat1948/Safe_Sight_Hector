@@ -23,13 +23,17 @@
 | 13 | SOS Module | `src/modules/sos/` (`sos.service.ts`, `sos.controller.ts`, `sos.module.ts`) | Akshat | Aug 21 | Public SOS creation, automatic incident generation, WebSocket alert |
 | 14 | Transport Module | `src/modules/transport/` (`transport.service.ts`, `transport.controller.ts`, `transport.module.ts`) | Akshat | Aug 21 | Parking & shuttle status queries (public) and updates (manager) |
 
+| 15 | Swagger ApiQuery Fixes | `src/modules/` (incidents, alerts, sos, transport controllers) | Akshat | Aug 22 | Explicit `@ApiQuery({ required: false })` added to fix Swagger UI param rendering |
+| 16 | Transport Demo Seeder | `src/modules/transport/transport.service.ts` | Akshat | Aug 22 | Auto-seeder for parking lots and shuttle bus schedules |
+| 17 | End-to-End Manual & Integration Testing | All 18 endpoints + WebSocket Gateway | Ayush | Aug 22 | 100% verified in Swagger: Auth, Zones, Geofences, Weather, Incidents, Alerts, SOS, Transport |
+
 ---
 
 ## 🟡 IN PROGRESS
 
 | # | Feature / Task | Files Being Touched | Being Done By | Approach / Notes |
 |---|---------------|--------------------|--------------|-----------------|
-| - | None | — | — | All assigned modules implemented and built |
+| - | None | — | — | All assigned modules implemented, tested, and verified |
 
 ---
 
@@ -37,8 +41,7 @@
 
 | # | Feature / Task | Priority | Assigned To | Dependencies / Notes |
 |---|---------------|----------|-------------|---------------------|
-| 1 | Add `@ApiQuery({ required: false })` annotations | MEDIUM | Akshat | In `incidents`, `alerts`, `sos`, and `transport` controllers, optional `@Query()` parameters (`status`, `severity`, `limit`, `offset`) currently render as mandatory (red starred) in Swagger UI. Adding explicit `@ApiQuery({ name: 'param', required: false })` decorators will fix this. |
-| 2 | Demo Simulation Script (`scripts/simulate-demo.ts`) | MEDIUM | Ayush | Pumping automated density spikes into Zone C for SIH judges demo |
+| 1 | Demo Simulation Script (`scripts/simulate-demo.ts`) | MEDIUM | Ayush | Pumping automated density spikes into Zone C for live SIH judges demo |
 
 ---
 
@@ -103,5 +106,5 @@ backend/
 
 | # | Issue | Severity | Workaround | Filed By |
 |---|-------|----------|-----------|----------|
-| 1 | Swagger UI marks optional query parameters as required in Akshat's controllers | Low | Provide default non-empty query values in Swagger test execution or let Akshat add `@ApiQuery({ required: false })` | Ayush |
+| - | None (All endpoints tested & verified) | — | — | — |
 
