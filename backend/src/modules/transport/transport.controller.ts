@@ -8,7 +8,7 @@ import {
   UseGuards,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { TransportService } from './transport.service';
 import { UpdateTransportDto } from '../../common/dto';
 import { JwtAuthGuard, RolesGuard } from '../../common/guards';
@@ -21,6 +21,7 @@ export class TransportController {
   constructor(private readonly transportService: TransportService) {}
 
   @Get('parking')
+  @ApiQuery({ name: 'siteId', required: false, type: String })
   async getParkingStatus(@Query('siteId') siteId?: string) {
     const data = await this.transportService.getParkingStatus(siteId);
     return {
@@ -31,6 +32,7 @@ export class TransportController {
   }
 
   @Get('shuttles')
+  @ApiQuery({ name: 'siteId', required: false, type: String })
   async getShuttleStatus(@Query('siteId') siteId?: string) {
     const data = await this.transportService.getShuttleStatus(siteId);
     return {

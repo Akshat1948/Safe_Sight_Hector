@@ -38,8 +38,10 @@ export class SosController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.MANAGER, UserRole.RESPONDER)
+  @ApiQuery({ name: 'siteId', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, type: String })
   async getSosRequests(
-    @Query('siteId') siteId: string,
+    @Query('siteId') siteId?: string,
     @Query('status') status?: string,
   ) {
     const data = await this.sosService.getSosRequests(siteId, status);

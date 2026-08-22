@@ -11,7 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AlertsService } from './alerts.service';
 import { CreateAlertDto } from '../../common/dto';
 import { JwtAuthGuard, RolesGuard } from '../../common/guards';
@@ -27,8 +27,11 @@ export class AlertsController {
 
   @Get()
   @Roles(UserRole.MANAGER, UserRole.RESPONDER)
+  @ApiQuery({ name: 'siteId', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  @ApiQuery({ name: 'severity', required: false, type: String })
   async getAlerts(
-    @Query('siteId') siteId: string,
+    @Query('siteId') siteId?: string,
     @Query('status') status?: string,
     @Query('severity') severity?: string,
   ) {
