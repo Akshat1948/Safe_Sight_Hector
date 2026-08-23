@@ -1,104 +1,90 @@
-# Pod B (Backend) — STATUS LOG
+# [POD NAME] — STATUS LOG
 
-> **Last updated:** 2026-08-22 18:45 by Akshat & Ayush
+<!--
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║  🤖 AI AGENTS: YOU MUST READ THIS ENTIRE FILE BEFORE MAKING       ║
+  ║     ANY CHANGES TO CODE IN THIS FOLDER.                            ║
+  ║                                                                    ║
+  ║  This file is the coordination protocol between two humans         ║
+  ║  and their AI agents working in the same codebase folder.          ║
+  ║  Ignoring this file WILL cause conflicts and reverted work.        ║
+  ╚══════════════════════════════════════════════════════════════════════╝
+-->
+
+> **Last updated:** [YYYY-MM-DD HH:MM] by [Person Name]
 
 ---
 
 ## 🟢 COMPLETED
 
+List every completed feature/task with the files it touched, so the other person's AI knows what exists and should NOT be rewritten or restructured.
+
 | # | Feature / Task | Files Created/Modified | Done By | Date | Notes |
 |---|---------------|----------------------|---------|------|-------|
-| 1 | Docker Infrastructure | `docker-compose.yml` | Ayush | Aug 21 | PostgreSQL 15 (PostGIS 3.4) + Redis 7 |
-| 2 | Backend Project Scaffolding | `package.json`, `tsconfig.json`, `nest-cli.json`, `.env` | Ayush | Aug 21 | NestJS 10 + TypeORM setup |
-| 3 | Shared Contracts & Common DTOs | `src/common/` (constants, interfaces, DTOs, guards, decorators) | Ayush | Aug 21 | All DTOs, interfaces, and enums from MASTER.md defined and locked |
-| 4 | Database Entities | `src/database/entities/` (10 entities), `src/database/database.module.ts` | Ayush | Aug 21 | TypeORM entities for all tables matching MASTER.md schema |
-| 5 | Auth Module (JWT + RBAC) | `src/modules/auth/` (`auth.service.ts`, `auth.controller.ts`, `auth.module.ts`, `jwt.strategy.ts`) | Ayush | Aug 21 | Login, Refresh, Me endpoints + demo user seeder |
-| 6 | Zones Module | `src/modules/zones/` (`zones.service.ts`, `zones.controller.ts`, `zones.module.ts`) | Ayush | Aug 21 | Zone CRUD, density status calculator, time-series history, demo site seeder |
-| 7 | Geofences Module | `src/modules/geofences/` (`geofences.service.ts`, `geofences.controller.ts`, `geofences.module.ts`) | Ayush | Aug 21 | Geofence CRUD + zone boundaries |
-| 8 | Weather Module | `src/modules/weather/` (`weather.service.ts`, `weather.controller.ts`, `weather.module.ts`) | Ayush | Aug 21 | IMD weather proxy + hazard assessments |
-| 9 | Application Bootstrap | `src/app.module.ts`, `src/main.ts` | Ayush | Aug 21 | Global /api prefix, CORS, ValidationPipe, Swagger at `/api/docs` |
-| 10 | WebSocket Gateway (Socket.io) | `src/gateway/` (`safesight.gateway.ts`, `gateway.module.ts`) | Akshat | Aug 21 | Room subscription (`siteId`), real-time event broadcasting |
-| 11 | Incidents Module | `src/modules/incidents/` (`incidents.service.ts`, `incidents.controller.ts`, `incidents.module.ts`) | Akshat | Aug 21 | Incidents CRUD, verification flow, status updates, WebSocket triggers |
-| 12 | Alerts Module | `src/modules/alerts/` (`alerts.service.ts`, `alerts.controller.ts`, `alerts.module.ts`) | Akshat | Aug 21 | Alert composition, Bhashini translation call, auto-escalation timer, WebSocket dispatch |
-| 13 | SOS Module | `src/modules/sos/` (`sos.service.ts`, `sos.controller.ts`, `sos.module.ts`) | Akshat | Aug 21 | Public SOS creation, automatic incident generation, WebSocket alert |
-| 14 | Transport Module | `src/modules/transport/` (`transport.service.ts`, `transport.controller.ts`, `transport.module.ts`) | Akshat | Aug 21 | Parking & shuttle status queries (public) and updates (manager) |
-
-| 15 | Swagger ApiQuery Fixes | `src/modules/` (incidents, alerts, sos, transport controllers) | Akshat | Aug 22 | Explicit `@ApiQuery({ required: false })` added to fix Swagger UI param rendering |
-| 16 | Transport Demo Seeder | `src/modules/transport/transport.service.ts` | Akshat | Aug 22 | Auto-seeder for parking lots and shuttle bus schedules |
-| 17 | End-to-End Manual & Integration Testing | All 18 endpoints + WebSocket Gateway | Ayush | Aug 22 | 100% verified in Swagger: Auth, Zones, Geofences, Weather, Incidents, Alerts, SOS, Transport |
-| 18 | SIH Demo Simulation Script | `scripts/simulate-demo.ts`, `package.json` | Ayush | Aug 22 | Automated 45s crush simulation with step-by-step (`--step`), fast (`--fast`), and reset (`--reset`) modes |
+| 1 | _Example: Auth middleware_ | `src/middleware/auth.ts`, `src/guards/roles.guard.ts` | Ayush | Aug 21 | Uses JWT + RBAC, tokens expire in 24h |
 
 ---
 
 ## 🟡 IN PROGRESS
 
+List what is currently being worked on, so the other person's AI does NOT touch these files.
+
 | # | Feature / Task | Files Being Touched | Being Done By | Approach / Notes |
-|---|---------------|--------------------|--------------|-----------------|
-| - | None | — | — | All assigned modules & demo tools implemented and verified |
+|---|---------------|--------------------|--------------|-----------------| 
+| 1 | _Example: Alert engine_ | `src/services/alert.service.ts` | Akshat | Using event-driven pattern with Redis pub/sub |
+
+> ⚠️ **AI RULE:** If a file is listed here as "in progress" by the other person, DO NOT modify it. Work on something else or wait for it to move to COMPLETED.
 
 ---
 
-## 🔴 PENDING / TODO / ACTION ITEMS
+## 🔴 PENDING / TODO
 
-| # | Feature / Task | Priority | Assigned To | Dependencies / Notes |
-|---|---------------|----------|-------------|---------------------|
-| - | None | — | — | Backend 100% complete for MVP & Demo |
+Tasks that haven't been started yet. Either person can pick these up.
+
+| # | Feature / Task | Priority | Assigned To | Dependencies |
+|---|---------------|----------|-------------|-------------|
+| 1 | _Example: WebSocket setup_ | HIGH | Unassigned | Needs auth middleware (COMPLETED #1) |
 
 ---
 
 ## 📐 ARCHITECTURE DECISIONS
 
+Record every significant decision so the other person's AI doesn't undo it or choose a conflicting approach.
+
 | # | Decision | Why | Decided By | Date |
 |---|---------|-----|-----------|------|
-| 1 | Used NestJS built-in ValidationPipe with `class-validator` | Enforces request validation across all endpoints automatically | Ayush | Aug 21 |
-| 2 | Implemented demo data auto-seeder in `AuthService` and `ZonesService` | Enables immediate zero-config testing for demo flows and frontend integration | Ayush | Aug 21 |
-| 3 | Added Swagger at `/api/docs` | Live interactive UI for testing all backend endpoints | Ayush | Aug 21 |
-| 4 | Auto-incident creation on SOS request | Guarantees every SOS is immediately tracked in the manager/responder incident queue | Akshat | Aug 21 |
-| 5 | Non-blocking Bhashini translation with timeout | Ensures alert creation succeeds even if translation service is unavailable | Akshat | Aug 21 |
-| 6 | Background timeout for alert auto-escalation | Automatically escalates unacknowledged alerts after 60s without blocking request thread | Akshat | Aug 21 |
+| 1 | _Example: Using NestJS Guards for RBAC instead of middleware_ | Cleaner decorator pattern, built-in NestJS support | Ayush | Aug 21 |
+
+> ⚠️ **AI RULE:** Do NOT change or refactor patterns listed here without explicit human approval. These are deliberate choices.
 
 ---
 
 ## 🔌 INTERFACE CHANGES (CROSS-POD IMPACT)
 
+If you changed anything that affects another pod (API endpoint shape, WebSocket event name, shared type, DB schema), log it here AND notify the team chat.
+
 | # | What Changed | Old | New | Affects | Notified? |
 |---|-------------|-----|-----|---------|----------|
-| - | No breaking changes from MASTER.md | — | — | All | ✅ Yes |
+| 1 | _Example: `/api/incidents` response now includes `zoneId`_ | `{ id, type, severity }` | `{ id, type, severity, zoneId }` | Frontend (Pod A) | ✅ Yes |
 
 ---
 
 ## 📁 FILE MAP
 
+Brief description of what each key file/module does. Update this as new files are created.
+
 ```
-backend/
-├── docker-compose.yml       — PostgreSQL 15 + PostGIS & Redis
-├── package.json             — Dependencies
-├── tsconfig.json            — TypeScript config & path aliases
-├── .env                     — Environment variables
-├── src/
-│   ├── main.ts              — Bootstrap, Swagger, CORS, Validation
-│   ├── app.module.ts        — Root module
-│   ├── common/
-│   │   ├── constants.ts     — Shared thresholds, timeouts, languages
-│   │   ├── interfaces/      — API responses, User, Zone, Incident, Alert, SOS, Weather, Transport
-│   │   ├── dto/             — All validated DTO request classes
-│   │   ├── decorators/      — @Roles, @CurrentUser
-│   │   └── guards/          — JwtAuthGuard, RolesGuard
-│   ├── database/
-│   │   ├── database.module.ts
-│   │   └── entities/        — TypeORM entities (User, Site, Zone, Geofence, DensityReading, Incident, Alert, SosRequest, WeatherData, TransportStatus)
-│   ├── gateway/             — WebSocket Gateway & Module (AKSHAT)
-│   │   ├── safesight.gateway.ts
-│   │   └── gateway.module.ts
-│   └── modules/
-│       ├── auth/            — JWT auth, login, refresh, me (AYUSH)
-│       ├── zones/           — Zone CRUD & density (AYUSH)
-│       ├── geofences/       — Geofence management (AYUSH)
-│       ├── weather/         — Weather proxy & hazard alerts (AYUSH)
-│       ├── incidents/       — Incident CRUD, verification & status updates (AKSHAT)
-│       ├── alerts/          — Alert composition, auto-translate & escalation (AKSHAT)
-│       ├── sos/             — Public SOS handling & auto-incident creation (AKSHAT)
-│       └── transport/       — Parking & shuttle status (AKSHAT)
+src/
+├── main.ts                  — App entry point
+├── app.module.ts            — Root module
+├── middleware/
+│   └── ...
+├── modules/
+│   ├── zones/               — Zone CRUD + density endpoints
+│   ├── incidents/           — Incident detection + management
+│   ├── alerts/              — Alert composition + dispatch
+│   └── ...
+└── ...
 ```
 
 ---
@@ -107,5 +93,18 @@ backend/
 
 | # | Issue | Severity | Workaround | Filed By |
 |---|-------|----------|-----------|----------|
-| - | None (All endpoints tested & verified) | — | — | — |
+| 1 | _Example: WebSocket disconnects after 60s idle_ | Low | Client sends ping every 30s | Akshat |
 
+---
+
+## 📝 HOW TO UPDATE THIS FILE
+
+After finishing any work session:
+
+1. Move your task from **IN PROGRESS** → **COMPLETED** (with files list)
+2. Add any new tasks you discovered to **PENDING**
+3. Update the **FILE MAP** if you created new files
+4. If you changed any shared interface, add to **INTERFACE CHANGES** and tell the group chat
+5. Log any significant decisions in **ARCHITECTURE DECISIONS**
+6. Update the **"Last updated"** timestamp at the top
+7. **Commit this file** in the same PR as your code changes

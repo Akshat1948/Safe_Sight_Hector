@@ -1,77 +1,58 @@
-# SafeSight — Project Status
+# SafeSight - Root Project Status
 
-> **Last updated:** 2026-08-22 18:45 by Ayush & Akshat (Pod B Leads)
+> **Last updated:** 2026-08-23 19:25 by Shreyashi (Pod C)
 
----
+## 📍 CURRENT CHECKPOINT
+Day 3 of 6 — Integration & End-to-End Testing
 
-## 📊 CURRENT CHECKPOINT
-**Day 2 of 6 — Core Features (Phase 1 Integration)**
+## 🔄 CROSS-POD INTEGRATION STATUS
 
----
+### AI/ML Endpoints (Pod C → Pod B consumes)
+| Endpoint                    | Status       | Owner     | Notes                                                    |
+|-----------------------------|--------------|-----------|----------------------------------------------------------|
+| POST /ml/forecast           | ✅ LIVE      | Shreyashi | Prophet crowd forecaster with heuristic fallback          |
+| GET  /ml/weather/current    | ✅ LIVE      | Shreyashi | Current weather, 24h forecast & 10m cache               |
+| POST /ml/weather/hazards    | ✅ LIVE      | Shreyashi | Multi-hazard rule matrix (flood, landslide, lightning, heat)|
+| POST /ml/anomaly/detect     | ✅ LIVE      | Diya      | IsolationForest + 2-tier crush precursor pattern rules   |
+| POST /ml/bhashini/translate | ✅ LIVE      | Diya      | Bhashini ULCA API + MyMemory free translation fallback    |
+| POST /ml/bhashini/tts       | ✅ LIVE      | Diya      | Bhashini TTS + gTTS audio generation fallback            |
+| POST /ml/bhashini/stt       | ✅ LIVE      | Diya      | Bhashini ASR pipeline for voice alerts/SOS               |
 
-## 🔗 CROSS-POD INTEGRATION STATUS
+### Backend API Endpoints (Pod B → Pod A consumes)
+| Endpoint               | Status      | Owner  | Notes                                            |
+|------------------------|-------------|--------|--------------------------------------------------|
+| POST /api/auth/login   | ✅ LIVE     | Ayush  | JWT authentication & RBAC                        |
+| GET  /api/zones        | ✅ LIVE     | Ayush  | Zone management & live density telemetry         |
+| GET  /api/weather/:siteId | ✅ LIVE  | Ayush  | Proxy to AI/ML `/ml/weather/current`             |
+| POST /api/forecast/:zoneId | ✅ LIVE | Ayush  | Proxy to AI/ML `/ml/forecast`                    |
+| POST /api/incidents    | ✅ LIVE     | Akshat | Incident tracking & verification workflow        |
+| POST /api/alerts       | ✅ LIVE     | Akshat | Multi-channel alert dispatch & escalation        |
+| POST /api/sos          | ✅ LIVE     | Akshat | Emergency SOS routing & responder notification   |
 
-### Backend API Endpoints (Pod B — 100% COMPLETE & LIVE)
-| Endpoint | Method | Status | Owner | Notes / Contract |
-|----------|--------|--------|-------|------------------|
-| /api/auth/login | POST | 🟢 LIVE | Ayush | Returns { accessToken, refreshToken, user } |
-| /api/auth/refresh | POST | 🟢 LIVE | Ayush | Returns new access & refresh tokens |
-| /api/auth/me | GET | 🟢 LIVE | Ayush | Requires Bearer JWT |
-| /api/zones | GET | 🟢 LIVE | Ayush | Returns all active zones (filtered by siteId) |
-| /api/zones/:id | GET | 🟢 LIVE | Ayush | Returns single zone with polygon |
-| /api/zones | POST | 🟢 LIVE | Ayush | Creates zone (Manager/Admin role) |
-| /api/zones/:id | PUT | 🟢 LIVE | Ayush | Updates zone (Manager/Admin role) |
-| /api/zones/:id/density | GET | 🟢 LIVE | Ayush | Returns density time-series history |
-| /api/zones/:id/density | PATCH | 🟢 LIVE | Ayush | Updates headcount & recalculates status |
-| /api/geofences | GET | 🟢 LIVE | Ayush | Returns geofences for zone/site |
-| /api/geofences | POST/PUT/DEL | 🟢 LIVE | Ayush | Geofence CRUD |
-| /api/weather/:siteId | GET | 🟢 LIVE | Ayush | Live weather + hazard advisory |
-| /api/incidents | GET/POST | 🟢 LIVE | Akshat | Full incident CRUD & verification |
-| /api/incidents/:id/verify | PATCH | 🟢 LIVE | Akshat | Verify/dismiss incident |
-| /api/incidents/:id/status | PATCH | 🟢 LIVE | Akshat | Responding/resolved status update |
-| /api/alerts | GET/POST | 🟢 LIVE | Akshat | Alert composition & dispatch |
-| /api/alerts/:id/acknowledge | PATCH | 🟢 LIVE | Akshat | Acknowledge alert |
-| /api/sos | POST/GET | 🟢 LIVE | Akshat | Visitor SOS creation & tracking |
-| /api/transport/parking | GET | 🟢 LIVE | Akshat | Live parking occupancy |
-| /api/transport/shuttles | GET | 🟢 LIVE | Akshat | Live shuttle schedules |
-| WebSocket Gateway | WS | 🟢 LIVE | Akshat | Real-time events on ws://localhost:3001 |
+### Frontend Pages (Pod A)
+| Page               | Status      | Owner    | Notes                                            |
+|--------------------|-------------|----------|--------------------------------------------------|
+| Visitor View       | ✅ LIVE     | Yashasvi | Map, heatmap density overlay & weather widget    |
+| Manager Dashboard  | ✅ LIVE     | Aditya   | Real-time command center & hazard radar          |
+| Responder Console  | ✅ LIVE     | Aditya   | Incident triage, queue & routing navigation      |
 
-### AI/ML Endpoints (Pod C)
-| Endpoint | Method | Status | Owner | Notes |
-|----------|--------|--------|-------|-------|
-| /ml/forecast | POST | 🟢 LIVE | Shreyashi | Prophet/LSTM crowd forecast (6-24h ahead) |
-| /ml/weather/current | GET | 🟢 LIVE | Shreyashi | Live IMD weather data |
-| /ml/weather/hazards | POST | 🟢 LIVE | Shreyashi | Multi-hazard assessment logic |
-| /ml/anomaly/detect | POST | 🔴 NOT STARTED | Diya | Isolation Forest crush detection |
-| /ml/bhashini/translate | POST | 🔴 NOT STARTED | Diya | Bhashini translation API |
-| /ml/bhashini/tts | POST | 🔴 NOT STARTED | Diya | Text-to-speech API |
+## 🚫 BLOCKERS
+| What is Blocked                        | Blocked By                              | Who Needs to Act |
+|----------------------------------------|-----------------------------------------|------------------|
+| None                                   | All core microservices & routers live   | Pods A, B, C ready for E2E integration |
 
-### Frontend Views (Pod A)
-| View / Component | Status | Owner | Using Real API? |
-|------------------|--------|-------|-----------------|
-| Visitor Landing & Heatmap | 🔴 NOT STARTED | Yashasvi | Ready to consume /api/zones & /api/weather |
-| MapView & Zone Overlays | 🔴 NOT STARTED | Yashasvi | Ready for /api/zones data |
-| WeatherWidget | 🔴 NOT STARTED | Yashasvi | Ready for /api/weather/:siteId |
-| LanguageSwitcher (i18n) | 🔴 NOT STARTED | Yashasvi | Config ready |
-| Manager Dashboard | 🔴 NOT STARTED | Aditya | Ready for /api/auth/login & /api/incidents |
-| Incident Queue UI | 🔴 NOT STARTED | Aditya | Ready for /api/incidents & WebSocket |
-| Responder Console | 🔴 NOT STARTED | Aditya | Ready for /api/sos & /api/incidents |
+## 🛠️ SHARED INFRA STATUS
+| Item                   | Status      | Notes                                                    |
+|------------------------|-------------|----------------------------------------------------------|
+| GitHub repo created    | ✅ LIVE     | Monorepo with feature branches merged into `develop`     |
+| Docker Compose working | ✅ LIVE     | Postgres (PostGIS), Redis, and AI/ML container ready     |
+| AI/ML Dockerfile       | ✅ LIVE     | `python:3.11-slim` multi-stage build on port 8000        |
+| Backend (NestJS)       | ✅ LIVE     | Running on port 3001                                     |
+| Frontend (Next.js PWA) | ✅ LIVE     | Running on port 3000                                     |
+| Bhashini Fallback      | ✅ LIVE     | MyMemory + gTTS active for live demo without MeitY keys  |
+| IMD Weather Fallback   | ✅ LIVE     | Real-time realistic weather synthesis active            |
 
----
-
-## 🚧 BLOCKERS & ACTION ITEMS
-| Item | Priority | Owner | Status | Notes |
-|------|----------|-------|--------|-------|
-| Add `@ApiQuery({ required: false })` decorators | Low/Medium | Akshat | 🟢 RESOLVED | Merged & verified across all controllers. |
-| Build Demo Simulation Script (`scripts/simulate-demo.ts`) | Medium | Ayush | 🟢 COMPLETED | Automated 45s live crush simulation script ready (`npm run simulate:crush`). |
-
----
-
-## 🏗️ SHARED INFRA STATUS
-| Item | Status | Notes |
-|------|--------|-------|
-| GitHub Repository | 🟢 READY | develop branch up to date with Pod B & C |
-| Docker Containers | 🟢 RUNNING | PostgreSQL 15 (PostGIS 3.4) on :5432, Redis on :6379 |
-| Backend API Gateway | 🟢 100% READY | All 18 endpoints + WebSocket Gateway 100% verified & tested |
-| AI/ML Forecast & Weather | 🟢 100% READY | Prophet model + IMD hazard evaluation ready |
-| Swagger API Docs | 🟢 LIVE | Available at http://localhost:3001/api/docs |
+## 📝 CONTRACT CHANGES LOG
+| Date | What Changed | Changed By | All Pods Notified? |
+|------|-------------|-----------|-------------------|
+| 2026-08-23 | Unified all 4 AI/ML router groups in `api/main.py` and added Dockerfile | Shreyashi | ✅ Yes |
