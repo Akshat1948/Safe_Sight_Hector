@@ -1,6 +1,44 @@
 ﻿# SafeSight — Root Project Status
 
-> **Last updated:** 2026-08-23 22:30 by Team Blueprint (Diya, Aditya, Ayush, Akshat, Shreyashi)
+> **Last updated:** 2026-08-23 22:32 by Team Blueprint (Diya, Aditya, Ayush, Akshat, Shreyashi)
+
+---
+
+## 📢 IMPORTANT ANNOUNCEMENT: TRANSLATION FEATURE UPDATE (POD C)
+> **To All Pods (Frontend, Backend, AI/ML):**
+> 
+> * **1. Name Change (Bhashini ➔ Multilingual Translator):**
+>   We have renamed the module from **Bhashini** to **Multilingual Translator Feature**. Because the MeitY Bhashini government portal was inaccessible for account registration, we transitioned to the **MyMemory Open Translation Engine**.
+> 
+> * **2. Zero Setup / No API Keys Required:**
+>   The translation engine works **100% out of the box**. Nobody on the team needs to register, login, or configure any API keys in .env for local testing or judge presentations.
+> 
+> * **3. Scope Refinement (Text-Only):**
+>   Synthetic audio generation (TTS / STT) has been **removed** to eliminate synthetic voice glitches, latency, and system dependencies. We are delivering 100% stable, instant **text translation** across 13 scheduled Indian languages.
+> 
+> * **4. Endpoints & 100% Backward Compatibility:**
+>   * **New Clean Endpoint:** POST /ml/translate
+>   * **Legacy Aliases (Will NOT break existing code):** POST /ml/bhashini/translate and POST /ml/translator/translate are active aliases that route to the exact same engine.
+>   * **Payload Contract:**
+>     `json
+>     // Request: POST /ml/translate
+>     {
+>       "text": "Avoid Zone C staircase. Use Zone D corridor instead.",
+>       "source_language": "en",
+>       "target_language": "hi"
+>     }
+> 
+>     // Response: HTTP 200 OK
+>     {
+>       "success": true,
+>       "data": {
+>         "translated_text": "ज़ोन सी सीढ़ी से बचें। इसके बजाय ज़ोन डी कॉरिडोर का उपयोग करें।",
+>         "source_language": "en",
+>         "target_language": "hi"
+>       },
+>       "message": "Translation complete"
+>     }
+>     `
 
 ---
 
@@ -47,40 +85,6 @@
 
 ---
 
-## 🌐 MULTILINGUAL TRANSLATOR FEATURE (NOTICE FOR ALL PODS)
-
-> **Important Update Regarding Translation (Frontend Pod A / Backend Pod B):**
-> 
-> * **Feature Name:** **Multilingual Translator Feature** (Formerly referred to as Bhashini).
-> * **Engine Used:** High-speed open translation engine (**MyMemory**) covering 13 Indian languages (hi, 	a, 	e, n, mr, gu, kn, ml, pa, or, s, ur).
-> * **Why the Name Change?** Since government Bhashini registration portal required external logins that were inaccessible, we transitioned to a dedicated, zero-configuration open translation engine. Renaming prevents team confusion.
-> * **Clean Endpoint:** POST /ml/translate
-> * **Backward Compatibility:** POST /ml/bhashini/translate and POST /ml/translator/translate are also active as route aliases, so **existing backend/frontend code will NOT break**.
-> * **Zero-Auth:** **No API keys or logins required.** Works immediately on local dev and during judge demos!
-> 
-> **Standard Request & Response Shape:**
-> `json
-> // POST /ml/translate (or /ml/bhashini/translate)
-> {
->   "text": "Avoid Zone C staircase. Use Zone D corridor instead.",
->   "source_language": "en",
->   "target_language": "hi"
-> }
-> 
-> // Response: HTTP 200 OK
-> {
->   "success": true,
->   "data": {
->     "translated_text": "ज़ोन सी सीढ़ी से बचें। इसके बजाय ज़ोन डी कॉरिडोर का उपयोग करें।",
->     "source_language": "en",
->     "target_language": "hi"
->   },
->   "message": "Translation complete"
-> }
-> `
-
----
-
 ## 🔄 CROSS-POD INTEGRATION STATUS
 
 ### AI/ML Endpoints (Pod C → Pod B & Pod A consume)
@@ -90,7 +94,7 @@
 | /ml/weather/current | GET | 🟢 LIVE | Shreyashi | Current IMD weather, 24h forecast & 10m cache |
 | /ml/weather/hazards | POST | 🟢 LIVE | Shreyashi | Multi-hazard rule matrix (flood, landslide, lightning, heat) |
 | /ml/anomaly/detect | POST | 🟢 LIVE | Diya | IsolationForest + 2-tier crush precursor pattern rules |
-| /ml/translate | POST | 🟢 LIVE | Diya | 13-language open translation engine (also aliases /ml/bhashini/translate) |
+| /ml/translate | POST | 🟢 LIVE | Diya | 13-language open translation engine (aliases /ml/bhashini/translate) |
 
 ### Backend API Endpoints (Pod B → Pod A consumes)
 | Endpoint | Method | Status | Owner | Notes / Contract |
@@ -152,7 +156,7 @@
 ## 📝 CONTRACT CHANGES LOG
 | Date | What Changed | Changed By | All Pods Notified? |
 |---|---|---|---|
-| 2026-08-23 | Refactored Bhashini naming to generic Multilingual Translator (/ml/translate) with backward-compatible alias /ml/bhashini/translate to eliminate naming confusion | Diya | ✅ Yes |
+| 2026-08-23 | Renamed Bhashini to Multilingual Translator (/ml/translate) using MyMemory zero-auth engine with backward-compatible aliases | Diya | ✅ Yes |
 | 2026-08-23 | Recorded temporary team reallocation for Yashasvi to Aditya, Shreyashi, and Akshat | Aditya | ✅ Yes |
 | 2026-08-23 | Added start.sh and stop.sh one-click automation scripts and cleaned .gitignore | Akshat | ✅ Yes |
 | 2026-08-23 | Unified all 4 AI/ML router groups in pi/main.py and added Dockerfile | Shreyashi & Diya | ✅ Yes |
