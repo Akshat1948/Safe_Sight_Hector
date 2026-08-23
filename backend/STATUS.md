@@ -1,6 +1,6 @@
 # Pod B (Backend) — STATUS LOG
 
-> **Last updated:** 2026-08-23 19:48 by Akshat & Ayush (Pod B Leads)
+> **Last updated:** 2026-08-23 20:05 by Akshat & Ayush (Pod B Leads)
 
 ---
 
@@ -26,6 +26,7 @@
 | 16 | Transport Demo Seeder | `src/modules/transport/transport.service.ts` | Akshat | Aug 22 | Auto-seeder for parking lots and shuttle bus schedules |
 | 17 | End-to-End Manual & Integration Testing | All 18 endpoints + WebSocket Gateway | Ayush | Aug 22 | 100% verified in Swagger: Auth, Zones, Geofences, Weather, Incidents, Alerts, SOS, Transport |
 | 18 | Cross-Pod Integration with Pod C (AI/ML) | `weather.service.ts`, `zones.service.ts` | Ayush & Akshat | Aug 23 | Live integration with FastAPI endpoints on port 8000 |
+| 19 | One-Click Startup & Shutdown Scripts | `start.sh`, `stop.sh`, `.gitignore` | Akshat | Aug 23 | Automated full-stack launch & shutdown with browser auto-open |
 
 ---
 
@@ -55,6 +56,7 @@
 | 4 | Auto-incident creation on SOS request | Guarantees every SOS is immediately tracked in the manager/responder incident queue | Akshat | Aug 21 |
 | 5 | Non-blocking Bhashini translation with timeout & fallback | Ensures alert creation succeeds even if translation service is unavailable | Akshat | Aug 21 |
 | 6 | Background timeout for alert auto-escalation | Automatically escalates unacknowledged alerts after 60s without blocking request thread | Akshat | Aug 21 |
+| 7 | One-click `start.sh` and `stop.sh` scripts | Eliminates manual multi-terminal management for developers and demo presentation | Akshat | Aug 23 |
 
 ---
 

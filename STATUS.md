@@ -1,6 +1,6 @@
 # SafeSight — Root Project Status
 
-> **Last updated:** 2026-08-23 19:48 by Akshat & Shreyashi (Cross-Pod Integration)
+> **Last updated:** 2026-08-23 20:05 by Akshat & Ayush (Pod B Leads)
 
 ---
 
@@ -63,9 +63,11 @@
 
 ---
 
-## 🛠️ SHARED INFRA STATUS
+## 🛠️ SHARED INFRA & DEVELOPER TOOLS STATUS
 | Item | Status | Notes |
 |---|---|---|
+| One-Click Startup Script (`./start.sh`) | 🟢 LIVE | Auto-launches DB, Backend (:3001), AI/ML (:8000), and opens Swagger Docs in browser |
+| One-Click Shutdown Script (`./stop.sh`) | 🟢 LIVE | Gracefully terminates all background services and frees ports |
 | GitHub Repository | 🟢 LIVE | All Pod A, B, and C branches integrated into `develop` |
 | Docker Compose | 🟢 LIVE | PostgreSQL 15 (PostGIS 3.4) on :5432, Redis on :6379, AI/ML on :8000 |
 | AI/ML Dockerfile | 🟢 LIVE | `python:3.11-slim` multi-stage build on port 8000 |
@@ -80,6 +82,7 @@
 ## 📝 CONTRACT CHANGES LOG
 | Date | What Changed | Changed By | All Pods Notified? |
 |---|---|---|---|
+| 2026-08-23 | Added `start.sh` and `stop.sh` one-click automation scripts and cleaned `.gitignore` | Akshat | ✅ Yes |
 | 2026-08-23 | Unified all 4 AI/ML router groups in `api/main.py` and added Dockerfile | Shreyashi & Diya | ✅ Yes |
 | 2026-08-22 | Added Swagger ApiQuery optional decorators & Transport Demo Seeder | Akshat | ✅ Yes |
 | 2026-08-21 | Added initial Pod B endpoints and shared DTOs | Ayush & Akshat | ✅ Yes |
