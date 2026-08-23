@@ -6,25 +6,16 @@ Base prefix: /ml/bhashini  (registered in api/main.py by Shreyashi)
 
 Endpoints:
   POST /ml/bhashini/translate   — Text translation between Indian languages
-  POST /ml/bhashini/tts         — Text-to-speech (returns base64 WAV)
-  POST /ml/bhashini/stt         — Speech-to-text (accepts base64 WAV)
+
+Note: TTS and STT are out of scope for this hackathon submission.
 """
 
 import logging
 from fastapi import APIRouter, HTTPException, status
 
-from shared.schemas import (
-    TranslateRequest,
-    TranslateResponse,
-    TTSRequest,
-    TTSResponse,
-    STTRequest,
-    STTResponse,
-)
+from shared.schemas import TranslateRequest, TranslateResponse
 from shared.config import SUPPORTED_LANGUAGES
 from bhashini.translate import translate
-from bhashini.tts import text_to_speech
-from bhashini.stt import speech_to_text
 
 logger = logging.getLogger(__name__)
 
@@ -47,8 +38,9 @@ def _validate_language(lang: str, field_name: str = "language") -> None:
     "/translate",
     summary="Translate text between Indian languages",
     description=(
-        "Translate text from source_language to target_language using "
-        "the Bhashini (MeitY) API. Supports 13 Indian languages."
+        "Translate text from source_language to target_language. "
+        "Uses Bhashini API if keys are configured, otherwise falls back "
+        "to MyMemory free API. Supports 13 Indian languages."
     ),
     status_code=status.HTTP_200_OK,
 )
@@ -74,91 +66,11 @@ async def translate_text(request: TranslateRequest) -> dict:
         logger.exception("Translation failed: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Bhashini translation service encountered an error.",
+            detail="Translation service encountered an error.",
         )
 
     return {
         "success": True,
         "data": result.model_dump(),
         "message": "Translation complete",
-    }
-
-
-@router.post(
-    "/tts",
-    summary="Text-to-speech via Bhashini",
-    description=(
-        "Convert text in a supported Indian language to speech. "
-        "Returns base64-encoded WAV audio."
-    ),
-    status_code=status.HTTP_200_OK,
-)
-async def tts(request: TTSRequest) -> dict:
-    """
-    POST /ml/bhashini/tts
-
-    Request body: TTSRequest
-    Response envelope: { success, data: TTSResponse, message }
-    """
-    _validate_language(request.language)
-
-    if not request.text.strip():
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="text must not be empty.",
-        )
-
-    try:
-        result: TTSResponse = text_to_speech(request)
-    except Exception as exc:
-        logger.exception("TTS failed: %s", exc)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Bhashini TTS service encountered an error.",
-        )
-
-    return {
-        "success": True,
-        "data": result.model_dump(),
-        "message": "Speech generated",
-    }
-
-
-@router.post(
-    "/stt",
-    summary="Speech-to-text via Bhashini",
-    description=(
-        "Transcribe base64-encoded WAV audio in a supported Indian language "
-        "to text using Bhashini ASR."
-    ),
-    status_code=status.HTTP_200_OK,
-)
-async def stt(request: STTRequest) -> dict:
-    """
-    POST /ml/bhashini/stt
-
-    Request body: STTRequest
-    Response envelope: { success, data: STTResponse, message }
-    """
-    _validate_language(request.language)
-
-    if not request.audio_base64.strip():
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="audio_base64 must not be empty.",
-        )
-
-    try:
-        result: STTResponse = speech_to_text(request)
-    except Exception as exc:
-        logger.exception("STT failed: %s", exc)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Bhashini STT service encountered an error.",
-        )
-
-    return {
-        "success": True,
-        "data": result.model_dump(),
-        "message": "Transcription complete",
     }
