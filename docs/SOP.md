@@ -11,10 +11,13 @@
 
 ## 1. TEAM STRUCTURE & POD ASSIGNMENTS
 
-| Pod | Focus Area | Members | Responsibilities |
+> ⚠️ **TEMPORARY WORKLOAD REALLOCATION NOTICE (Effective Aug 23, 2026):**  
+> **Yashasvi** is temporarily unavailable. To ensure uninterrupted momentum, his responsibilities have been temporarily redistributed among **Aditya** (Pod A Co-Lead), **Shreyashi** (Pod C), and **Akshat** (Pod B) until Yashasvi returns.
+
+| Pod | Focus Area | Members | Responsibilities & Status |
 |-----|-----------|---------|-----------------|
-| **Pod A — Frontend** | PWA, UI, Maps, Multilingual | **Yashasvi** & **Aditya** | Next.js app, all 3 views (Visitor, Manager Dashboard, Responder Console), Leaflet maps, heatmap overlays, language toggle, offline shell, PWA setup, UI/UX |
-| **Pod B — Backend** | API, Real-time, Auth | **Ayush** & **Akshat** | NestJS API gateway, all REST endpoints, WebSocket layer, RBAC authentication, geofencing logic, SMS simulation, database setup |
+| **Pod A — Frontend** | PWA, UI, Maps, Multilingual | **Aditya** (Co-Lead)<br>*(Interim Support: **Shreyashi** & **Akshat**)*<br>*(**Yashasvi** temporarily on leave)* | Next.js app, all 3 views (Visitor, Manager Dashboard, Responder Console), Leaflet maps, heatmap overlays, language toggle, offline shell, PWA setup, UI/UX |
+| **Pod B — Backend** | API, Real-time, Auth | **Ayush** (Lead) & **Akshat** | NestJS API gateway, all REST endpoints, WebSocket layer, RBAC authentication, geofencing logic, SMS simulation, database setup |
 | **Pod C — AI/ML + Integrations** | Intelligence Layer | **Shreyashi** & **Diya** | Crowd forecasting model (Prophet/LSTM), anomaly detection, Bhashini API integration, IMD weather API integration, FastAPI microservices, sample/simulated datasets |
 
 ---
@@ -55,29 +58,29 @@ backend/src/
 └── main.ts              ← AYUSH ONLY       (entry point, bootstrap)
 ```
 
-### Pod A — Frontend Module Split
+### Pod A — Frontend Module Split (With Temporary Handover)
 
 ```
 frontend/src/
 ├── app/
-│   ├── (visitor)/           ← YASHASVI ONLY   (visitor landing, live heatmap view)
-│   ├── (dashboard)/         ← ADITYA ONLY     (site manager dashboard)
-│   ├── (responder)/         ← ADITYA ONLY     (emergency responder console)
-│   ├── layout.tsx           ← YASHASVI ONLY   (root layout, theme, fonts)
-│   └── page.tsx             ← YASHASVI ONLY   (landing page / visitor home)
+│   ├── (visitor)/           ← ADITYA (Interim for Yashasvi)  (visitor landing, live heatmap view)
+│   ├── (dashboard)/         ← ADITYA ONLY                   (site manager dashboard)
+│   ├── (responder)/         ← ADITYA ONLY                   (emergency responder console)
+│   ├── layout.tsx           ← ADITYA (Interim for Yashasvi)  (root layout, theme, fonts)
+│   └── page.tsx             ← ADITYA (Interim for Yashasvi)  (landing page / visitor home)
 │
 ├── components/
-│   ├── map/                 ← YASHASVI ONLY   (MapView, ZoneHeatmap, zone overlays)
-│   ├── weather/             ← YASHASVI ONLY   (WeatherWidget, hazard overlays)
-│   ├── transport/           ← YASHASVI ONLY   (ParkingStatus, ShuttleInfo)
-│   ├── language/            ← YASHASVI ONLY   (LanguageSwitcher, i18n setup)
-│   ├── visitor/             ← YASHASVI ONLY   (SOSButton, SafetyEssentials)
+│   ├── map/                 ← AKSHAT (Interim for Yashasvi)  (MapView, ZoneHeatmap, zone overlays)
+│   ├── weather/             ← SHREYASHI (Interim for Yashasvi) (WeatherWidget, hazard overlays)
+│   ├── transport/           ← AKSHAT (Interim for Yashasvi)  (ParkingStatus, ShuttleInfo)
+│   ├── language/            ← SHREYASHI (Interim for Yashasvi) (LanguageSwitcher, i18n setup)
+│   ├── visitor/             ← AKSHAT (Interim for Yashasvi)  (SOSButton, SafetyEssentials)
 │   │
-│   ├── incidents/           ← ADITYA ONLY     (IncidentCard, IncidentQueue)
-│   ├── alerts/              ← ADITYA ONLY     (AlertComposer, AlertBanner)
-│   ├── responder/           ← ADITYA ONLY     (ResponderFeed, NavigationPanel)
-│   ├── dashboard/           ← ADITYA ONLY     (DashboardLayout, AnalyticsPanel)
-│   └── auth/                ← ADITYA ONLY     (LoginForm, RoleGuard)
+│   ├── incidents/           ← ADITYA ONLY                   (IncidentCard, IncidentQueue)
+│   ├── alerts/              ← ADITYA ONLY                   (AlertComposer, AlertBanner)
+│   ├── responder/           ← ADITYA ONLY                   (ResponderFeed, NavigationPanel)
+│   ├── dashboard/           ← ADITYA ONLY                   (DashboardLayout, AnalyticsPanel)
+│   └── auth/                ← ADITYA ONLY                   (LoginForm, RoleGuard)
 │
 ├── shared/                  ← SHARED — PRE-DEFINED, LOCKED
 │   ├── types/               ← TypeScript types matching backend DTOs
@@ -85,9 +88,9 @@ frontend/src/
 │   ├── hooks/               ← Shared React hooks
 │   └── constants.ts         ← API base URL, config
 │
-├── styles/                  ← YASHASVI ONLY   (global styles, design tokens)
-├── public/                  ← YASHASVI ONLY   (PWA manifest, icons, offline assets)
-└── i18n/                    ← YASHASVI ONLY   (translation JSON files)
+├── styles/                  ← ADITYA (Interim for Yashasvi)  (global styles, design tokens)
+├── public/                  ← ADITYA (Interim for Yashasvi)  (PWA manifest, icons, offline assets)
+└── i18n/                    ← SHREYASHI (Interim for Yashasvi) (translation JSON files)
 ```
 
 ### Pod C — AI/ML Module Split
