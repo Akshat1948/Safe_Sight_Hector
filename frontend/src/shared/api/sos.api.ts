@@ -11,9 +11,23 @@ export async function getSosRequests(
   return apiClient<ISosRequest[]>(`/sos?${query}`);
 }
 
+export async function createSos(data: {
+  siteId?: string | null;
+  latitude: number;
+  longitude: number;
+  message?: string | null;
+  contactPhone?: string | null;
+}) {
+  return apiClient<{ id: string; status: string; message: string; createdAt: string }>('/sos', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
 export async function updateSosStatus(id: string, status: string) {
   return apiClient<ISosRequest>(`/sos/${id}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
   });
 }
+

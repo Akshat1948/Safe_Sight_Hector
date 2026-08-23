@@ -5,3 +5,4 @@ export * from './incident.types';
 export * from './alert.types';
 export * from './sos.types';
 export * from './weather.types';
+export * from './transport.types';
