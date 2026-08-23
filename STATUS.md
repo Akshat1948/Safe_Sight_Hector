@@ -1,55 +1,69 @@
-﻿# SafeSight - Root Project Status
+﻿# SafeSight — Root Project Status
 
-> **Last updated:** 2026-08-21 17:45 by Diya (Pod C)
+> **Last updated:** 2026-08-23 19:14 by Diya (Pod C)
+
+---
 
 ## CURRENT CHECKPOINT
-Day 2 of 6
+
+Day 4 of 6 — Integration Day
+
+---
 
 ## CROSS-POD INTEGRATION STATUS
 
-### AI/ML Endpoints (Pod C -> Pod B consumes)
-| Endpoint                    | Status       | Owner     | Notes                                                    |
-|-----------------------------|--------------|-----------|----------------------------------------------------------|
-| POST /ml/anomaly/detect     | READY        | Diya      | IsolationForest + pattern rules. Needs router registered in main.py by Shreyashi |
-| POST /ml/bhashini/translate | READY        | Diya      | Needs BHASHINI_API_KEY in .env; stub fallback active     |
-| POST /ml/bhashini/tts       | READY        | Diya      | Needs BHASHINI_API_KEY in .env; silent WAV stub active   |
-| POST /ml/bhashini/stt       | READY        | Diya      | Needs BHASHINI_API_KEY in .env; stub fallback active     |
-| POST /ml/forecast           | NOT STARTED  | Shreyashi |                                                          |
-| GET  /ml/weather/current    | NOT STARTED  | Shreyashi |                                                          |
-| POST /ml/weather/hazards    | NOT STARTED  | Shreyashi |                                                          |
+### AI/ML Endpoints (Pod C → Pod B consumes)
 
-### Backend API Endpoints (Pod B -> Pod A consumes)
-| Endpoint               | Status      | Owner  | Notes              |
-|------------------------|-------------|--------|--------------------|
-| POST /api/auth/login   | NOT STARTED | Ayush  |                    |
-| GET  /api/zones        | NOT STARTED | Ayush  |                    |
-| POST /api/incidents    | NOT STARTED | Akshat |                    |
-| POST /api/alerts       | NOT STARTED | Akshat |                    |
+| Endpoint | Status | Owner | Notes |
+|----------|--------|-------|-------|
+| POST /ml/anomaly/detect | READY — awaiting router registration | Diya | Code done, tested. Shreyashi must uncomment 4 lines in api/main.py |
+| POST /ml/bhashini/translate | READY — awaiting router registration | Diya | MyMemory fallback active. Live tested 5 languages |
+| POST /ml/forecast | LIVE | Shreyashi | |
+| GET /ml/weather/current | LIVE | Shreyashi | |
+| POST /ml/weather/hazards | LIVE | Shreyashi | |
+
+### Backend API Endpoints (Pod B → Pod A consumes)
+
+| Endpoint | Status | Owner | Notes |
+|----------|--------|-------|-------|
+| POST /api/auth/login | LIVE | Ayush | |
+| GET /api/zones | LIVE | Ayush | |
+| POST /api/incidents | LIVE | Akshat | |
+| POST /api/alerts | LIVE | Akshat | |
+| WebSocket gateway | LIVE | Akshat | |
 
 ### Frontend Pages (Pod A)
-| Page               | Status      | Owner    | Notes |
-|--------------------|-------------|----------|-------|
-| Visitor View       | NOT STARTED | Yashasvi |       |
-| Manager Dashboard  | NOT STARTED | Aditya   |       |
-| Responder Console  | NOT STARTED | Aditya   |       |
+
+| Page | Status | Owner | Notes |
+|------|--------|-------|-------|
+| Visitor View + Heatmap | WIP | Yashasvi | |
+| Manager Dashboard | WIP | Aditya | |
+| Responder Console | WIP | Aditya | |
+
+---
 
 ## BLOCKERS
-| What is Blocked                        | Blocked By                              | Who Needs to Act |
-|----------------------------------------|-----------------------------------------|------------------|
-| /ml/anomaly + /ml/bhashini endpoints not reachable | Shreyashi must register Diya's routers in api/main.py | Shreyashi |
-| Bhashini API returning live results    | Need BHASHINI_API_KEY + USER_ID from MeitY dashboard | Team/Diya |
+
+| What is Blocked | Blocked By | Who Needs to Act |
+|----------------|-----------|-----------------|
+| /ml/anomaly/detect and /ml/bhashini/translate not reachable | Shreyashi must register Diya routers in api/main.py | Shreyashi |
+
+---
 
 ## SHARED INFRA STATUS
-| Item                   | Status      | Notes                              |
-|------------------------|-------------|------------------------------------|
-| GitHub repo created    | YES         | Ayush created                      |
-| Docker compose working | NOT STARTED |                                    |
-| PostgreSQL + PostGIS   | NOT STARTED |                                    |
-| Bhashini API key       | NOT SET     | Needed in ai-ml/.env               |
-| IMD API access         | NOT STARTED |                                    |
-| Git on Diya machine    | NOT INSTALLED | Using API download workaround     |
+
+| Item | Status | Notes |
+|------|--------|-------|
+| GitHub repo | LIVE | ayushsavarn/Wordle |
+| Git installed (Diya machine) | DONE | v2.55.0 installed Aug 23 |
+| Bhashini API key | NOT SET | MyMemory fallback covers demo |
+| Docker compose | NOT STARTED | |
+
+---
 
 ## CONTRACT CHANGES LOG
+
 | Date | What Changed | Changed By | All Pods Notified? |
 |------|-------------|-----------|-------------------|
-| —    | No changes — all code follows MASTER.md exactly | — | — |
+| Aug 23 | POST /ml/bhashini/tts removed | Diya | Note in ai-ml/STATUS.md |
+| Aug 23 | POST /ml/bhashini/stt removed | Diya | Note in ai-ml/STATUS.md |
