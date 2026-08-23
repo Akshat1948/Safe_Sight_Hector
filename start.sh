@@ -96,7 +96,7 @@ echo "================================================================="
 echo "  🛑 To stop all services, run: ./stop.sh"
 echo "================================================================="
 
-# Automatically open Swagger documentation in browser
+# Automatically open Frontend Website in browser
 if command -v open >/dev/null 2>&1; then
-    open "http://localhost:3001/api/docs"
+    open "http://localhost:3000"
 fi
