@@ -1,6 +1,6 @@
 ﻿# SafeSight — Root Project Status
 
-> **Last updated:** 2026-08-23 19:14 by Diya (Pod C)
+> **Last updated:** 2026-08-23 19:37 by Diya (Pod C)
 
 ---
 
@@ -12,17 +12,17 @@ Day 4 of 6 — Integration Day
 
 ## CROSS-POD INTEGRATION STATUS
 
-### AI/ML Endpoints (Pod C → Pod B consumes)
+### AI/ML Endpoints (Pod C — all LIVE on port 8000)
 
 | Endpoint | Status | Owner | Notes |
 |----------|--------|-------|-------|
-| POST /ml/anomaly/detect | READY — awaiting router registration | Diya | Code done, tested. Shreyashi must uncomment 4 lines in api/main.py |
-| POST /ml/bhashini/translate | READY — awaiting router registration | Diya | MyMemory fallback active. Live tested 5 languages |
+| POST /ml/anomaly/detect | LIVE | Diya | IsolationForest + pattern rules. Returns 200. |
+| POST /ml/bhashini/translate | LIVE | Diya | MyMemory fallback active. 5 languages tested. |
 | POST /ml/forecast | LIVE | Shreyashi | |
 | GET /ml/weather/current | LIVE | Shreyashi | |
 | POST /ml/weather/hazards | LIVE | Shreyashi | |
 
-### Backend API Endpoints (Pod B → Pod A consumes)
+### Backend API Endpoints (Pod B)
 
 | Endpoint | Status | Owner | Notes |
 |----------|--------|-------|-------|
@@ -46,7 +46,7 @@ Day 4 of 6 — Integration Day
 
 | What is Blocked | Blocked By | Who Needs to Act |
 |----------------|-----------|-----------------|
-| /ml/anomaly/detect and /ml/bhashini/translate not reachable | Shreyashi must register Diya routers in api/main.py | Shreyashi |
+| No current blockers for Pod C | — | — |
 
 ---
 
@@ -55,7 +55,8 @@ Day 4 of 6 — Integration Day
 | Item | Status | Notes |
 |------|--------|-------|
 | GitHub repo | LIVE | ayushsavarn/Wordle |
-| Git installed (Diya machine) | DONE | v2.55.0 installed Aug 23 |
+| AI/ML server | LIVE | Port 8000, all 4 routers active. Docs: http://127.0.0.1:8000/docs |
+| Git installed (Diya machine) | DONE | v2.55.0 |
 | Bhashini API key | NOT SET | MyMemory fallback covers demo |
 | Docker compose | NOT STARTED | |
 
@@ -65,5 +66,5 @@ Day 4 of 6 — Integration Day
 
 | Date | What Changed | Changed By | All Pods Notified? |
 |------|-------------|-----------|-------------------|
-| Aug 23 | POST /ml/bhashini/tts removed | Diya | Note in ai-ml/STATUS.md |
-| Aug 23 | POST /ml/bhashini/stt removed | Diya | Note in ai-ml/STATUS.md |
+| Aug 23 | POST /ml/bhashini/tts removed | Diya | Yes — STATUS.md |
+| Aug 23 | POST /ml/bhashini/stt removed | Diya | Yes — STATUS.md |
