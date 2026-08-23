@@ -1,25 +1,8 @@
 import { apiClient } from './client';
 import { CreateAlertRequest, IAlert, AlertSeverity, AlertStatus, AlertChannel } from '@/shared/types';
 
-let localDemoAlerts: IAlert[] = [
-  {
-    id: 'alert-demo-1',
-    incidentId: 'inc-demo-1',
-    siteId: 'demo-site-prayagraj-01',
-    targetZoneId: 'zone-c-staircase',
-    targetZoneName: 'Zone C — Main Staircase Chokepoint',
-    severity: AlertSeverity.CRITICAL,
-    title: 'Hold Position: Avoid Zone C Staircase',
-    message: 'High density detected at main staircase. Hold position and use Zone D assembly ground corridor.',
-    messageHi: 'ज़ोन C सीढ़ियों पर भारी भीड़ है। कृपया वहीं रुकें और ज़ोन D कॉरिडोर का प्रयोग करें।',
-    channels: [AlertChannel.PUSH, AlertChannel.DASHBOARD, AlertChannel.PA_SYSTEM],
-    status: AlertStatus.DISPATCHED,
-    createdBy: 'demo-manager-uuid-01',
-    acknowledgedBy: null,
-    acknowledgedAt: null,
-    createdAt: new Date().toISOString(),
-  },
-];
+let localDemoAlerts: IAlert[] = [];
+
 
 export async function getAlerts(
   siteId: string,

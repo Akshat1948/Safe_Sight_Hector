@@ -14,20 +14,6 @@ interface ResponderFeedProps {
   onStatusUpdate?: (id: string, newStatus: 'responding' | 'resolved') => void;
 }
 
-const SEVERITY_COLORS: Record<string, string> = {
-  critical: 'border-l-red-600',
-  high: 'border-l-orange-500',
-  medium: 'border-l-yellow-500',
-  low: 'border-l-green-500',
-};
-
-const SEVERITY_BADGE_COLORS: Record<string, string> = {
-  critical: 'bg-red-100 text-red-800 border-red-200',
-  high: 'bg-orange-100 text-orange-800 border-orange-200',
-  medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  low: 'bg-green-100 text-green-800 border-green-200',
-};
-
 export default function ResponderFeed({
   siteId,
   onSelectIncident,
@@ -120,9 +106,9 @@ export default function ResponderFeed({
 
   if (loading) {
     return (
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-24 bg-slate-200 animate-pulse rounded-lg" />
+          <div key={i} className="h-28 bg-surface-container animate-pulse rounded-lg border border-border-subtle" />
         ))}
       </div>
     );
@@ -130,23 +116,26 @@ export default function ResponderFeed({
 
   if (incidents.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 text-slate-400 bg-[#F3F4F1]">
-        <span className="text-5xl mb-4">✅</span>
-        <h3 className="text-xl font-semibold text-slate-600">All Clear</h3>
-        <p className="text-center text-sm mt-2">No active emergencies require your attention.</p>
+      <div className="flex flex-col items-center justify-center h-full p-8 text-on-surface-variant">
+        <span className="material-symbols-outlined text-5xl mb-3 text-status-nominal">check_circle</span>
+        <h3 className="font-headline-sm text-base font-bold text-on-surface">Sector All Clear</h3>
+        <p className="text-center text-xs font-telemetry-md mt-1">No active emergency dispatches currently assigned to your team.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3 p-4 bg-[#F3F4F1]">
-      <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">
-        Active Dispatches ({incidents.length})
-      </h2>
+    <div className="flex flex-col gap-3 p-4">
+      <div className="flex justify-between items-center pb-2 border-b border-border-subtle">
+        <h2 className="font-label-caps text-xs text-on-surface-variant uppercase tracking-wider font-bold">
+          Active Dispatches ({incidents.length})
+        </h2>
+        <span className="font-telemetry-md text-[10px] text-primary font-bold">LIVE TELEMETRY</span>
+      </div>
+
       {incidents.map((incident) => {
         const isSelected = selectedId === incident.id;
-        const borderClass = SEVERITY_COLORS[incident.severity] || 'border-l-slate-400';
-        const badgeClass = SEVERITY_BADGE_COLORS[incident.severity] || 'bg-slate-100 text-slate-800';
+        const isCritical = incident.severity === 'critical';
         const timeAgo = incident.createdAt
           ? new Date(incident.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           : '';
@@ -155,49 +144,59 @@ export default function ResponderFeed({
           <div
             key={incident.id}
             onClick={() => onSelectIncident(incident)}
-            className={`cursor-pointer bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 ${borderClass} p-4 transition-all ${
-              isSelected ? 'ring-2 ring-indigo-500 shadow-md transform scale-[1.01]' : 'hover:bg-slate-50 hover:shadow-md'
+            className={`cursor-pointer rounded-lg p-3.5 transition-all relative overflow-hidden ${
+              isSelected
+                ? 'bg-surface hud-border border-primary shadow-md ring-1 ring-primary/40'
+                : 'bg-surface hud-border hover:border-primary/50 shadow-xs'
             }`}
           >
-            <div className="flex justify-between items-start mb-2">
+            {isSelected && (
+              <div className="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+            )}
+
+            <div className="flex justify-between items-start mb-2 pl-1">
               <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase ${badgeClass}`}>
-                  {incident.severity}
-                </span>
                 <span
-                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase shadow-2xs ${
-                    incident.status?.toLowerCase() === 'verified'
-                      ? 'bg-white text-emerald-600 border-emerald-200'
-                      : incident.status?.toLowerCase() === 'responding'
-                      ? 'bg-white text-purple-600 border-purple-200'
-                      : 'bg-white text-slate-700 border-slate-200'
+                  className={`text-[9px] font-label-caps font-bold px-1.5 py-0.5 rounded border uppercase ${
+                    isCritical
+                      ? 'bg-error/20 text-error border-error'
+                      : 'bg-primary-container/20 text-primary border-primary'
                   }`}
                 >
+                  {incident.severity}
+                </span>
+                <span className="text-[9px] font-label-caps font-bold px-1.5 py-0.5 rounded border uppercase bg-surface-container text-on-surface border-border-subtle">
                   {incident.status}
                 </span>
               </div>
-              <span className="text-xs text-slate-500 font-medium">{timeAgo}</span>
+              <span className="text-[10px] font-telemetry-md text-on-surface-variant">{timeAgo}</span>
             </div>
 
-            <h3 className="font-bold text-slate-800">{incident.title || incident.incidentType?.replace('_', ' ')}</h3>
-            <div className="text-sm text-slate-600 mt-1 flex items-center gap-1">
-              <span>📍</span> {incident.zoneName || incident.zoneId || 'Site Wide'}
+            <h3 className="font-body-bold text-xs text-on-surface pl-1 leading-snug">
+              {incident.title || incident.incidentType?.replace('_', ' ')}
+            </h3>
+
+            <div className="text-[11px] font-telemetry-md text-on-surface-variant mt-1.5 pl-1 flex items-center gap-1">
+              <span className="material-symbols-outlined text-[13px] text-primary">location_on</span>
+              <span>{incident.zoneName || incident.zoneId || 'Site Wide'}</span>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-slate-100 flex gap-2">
+            <div className="mt-3 pt-2.5 border-t border-border-subtle flex gap-2 pl-1">
               {incident.status === 'verified' && (
                 <button
                   onClick={(e) => handleStatusUpdate(e, incident.id, 'responding')}
-                  className="flex-1 bg-red-700 hover:bg-red-800 text-white text-xs font-semibold py-2 px-3 rounded-lg transition-colors shadow-2xs cursor-pointer"
+                  className="flex-1 bg-error hover:bg-error/90 text-white text-[11px] font-body-bold py-1.5 px-3 rounded transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1"
                 >
+                  <span className="material-symbols-outlined text-sm">directions_run</span>
                   Acknowledge & Respond
                 </button>
               )}
               {incident.status === 'responding' && (
                 <button
                   onClick={(e) => handleStatusUpdate(e, incident.id, 'resolved')}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-2 px-3 rounded transition-colors"
+                  className="flex-1 bg-status-nominal hover:bg-emerald-700 text-white text-[11px] font-body-bold py-1.5 px-3 rounded transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1"
                 >
+                  <span className="material-symbols-outlined text-sm">check_circle</span>
                   Mark Resolved
                 </button>
               )}
@@ -208,3 +207,4 @@ export default function ResponderFeed({
     </div>
   );
 }
+

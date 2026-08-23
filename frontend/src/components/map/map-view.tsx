@@ -1,15 +1,18 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { IZone, DensityStatus } from '@/shared/types';
+import { IZone, DensityStatus, IIncident } from '@/shared/types';
 
 interface MapViewProps {
   zones?: IZone[];
+  incidents?: IIncident[];
   selectedZoneId?: string | null;
   onSelectZone?: (zoneId: string) => void;
   center?: [number, number];
   zoom?: number;
   showHeatmap?: boolean;
+  showLegend?: boolean;
+  showZoneDrawer?: boolean;
   className?: string;
 }
 
@@ -95,11 +98,14 @@ const DEFAULT_DEMO_ZONES = [
 
 export default function MapView({
   zones = [],
+  incidents = [],
   selectedZoneId,
   onSelectZone,
   center = [25.4358, 81.8463], // Prayagraj Sangam
   zoom = 15,
   showHeatmap = true,
+  showLegend = false,
+  showZoneDrawer = false,
   className = '',
 }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -263,6 +269,50 @@ export default function MapView({
 
           layerGroupRef.current.addLayer(marker);
         });
+
+        // Render Active Incidents
+        if (incidents && incidents.length > 0) {
+          incidents.forEach((inc) => {
+            if (!inc.location?.coordinates) return;
+            const [lng, lat] = inc.location.coordinates;
+            const isCritical = inc.severity === 'critical';
+
+            const incIcon = L.divIcon({
+              className: 'custom-map-incident',
+              html: `
+                <div style="
+                  width: 28px;
+                  height: 28px;
+                  border-radius: 50%;
+                  background: ${isCritical ? '#dc2626' : '#ea580c'};
+                  border: 2px solid #ffffff;
+                  box-shadow: 0 0 12px ${isCritical ? 'rgba(220,38,38,0.7)' : 'rgba(234,88,12,0.7)'};
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: #ffffff;
+                  font-size: 14px;
+                  font-weight: bold;
+                  cursor: pointer;
+                ">
+                  !
+                </div>
+              `,
+              iconSize: [28, 28],
+              iconAnchor: [14, 14],
+            });
+
+            const incMarker = L.marker([lat, lng], { icon: incIcon });
+            incMarker.bindPopup(`
+              <div style="font-family: system-ui, sans-serif; padding: 4px;">
+                <strong style="color: ${isCritical ? '#dc2626' : '#ea580c'};">${inc.severity.toUpperCase()} INCIDENT</strong>
+                <p style="font-size: 12px; margin: 4px 0 0 0; color: #0f172a;">${inc.title}</p>
+                <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Zone: ${inc.zoneName || inc.zoneId || 'Site'}</p>
+              </div>
+            `);
+            layerGroupRef.current.addLayer(incMarker);
+          });
+        }
       }
     };
 
@@ -274,7 +324,7 @@ export default function MapView({
         mapInstanceRef.current = null;
       }
     };
-  }, [isMounted, center, zoom, displayZones, selectedZoneId, showHeatmap, onSelectZone]);
+  }, [isMounted, center, zoom, displayZones, incidents, selectedZoneId, showHeatmap, onSelectZone]);
 
   return (
     <div className={`relative w-full h-full min-h-[380px] rounded-2xl overflow-hidden border border-slate-700/60 shadow-xl bg-slate-950 ${className}`}>
@@ -282,27 +332,29 @@ export default function MapView({
       <div ref={mapContainerRef} className="w-full h-full min-h-[380px] z-0" />
 
       {/* Floating HUD Legend */}
-      <div className="absolute top-3 left-3 z-[400] bg-slate-900/90 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-slate-700/70 shadow-lg flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-200">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-          <span>Normal (&lt;50%)</span>
+      {showLegend && (
+        <div className="absolute top-3 left-3 z-[400] bg-slate-900/90 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-slate-700/70 shadow-lg flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-200">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <span>Normal (&lt;50%)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <span>Moderate</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+            <span>High Risk</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+            <span className="text-red-400 font-bold">Surge Alert</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-          <span>Moderate</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
-          <span>High Risk</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
-          <span className="text-red-400 font-bold">Surge Alert</span>
-        </div>
-      </div>
+      )}
 
       {/* Active Selected Zone Drawer Card */}
-      {activeZoneDetails && (
+      {showZoneDrawer && activeZoneDetails && (
         <div className="absolute bottom-3 left-3 right-3 sm:right-auto sm:max-w-sm z-[400] bg-slate-900/95 backdrop-blur-lg p-4 rounded-xl border border-slate-700/80 shadow-2xl animate-in slide-in-from-bottom duration-200">
           <div className="flex justify-between items-start mb-1">
             <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-cyan-400">
@@ -341,3 +393,4 @@ export default function MapView({
     </div>
   );
 }
+

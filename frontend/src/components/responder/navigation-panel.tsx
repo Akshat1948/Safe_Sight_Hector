@@ -12,11 +12,11 @@ interface NavigationPanelProps {
 export default function NavigationPanel({ incident, onStatusUpdate }: NavigationPanelProps) {
   if (!incident) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-slate-400 bg-[#F3F4F1] p-8">
-        <span className="text-5xl mb-4">🗺️</span>
-        <h3 className="text-xl font-semibold text-slate-600">Select an Incident</h3>
-        <p className="text-center text-sm mt-2 max-w-sm">
-          Select an active dispatch from the list to view detailed location information and navigate to the scene.
+      <div className="flex flex-col items-center justify-center h-full text-on-surface-variant bg-surface-container-low p-8">
+        <span className="material-symbols-outlined text-5xl mb-3 text-secondary">explore</span>
+        <h3 className="font-headline-sm text-base font-bold text-on-surface">Select an Incident</h3>
+        <p className="text-center text-xs font-telemetry-md mt-1 max-w-sm">
+          Select an active dispatch from the roster on the left to inspect telemetry, live GPS coordinates, and initiate navigation.
         </p>
       </div>
     );
@@ -34,74 +34,70 @@ export default function NavigationPanel({ incident, onStatusUpdate }: Navigation
     ? `https://www.google.com/maps/search/?api=1&query=${incident.location.coordinates[1]},${incident.location.coordinates[0]}`
     : '#';
 
-  const severityHeaderColors: Record<string, string> = {
-    critical: 'bg-red-600/70 backdrop-blur-md',
-    high: 'bg-orange-500/70 backdrop-blur-md',
-    medium: 'bg-amber-500/70 backdrop-blur-md',
-    low: 'bg-blue-500/70 backdrop-blur-md',
-  };
-
-  const headerBg = severityHeaderColors[incident.severity?.toLowerCase()] || 'bg-slate-900';
+  const isCritical = incident.severity === 'critical';
 
   return (
-    <div className="flex flex-col h-full bg-[#F3F4F1] overflow-hidden">
-      {/* Header Dynamic Translucent Severity Color */}
-      <div className="bg-slate-900/50">
-        <div className={`${headerBg} text-white p-6 transition-colors duration-300 shadow-sm`}>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase bg-white/20 backdrop-blur-xs border border-white/20">
-              {incident.severity} Priority
-            </span>
-            <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase bg-white shadow-xs border border-white/40 ${
-                incident.status?.toLowerCase() === 'verified'
-                  ? 'text-emerald-600'
-                  : incident.status?.toLowerCase() === 'responding'
-                  ? 'text-purple-600'
-                  : incident.status?.toLowerCase() === 'resolved'
-                  ? 'text-sky-600'
-                  : 'text-slate-800'
-              }`}
-            >
-              {incident.status}
-            </span>
-          </div>
-          <h2 className="text-2xl font-bold mb-1 tracking-tight">{incident.title || incident.incidentType?.replace('_', ' ')}</h2>
-          <p className="text-white/90 text-sm flex items-center gap-2 font-medium">
-            <span>📍</span> Zone: {incident.zoneName || incident.zoneId || 'Site Wide'}
-          </p>
+    <div className="flex flex-col h-full bg-surface-container-low overflow-hidden">
+      {/* Header */}
+      <div className="p-6 border-b border-outline-variant bg-surface flex flex-col gap-2 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className={`px-2.5 py-0.5 rounded text-[10px] font-label-caps font-bold uppercase ${
+            isCritical
+              ? 'bg-error/20 border border-error text-error'
+              : 'bg-primary-container/20 border border-primary-container text-primary'
+          }`}>
+            {incident.severity} Priority
+          </span>
+          <span className="px-2.5 py-0.5 rounded text-[10px] font-label-caps font-bold uppercase bg-surface-container border border-border-subtle text-on-surface">
+            {incident.status}
+          </span>
+          <span className="font-telemetry-md text-[10px] text-on-surface-variant ml-auto">
+            ID: {incident.id}
+          </span>
         </div>
+        <h2 className="font-headline-md text-xl font-bold text-on-surface tracking-tight">
+          {incident.title || incident.incidentType?.replace('_', ' ')}
+        </h2>
+        <p className="text-on-surface-variant font-telemetry-md text-xs flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-sm text-primary">location_on</span>
+          <span>Zone: {incident.zoneName || incident.zoneId || 'Site Wide'}</span>
+        </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#F3F4F1]">
-        {/* Description Card */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">Incident Details</h3>
-          <p className="text-slate-800 text-sm leading-relaxed">{incident.description || 'No additional description provided.'}</p>
-          <div className="mt-4 flex gap-6 text-sm text-slate-600 border-t border-slate-100 pt-3">
+      <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        {/* Incident Details Card */}
+        <div className="bg-surface p-4 rounded-lg hud-border shadow-xs">
+          <h3 className="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider mb-2 font-bold">
+            Tactical Briefing & Description
+          </h3>
+          <p className="text-on-surface font-body-base text-xs leading-relaxed">
+            {incident.description || 'No additional telemetry notes provided.'}
+          </p>
+          <div className="mt-4 flex gap-6 text-xs font-telemetry-md border-t border-border-subtle pt-3 text-on-surface-variant">
             <div>
-              <span className="font-semibold block text-xs text-slate-500 uppercase">Detected By</span>
-              <span className="uppercase font-medium">{incident.detectionSource || 'System'}</span>
+              <span className="block text-[10px] font-label-caps uppercase text-on-surface-variant/70">Detection Source</span>
+              <span className="font-bold text-on-surface uppercase">{incident.detectionSource || 'System AI'}</span>
             </div>
             {incident.confidenceScore && (
               <div>
-                <span className="font-semibold block text-xs text-slate-500 uppercase">Confidence</span>
-                <span className="font-medium">{Math.round(incident.confidenceScore * 100)}%</span>
+                <span className="block text-[10px] font-label-caps uppercase text-on-surface-variant/70">AI Confidence</span>
+                <span className="font-bold text-primary">{Math.round(incident.confidenceScore * 100)}%</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Location / Map Action Card */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3">
-          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Location & Navigation</h3>
+        {/* GPS Coordinates Card */}
+        <div className="bg-surface p-4 rounded-lg hud-border shadow-xs flex flex-col gap-3">
+          <h3 className="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider font-bold">
+            Location & GPS Waypoints
+          </h3>
           {incident.location ? (
-            <div className="text-sm text-slate-700 font-mono bg-slate-50 p-2.5 rounded-lg border border-slate-200 inline-block w-fit">
-              Latitude: {incident.location.coordinates[1].toFixed(6)}, Longitude:{' '}
-              {incident.location.coordinates[0].toFixed(6)}
+            <div className="text-xs font-telemetry-md text-on-surface bg-surface-container p-2.5 rounded border border-border-subtle font-mono">
+              Latitude: {incident.location.coordinates[1].toFixed(6)}° N, Longitude: {incident.location.coordinates[0].toFixed(6)}° E
             </div>
           ) : (
-            <p className="text-sm text-slate-500">GPS coordinates not available for this incident.</p>
+            <p className="text-xs font-telemetry-md text-on-surface-variant">GPS coordinates not available.</p>
           )}
 
           {incident.location && (
@@ -109,35 +105,41 @@ export default function NavigationPanel({ incident, onStatusUpdate }: Navigation
               href={mapUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg text-center transition-colors shadow-sm flex items-center justify-center gap-2"
+              className="bg-primary hover:bg-primary-container text-white font-body-bold text-xs py-2.5 px-4 rounded text-center transition-colors shadow-xs flex items-center justify-center gap-2"
             >
-              <span>🧭</span> Open in Google Maps
+              <span className="material-symbols-outlined text-sm">navigation</span>
+              Open Real-Time Turn-by-Turn in Google Maps
             </a>
           )}
         </div>
 
-        {/* Response Action Card */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Response Action</h3>
-          <div className="flex flex-col gap-4">
+        {/* Action Dispatch Card */}
+        <div className="bg-surface p-4 rounded-lg hud-border shadow-xs">
+          <h3 className="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider mb-3 font-bold">
+            Field Unit Status Control
+          </h3>
+          <div>
             {incident.status === 'verified' && (
               <button
                 onClick={() => handleUpdate('responding')}
-                className="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-sm text-lg cursor-pointer"
+                className="w-full bg-error hover:bg-error/90 text-white font-body-bold py-2.5 px-4 rounded text-xs transition-colors shadow-md shadow-error/20 cursor-pointer flex items-center justify-center gap-1.5"
               >
-                Acknowledge & Respond
+                <span className="material-symbols-outlined text-base">directions_run</span>
+                Acknowledge & Deploy Unit to Scene
               </button>
             )}
             {incident.status === 'responding' && (
               <div className="space-y-3">
-                <div className="bg-purple-50 text-purple-800 p-4 rounded-lg border border-purple-200 text-center font-medium">
-                  Status: Currently Responding to Incident
+                <div className="bg-primary/10 border border-primary/30 text-primary p-3 rounded text-center font-telemetry-md text-xs font-bold flex items-center justify-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                  STATUS: UNIT EN ROUTE TO SECTOR
                 </div>
                 <button
                   onClick={() => handleUpdate('resolved')}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-sm text-lg cursor-pointer"
+                  className="w-full bg-status-nominal hover:bg-emerald-700 text-white font-body-bold py-2.5 px-4 rounded text-xs transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  Mark as Resolved
+                  <span className="material-symbols-outlined text-base">check_circle</span>
+                  Mark Incident as Resolved
                 </button>
               </div>
             )}
@@ -147,3 +149,4 @@ export default function NavigationPanel({ incident, onStatusUpdate }: Navigation
     </div>
   );
 }
+
