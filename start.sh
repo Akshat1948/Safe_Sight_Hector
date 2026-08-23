@@ -32,10 +32,12 @@ lsof -ti :3000 | xargs kill -9 2>/dev/null || true
 # 3. Start NestJS Backend (Port 3001)
 echo "⚙️  Starting NestJS Backend API Gateway on port 3001..."
 cd "$SCRIPT_DIR/backend"
-nohup npm run start:dev > "$SCRIPT_DIR/backend.log" 2>&1 &
+npm run build > "$SCRIPT_DIR/backend.log" 2>&1
+nohup node dist/main >> "$SCRIPT_DIR/backend.log" 2>&1 &
 BACKEND_PID=$!
 echo $BACKEND_PID > "$SCRIPT_DIR/.backend.pid"
 echo "   ✅ Backend started (PID: $BACKEND_PID, logs: backend.log)"
+
 
 # 4. Start AI/ML Service if virtualenv / python uvicorn is configured (Port 8000)
 cd "$SCRIPT_DIR"
