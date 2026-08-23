@@ -1,5 +1,7 @@
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 export const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
+export const ML_BASE_URL = process.env.NEXT_PUBLIC_ML_URL || 'http://localhost:8000/ml';
+
 
 export const DENSITY_THRESHOLDS = {
   GREEN_MAX: 0.5,

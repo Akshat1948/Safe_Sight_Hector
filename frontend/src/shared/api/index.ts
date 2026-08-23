@@ -6,3 +6,4 @@ export * from './sos.api';
 export * from './zones.api';
 export * from './weather.api';
 export * from './transport.api';
+export * from './translation.api';

@@ -13,16 +13,18 @@ export async function getSosRequests(
 
 export async function createSos(data: {
   siteId?: string | null;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   message?: string | null;
   contactPhone?: string | null;
 }) {
-  return apiClient<{ id: string; status: string; message: string; createdAt: string }>('/sos', {
+  return apiClient<any>('/sos', {
     method: 'POST',
     body: JSON.stringify(data),
   });
 }
+
+export const createSosRequest = createSos;
 
 export async function updateSosStatus(id: string, status: string) {
   return apiClient<ISosRequest>(`/sos/${id}/status`, {
@@ -30,4 +32,3 @@ export async function updateSosStatus(id: string, status: string) {
     body: JSON.stringify({ status }),
   });
 }
-
