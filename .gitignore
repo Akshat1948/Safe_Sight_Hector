@@ -1,3 +1,12 @@
 node_modules/
 .env
-__pycache__/
+.env.*
+**/__pycache__/
+*.pyc
+*.log
+*.pid
+.DS_Store
+dist/
+build/
+.vscode/
+.idea/
