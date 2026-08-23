@@ -1,4 +1,4 @@
-﻿# Pod C — AI/ML STATUS LOG
+# Pod C — AI/ML STATUS LOG
 
 > **Last updated:** 2026-08-21 17:43 by Diya
 
@@ -18,7 +18,9 @@
 | 8 | Bhashini TTS wrapper | `bhashini/tts.py` | Diya | Aug 21 | Returns base64 WAV. Silent WAV stub fallback for dev |
 | 9 | Bhashini STT wrapper | `bhashini/stt.py` | Diya | Aug 21 | ASR pipeline, returns text + confidence. Stub fallback if unconfigured |
 | 10 | Bhashini FastAPI router | `api/bhashini_routes.py` | Diya | Aug 21 | POST /ml/bhashini/translate, /tts, /stt — exact contracts per MASTER.md Section 6.4 |
-| 11 | Python venv + deps | `requirements.txt`, `venv/` | Diya | Aug 21 | Python 3.14 compatible: fastapi 0.141.1, pydantic 2.13.4, scikit-learn 1.9.0, numpy 2.5.2, pandas 3.0.5, httpx 0.28.1 |
+| 11 | Python venv + deps | `requirements.txt`, `venv/` | Diya & Shreyashi | Aug 23 | Python 3.11-3.14 compatible: fastapi, pydantic, prophet, scikit-learn, numpy, pandas, httpx, gTTS |
+| 12 | Register anomaly + bhashini routers | `api/main.py` | Shreyashi | Aug 23 | All 4 routers (forecast, weather, anomaly, bhashini) unified and verified |
+| 13 | Dockerfile & container setup | `Dockerfile`, `.dockerignore`, `../docker-compose.yml` | Shreyashi | Aug 23 | Multi-stage slim Dockerfile and docker-compose aiml service entry |
 
 ---
 
