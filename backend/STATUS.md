@@ -1,6 +1,6 @@
 # Pod B (Backend) — STATUS LOG
 
-> **Last updated:** 2026-08-22 18:45 by Akshat & Ayush
+> **Last updated:** 2026-08-23 19:48 by Akshat & Ayush (Pod B Leads)
 
 ---
 
@@ -22,10 +22,10 @@
 | 12 | Alerts Module | `src/modules/alerts/` (`alerts.service.ts`, `alerts.controller.ts`, `alerts.module.ts`) | Akshat | Aug 21 | Alert composition, Bhashini translation call, auto-escalation timer, WebSocket dispatch |
 | 13 | SOS Module | `src/modules/sos/` (`sos.service.ts`, `sos.controller.ts`, `sos.module.ts`) | Akshat | Aug 21 | Public SOS creation, automatic incident generation, WebSocket alert |
 | 14 | Transport Module | `src/modules/transport/` (`transport.service.ts`, `transport.controller.ts`, `transport.module.ts`) | Akshat | Aug 21 | Parking & shuttle status queries (public) and updates (manager) |
-
 | 15 | Swagger ApiQuery Fixes | `src/modules/` (incidents, alerts, sos, transport controllers) | Akshat | Aug 22 | Explicit `@ApiQuery({ required: false })` added to fix Swagger UI param rendering |
 | 16 | Transport Demo Seeder | `src/modules/transport/transport.service.ts` | Akshat | Aug 22 | Auto-seeder for parking lots and shuttle bus schedules |
 | 17 | End-to-End Manual & Integration Testing | All 18 endpoints + WebSocket Gateway | Ayush | Aug 22 | 100% verified in Swagger: Auth, Zones, Geofences, Weather, Incidents, Alerts, SOS, Transport |
+| 18 | Cross-Pod Integration with Pod C (AI/ML) | `weather.service.ts`, `zones.service.ts` | Ayush & Akshat | Aug 23 | Live integration with FastAPI endpoints on port 8000 |
 
 ---
 
@@ -50,10 +50,10 @@
 | # | Decision | Why | Decided By | Date |
 |---|---------|-----|-----------|------|
 | 1 | Used NestJS built-in ValidationPipe with `class-validator` | Enforces request validation across all endpoints automatically | Ayush | Aug 21 |
-| 2 | Implemented demo data auto-seeder in `AuthService` and `ZonesService` | Enables immediate zero-config testing for demo flows and frontend integration | Ayush | Aug 21 |
+| 2 | Implemented demo data auto-seeder in `AuthService`, `ZonesService`, and `TransportService` | Enables immediate zero-config testing for demo flows and frontend integration | Ayush & Akshat | Aug 21–22 |
 | 3 | Added Swagger at `/api/docs` | Live interactive UI for testing all backend endpoints | Ayush | Aug 21 |
 | 4 | Auto-incident creation on SOS request | Guarantees every SOS is immediately tracked in the manager/responder incident queue | Akshat | Aug 21 |
-| 5 | Non-blocking Bhashini translation with timeout | Ensures alert creation succeeds even if translation service is unavailable | Akshat | Aug 21 |
+| 5 | Non-blocking Bhashini translation with timeout & fallback | Ensures alert creation succeeds even if translation service is unavailable | Akshat | Aug 21 |
 | 6 | Background timeout for alert auto-escalation | Automatically escalates unacknowledged alerts after 60s without blocking request thread | Akshat | Aug 21 |
 
 ---
@@ -107,4 +107,3 @@ backend/
 | # | Issue | Severity | Workaround | Filed By |
 |---|-------|----------|-----------|----------|
 | - | None (All endpoints tested & verified) | — | — | — |
-

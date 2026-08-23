@@ -1,10 +1,7 @@
-from __future__ import annotations
-
-from datetime import datetime
+﻿from pydantic import BaseModel, Field
+from typing import Optional
 from enum import Enum
-from typing import Optional, Any
-
-from pydantic import BaseModel
+from datetime import datetime
 
 
 class DensityStatusEnum(str, Enum):
@@ -36,7 +33,7 @@ class HazardLevelEnum(str, Enum):
     SEVERE = "severe"
 
 
-# --- Forecast ---
+# --- Forecast (Shreyashi) ---
 
 class DensityReading(BaseModel):
     timestamp: datetime
@@ -71,7 +68,7 @@ class ForecastResponse(BaseModel):
     model_version: str = "prophet-v1"
 
 
-# --- Anomaly Detection ---
+# --- Anomaly Detection (Diya) ---
 
 class ReadingInput(BaseModel):
     timestamp: datetime
@@ -97,7 +94,7 @@ class AnomalyResponse(BaseModel):
     recommended_action: str = ""
 
 
-# --- Weather ---
+# --- Weather (Shreyashi) ---
 
 class WeatherResponse(BaseModel):
     temperature: float
@@ -123,7 +120,7 @@ class HazardResponse(BaseModel):
     affected_zone_types: list[str] = []
 
 
-# --- Bhashini ---
+# --- Bhashini (Diya) ---
 
 class TranslateRequest(BaseModel):
     text: str
@@ -163,5 +160,5 @@ class STTResponse(BaseModel):
 
 class ApiEnvelope(BaseModel):
     success: bool = True
-    data: Optional[Any] = None
+    data: Optional[dict] = None
     message: str = ""
