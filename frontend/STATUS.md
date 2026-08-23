@@ -35,11 +35,11 @@
   * 🔴 `POST /ml/anomaly/detect` (Isolation Forest crowd crush detection) in progress.
   * 🔴 `POST /ml/bhashini/translate` and `POST /ml/bhashini/tts` in progress.
 
-### 3. Pod A (Frontend — Yashasvi)
-* **Yashasvi (Visitor UI & Maps)**:
-  * 🔴 Visitor landing page with Leaflet map and GeoJSON zone overlays.
-  * 🔴 Public weather and transport widgets.
-  * 🔴 Language switcher UI consuming Bhashini translations.
+### 3. Pod A (Frontend — Temporary Handover from Yashasvi)
+* ⚠️ **Notice:** Yashasvi is temporarily unavailable. His tasks are reallocated across **Aditya**, **Shreyashi**, and **Akshat**:
+  * **Aditya:** Visitor Landing Page (`app/page.tsx`, `(visitor)/`), PWA shell, Root layout & tactical styling.
+  * **Akshat:** Interactive Leaflet map, GeoJSON zone overlays, Public transport & SOS widgets.
+  * **Shreyashi:** Public weather advisory widget, Multilingual Bhashini i18n switcher.
 
 ---
 

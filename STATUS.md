@@ -1,11 +1,20 @@
 # SafeSight — Project Status
 
-> **Last updated:** 2026-08-22 21:50 by Aditya (Pod A Co-Lead — Frontend)
+> **Last updated:** 2026-08-23 20:10 by Aditya (Pod A Co-Lead — Frontend)
+
+---
+
+## ⚠️ TEMPORARY TEAM REALLOCATION NOTE
+> **Status:** Active (Effective Aug 23, 2026)  
+> **Notice:** **Yashasvi** is currently unavailable for a temporary time period. To maintain delivery momentum, his responsibilities are temporarily taken over by **Aditya**, **Shreyashi**, and **Akshat** until Yashasvi returns:
+> * **Aditya (Pod A Co-Lead):** Visitor Landing Page (`app/page.tsx`, `(visitor)/`), Root Layout & Styling, Service Worker & PWA Shell.
+> * **Shreyashi (Pod C):** Weather & Hazard Overlays (`components/weather/`), Multilingual i18n & Bhashini UI integration (`components/language/`, `i18n/`).
+> * **Akshat (Pod B):** Interactive Leaflet Map & GeoJSON Overlays (`components/map/`), Transport Widgets (`components/transport/`), Public SOS & Safety Essentials (`components/visitor/`).
 
 ---
 
 ## 📊 CURRENT CHECKPOINT
-**Day 2 of 6 — Core Features & Cross-Pod Contract Alignment (Phase 1 Complete)**
+**Day 3 of 6 — Integration & Multi-Pod Feature Execution**
 
 ---
 
@@ -23,15 +32,16 @@
 │   - Incidents & Evidence│   - Zones & Density CRUD     │   - IMD Weather Client        │
 │   - Alerts & Banner     │   - Geofences & Weather Proxy│   - Multi-Hazard Scoring      │
 │   - SOS Distress Queue  │   - PostGIS Seeding & Infra  │   - Synthetic Crowd Dataset   │
-│   - Responder Console   │   - Swagger Docs (/api/docs) │                               │
-│   - Centralized API/WS  │                              │ • Diya:                       │
-│                         │ • Akshat:                    │   🔴 IN PROGRESS (Day 3 Target│
-│ • Yashasvi:             │   🟢 100% COMPLETE & LIVE    │   - Isolation Forest Anomaly  │
-│   🔴 PENDING            │   - Incidents & Verification │   - Bhashini Translate & TTS  │
-│   - Visitor UI & Map    │   - Alerts & Auto-Escalation │                               │
-│   - Weather/Transport   │   - SOS & Auto-Incident Flow │                               │
-│   - Bhashini i18n UI    │   - Transport Status         │                               │
-│   - Public Safety Hub   │   - WebSocket Gateway (:3001)│                               │
+│   - Responder Console   │   - Swagger Docs (/api/docs) │   - [Interim: Weather/i18n UI]│
+│   - Tactical Light Theme│                              │                               │
+│   - [Interim: Visitor]  │ • Akshat:                    │ • Diya:                       │
+│                         │   🟢 100% COMPLETE & LIVE    │   🔴 IN PROGRESS (Day 3 Target│
+│ • Yashasvi (On Leave):  │   - Incidents & Verification │   - Isolation Forest Anomaly  │
+│   🟡 REALLOCATED        │   - Alerts & Auto-Escalation │   - Bhashini Translate & TTS  │
+│   (Handed to Aditya,    │   - SOS & Auto-Incident Flow │                               │
+│    Shreyashi & Akshat)  │   - Transport Status         │                               │
+│                         │   - WebSocket Gateway (:3001)│                               │
+│                         │   - [Interim: Maps/Transport]│                               │
 └─────────────────────────┴──────────────────────────────┴───────────────────────────────┘
 ```
 
@@ -90,11 +100,11 @@ All 18 REST endpoints and the real-time WebSocket Gateway are **100% COMPLETE, T
 
 ---
 
-## 🔴 POD A (FRONTEND — YASHASVI) IN PROGRESS
+## 🟡 POD A (FRONTEND — INTERIM HANDOVER FROM YASHASVI)
 
-* **Visitor Landing & Navigation**: Public view with interactive Leaflet map and GeoJSON zone overlays.
-* **Public Widgets**: Public weather advisory and transport (parking/shuttle) status components.
-* **Multilingual Switcher**: Indic language switcher consuming Bhashini translations.
+* **Aditya (Co-Lead):** Visitor Landing View (`app/(visitor)/page.tsx`), root routing, PWA shell and tactical light theme.
+* **Akshat:** Interactive Leaflet GIS map with GeoJSON zone overlays (`components/map/`), public transport status (`components/transport/`), SOS button (`components/visitor/`).
+* **Shreyashi:** Public weather advisory widget (`components/weather/`), Multilingual Bhashini i18n switcher (`components/language/`, `i18n/`).
 
 ---
 
