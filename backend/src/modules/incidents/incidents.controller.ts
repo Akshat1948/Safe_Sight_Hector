@@ -11,12 +11,15 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { IncidentsService } from './incidents.service';
 import { CreateIncidentDto, VerifyIncidentDto, UpdateIncidentStatusDto } from '../../common/dto';
 import { JwtAuthGuard, RolesGuard } from '../../common/guards';
 import { Roles, CurrentUser } from '../../common/decorators';
 import { UserRole, IUser } from '../../common/interfaces';
 
+@ApiTags('incidents')
+@ApiBearerAuth()
 @Controller('incidents')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class IncidentsController {
@@ -24,22 +27,27 @@ export class IncidentsController {
 
   @Get()
   @Roles(UserRole.MANAGER, UserRole.RESPONDER)
+  @ApiQuery({ name: 'siteId', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  @ApiQuery({ name: 'severity', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'offset', required: false, type: Number })
   async getIncidents(
-    @Query('siteId') siteId: string,
+    @Query('siteId') siteId?: string,
     @Query('status') status?: string,
     @Query('severity') severity?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ) {
-    const numLimit = limit ? parseInt(limit, 10) : 50;
-    const numOffset = offset ? parseInt(offset, 10) : 0;
+    const parsedLimit = limit && !isNaN(parseInt(limit, 10)) ? parseInt(limit, 10) : 50;
+    const parsedOffset = offset && !isNaN(parseInt(offset, 10)) ? parseInt(offset, 10) : 0;
 
     const data = await this.incidentsService.getIncidents(
       siteId,
       status,
       severity,
-      numLimit,
-      numOffset,
+      parsedLimit,
+      parsedOffset,
     );
     return { success: true, data, message: 'Incidents retrieved' };
   }

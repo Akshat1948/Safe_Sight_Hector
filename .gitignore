@@ -1,32 +1,12 @@
-# Dependencies
 node_modules/
-__pycache__/
-*.pyc
-venv/
-.venv/
-.pytest_cache/
-.coverage
-
-# Environment files
 .env
-.env.local
 .env.*
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Build outputs
+**/__pycache__/
+*.pyc
+*.log
+*.pid
+.DS_Store
 dist/
 build/
-.next/
-out/
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# OS Files
-.DS_Store
-Thumbs.db
+.vscode/
+.idea/

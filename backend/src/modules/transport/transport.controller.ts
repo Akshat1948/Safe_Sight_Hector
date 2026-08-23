@@ -8,18 +8,21 @@ import {
   UseGuards,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { TransportService } from './transport.service';
 import { UpdateTransportDto } from '../../common/dto';
 import { JwtAuthGuard, RolesGuard } from '../../common/guards';
 import { Roles } from '../../common/decorators';
 import { UserRole } from '../../common/interfaces';
 
+@ApiTags('transport')
 @Controller('transport')
 export class TransportController {
   constructor(private readonly transportService: TransportService) {}
 
   @Get('parking')
-  async getParkingStatus(@Query('siteId') siteId: string) {
+  @ApiQuery({ name: 'siteId', required: false, type: String })
+  async getParkingStatus(@Query('siteId') siteId?: string) {
     const data = await this.transportService.getParkingStatus(siteId);
     return {
       success: true,
@@ -29,7 +32,8 @@ export class TransportController {
   }
 
   @Get('shuttles')
-  async getShuttleStatus(@Query('siteId') siteId: string) {
+  @ApiQuery({ name: 'siteId', required: false, type: String })
+  async getShuttleStatus(@Query('siteId') siteId?: string) {
     const data = await this.transportService.getShuttleStatus(siteId);
     return {
       success: true,
@@ -39,6 +43,7 @@ export class TransportController {
   }
 
   @Put(':id')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.MANAGER)
   async updateTransport(

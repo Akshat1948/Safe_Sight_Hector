@@ -18,11 +18,14 @@ export class AlertsService {
     private readonly gateway: SafeSightGateway,
   ) {}
 
-  async getAlerts(siteId: string, status?: string, severity?: string) {
+  async getAlerts(siteId?: string, status?: string, severity?: string) {
     const query = this.alertRepository
       .createQueryBuilder('alert')
-      .leftJoinAndSelect('alert.targetZone', 'zone')
-      .where('alert.siteId = :siteId', { siteId });
+      .leftJoinAndSelect('alert.targetZone', 'zone');
+
+    if (siteId && siteId.trim().length > 0) {
+      query.andWhere('alert.siteId = :siteId', { siteId: siteId.trim() });
+    }
 
     if (status) {
       query.andWhere('alert.status = :status', { status });
