@@ -1,55 +1,58 @@
-﻿# SafeSight - Root Project Status
+# SafeSight - Root Project Status
 
-> **Last updated:** 2026-08-21 17:45 by Diya (Pod C)
+> **Last updated:** 2026-08-23 19:25 by Shreyashi (Pod C)
 
-## CURRENT CHECKPOINT
-Day 2 of 6
+## 📍 CURRENT CHECKPOINT
+Day 3 of 6 — Integration & End-to-End Testing
 
-## CROSS-POD INTEGRATION STATUS
+## 🔄 CROSS-POD INTEGRATION STATUS
 
-### AI/ML Endpoints (Pod C -> Pod B consumes)
+### AI/ML Endpoints (Pod C → Pod B consumes)
 | Endpoint                    | Status       | Owner     | Notes                                                    |
 |-----------------------------|--------------|-----------|----------------------------------------------------------|
-| POST /ml/anomaly/detect     | READY        | Diya      | IsolationForest + pattern rules. Needs router registered in main.py by Shreyashi |
-| POST /ml/bhashini/translate | READY        | Diya      | Needs BHASHINI_API_KEY in .env; stub fallback active     |
-| POST /ml/bhashini/tts       | READY        | Diya      | Needs BHASHINI_API_KEY in .env; silent WAV stub active   |
-| POST /ml/bhashini/stt       | READY        | Diya      | Needs BHASHINI_API_KEY in .env; stub fallback active     |
-| POST /ml/forecast           | NOT STARTED  | Shreyashi |                                                          |
-| GET  /ml/weather/current    | NOT STARTED  | Shreyashi |                                                          |
-| POST /ml/weather/hazards    | NOT STARTED  | Shreyashi |                                                          |
+| POST /ml/forecast           | ✅ LIVE      | Shreyashi | Prophet crowd forecaster with heuristic fallback          |
+| GET  /ml/weather/current    | ✅ LIVE      | Shreyashi | Current weather, 24h forecast & 10m cache               |
+| POST /ml/weather/hazards    | ✅ LIVE      | Shreyashi | Multi-hazard rule matrix (flood, landslide, lightning, heat)|
+| POST /ml/anomaly/detect     | ✅ LIVE      | Diya      | IsolationForest + 2-tier crush precursor pattern rules   |
+| POST /ml/bhashini/translate | ✅ LIVE      | Diya      | Bhashini ULCA API + MyMemory free translation fallback    |
+| POST /ml/bhashini/tts       | ✅ LIVE      | Diya      | Bhashini TTS + gTTS audio generation fallback            |
+| POST /ml/bhashini/stt       | ✅ LIVE      | Diya      | Bhashini ASR pipeline for voice alerts/SOS               |
 
-### Backend API Endpoints (Pod B -> Pod A consumes)
-| Endpoint               | Status      | Owner  | Notes              |
-|------------------------|-------------|--------|--------------------|
-| POST /api/auth/login   | NOT STARTED | Ayush  |                    |
-| GET  /api/zones        | NOT STARTED | Ayush  |                    |
-| POST /api/incidents    | NOT STARTED | Akshat |                    |
-| POST /api/alerts       | NOT STARTED | Akshat |                    |
+### Backend API Endpoints (Pod B → Pod A consumes)
+| Endpoint               | Status      | Owner  | Notes                                            |
+|------------------------|-------------|--------|--------------------------------------------------|
+| POST /api/auth/login   | ✅ LIVE     | Ayush  | JWT authentication & RBAC                        |
+| GET  /api/zones        | ✅ LIVE     | Ayush  | Zone management & live density telemetry         |
+| GET  /api/weather/:siteId | ✅ LIVE  | Ayush  | Proxy to AI/ML `/ml/weather/current`             |
+| POST /api/forecast/:zoneId | ✅ LIVE | Ayush  | Proxy to AI/ML `/ml/forecast`                    |
+| POST /api/incidents    | ✅ LIVE     | Akshat | Incident tracking & verification workflow        |
+| POST /api/alerts       | ✅ LIVE     | Akshat | Multi-channel alert dispatch & escalation        |
+| POST /api/sos          | ✅ LIVE     | Akshat | Emergency SOS routing & responder notification   |
 
 ### Frontend Pages (Pod A)
-| Page               | Status      | Owner    | Notes |
-|--------------------|-------------|----------|-------|
-| Visitor View       | NOT STARTED | Yashasvi |       |
-| Manager Dashboard  | NOT STARTED | Aditya   |       |
-| Responder Console  | NOT STARTED | Aditya   |       |
+| Page               | Status      | Owner    | Notes                                            |
+|--------------------|-------------|----------|--------------------------------------------------|
+| Visitor View       | ✅ LIVE     | Yashasvi | Map, heatmap density overlay & weather widget    |
+| Manager Dashboard  | ✅ LIVE     | Aditya   | Real-time command center & hazard radar          |
+| Responder Console  | ✅ LIVE     | Aditya   | Incident triage, queue & routing navigation      |
 
-## BLOCKERS
+## 🚫 BLOCKERS
 | What is Blocked                        | Blocked By                              | Who Needs to Act |
 |----------------------------------------|-----------------------------------------|------------------|
-| /ml/anomaly + /ml/bhashini endpoints not reachable | Shreyashi must register Diya's routers in api/main.py | Shreyashi |
-| Bhashini API returning live results    | Need BHASHINI_API_KEY + USER_ID from MeitY dashboard | Team/Diya |
+| None                                   | All core microservices & routers live   | Pods A, B, C ready for E2E integration |
 
-## SHARED INFRA STATUS
-| Item                   | Status      | Notes                              |
-|------------------------|-------------|------------------------------------|
-| GitHub repo created    | YES         | Ayush created                      |
-| Docker compose working | NOT STARTED |                                    |
-| PostgreSQL + PostGIS   | NOT STARTED |                                    |
-| Bhashini API key       | NOT SET     | Needed in ai-ml/.env               |
-| IMD API access         | NOT STARTED |                                    |
-| Git on Diya machine    | NOT INSTALLED | Using API download workaround     |
+## 🛠️ SHARED INFRA STATUS
+| Item                   | Status      | Notes                                                    |
+|------------------------|-------------|----------------------------------------------------------|
+| GitHub repo created    | ✅ LIVE     | Monorepo with feature branches merged into `develop`     |
+| Docker Compose working | ✅ LIVE     | Postgres (PostGIS), Redis, and AI/ML container ready     |
+| AI/ML Dockerfile       | ✅ LIVE     | `python:3.11-slim` multi-stage build on port 8000        |
+| Backend (NestJS)       | ✅ LIVE     | Running on port 3001                                     |
+| Frontend (Next.js PWA) | ✅ LIVE     | Running on port 3000                                     |
+| Bhashini Fallback      | ✅ LIVE     | MyMemory + gTTS active for live demo without MeitY keys  |
+| IMD Weather Fallback   | ✅ LIVE     | Real-time realistic weather synthesis active            |
 
-## CONTRACT CHANGES LOG
+## 📝 CONTRACT CHANGES LOG
 | Date | What Changed | Changed By | All Pods Notified? |
 |------|-------------|-----------|-------------------|
-| —    | No changes — all code follows MASTER.md exactly | — | — |
+| 2026-08-23 | Unified all 4 AI/ML router groups in `api/main.py` and added Dockerfile | Shreyashi | ✅ Yes |
