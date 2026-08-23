@@ -1,6 +1,6 @@
 ﻿# SafeSight — Root Project Status
 
-> **Last updated:** 2026-08-23 22:15 by Team Blueprint (Diya, Aditya, Ayush, Akshat, Shreyashi)
+> **Last updated:** 2026-08-23 22:30 by Team Blueprint (Diya, Aditya, Ayush, Akshat, Shreyashi)
 
 ---
 
@@ -8,7 +8,7 @@
 > **Status:** Active (Effective Aug 23, 2026)  
 > **Notice:** **Yashasvi** is currently unavailable for a temporary time period. To maintain uninterrupted delivery momentum, his responsibilities are temporarily taken over by **Aditya**, **Shreyashi**, and **Akshat** until Yashasvi returns:
 > * **Aditya (Pod A Co-Lead):** Visitor Landing View (pp/(visitor)/page.tsx, pp/page.tsx), Root Layout & Tactical Light UI, Service Worker & PWA Shell.
-> * **Shreyashi (Pod C):** Weather & Hazard Overlays (components/weather/), Multilingual i18n & Bhashini UI integration (components/language/, i18n/).
+> * **Shreyashi (Pod C):** Weather & Hazard Overlays (components/weather/), Multilingual i18n & Translator UI integration (components/language/, i18n/).
 > * **Akshat (Pod B):** Interactive Leaflet Map & GeoJSON Overlays (components/map/), Transport Widgets (components/transport/), Public SOS & Safety Essentials (components/visitor/).
 
 ---
@@ -37,9 +37,9 @@
 │   - [Interim: Visitor]  │ • Akshat:                    │ • Diya:                       │
 │                         │   🟢 100% COMPLETE & LIVE    │   🟢 100% COMPLETE & LIVE     │
 │ • Yashasvi (On Leave):  │   - Incidents & Verification │   - Isolation Forest Anomaly  │
-│   🟡 REALLOCATED        │   - Alerts & Auto-Escalation │   - Pure Text Translation API │
-│   (Handed to Aditya,    │   - SOS & Auto-Incident Flow │   - Bhashini + MyMemory Fallbk│
-│    Shreyashi & Akshat)  │   - Transport Status         │   - 13 Indian Languages Live  │
+│   🟡 REALLOCATED        │   - Alerts & Auto-Escalation │   - Multilingual Translator   │
+│   (Handed to Aditya,    │   - SOS & Auto-Incident Flow │   - MyMemory 13-Language Eng  │
+│    Shreyashi & Akshat)  │   - Transport Status         │   - Zero-Auth Setup Live      │
 │                         │   - WebSocket Gateway (:3001)│                               │
 │                         │   - [Interim: Maps/Transport]│                               │
 └─────────────────────────┴──────────────────────────────┴───────────────────────────────┘
@@ -47,36 +47,37 @@
 
 ---
 
-## 🌐 BHASHINI & MULTILINGUAL MODULE CLARIFICATION (FOR ALL PODS)
+## 🌐 MULTILINGUAL TRANSLATOR FEATURE (NOTICE FOR ALL PODS)
 
-> **Important Note for Frontend (Pod A / Shreyashi) & Backend (Pod B):**
+> **Important Update Regarding Translation (Frontend Pod A / Backend Pod B):**
 > 
-> 1. **Active Live Endpoint:** POST /ml/bhashini/translate
->    * **What it does:** Translates any text into **13 Indian languages** (hi, 	a, 	e, n, mr, gu, kn, ml, pa, or, s, ur).
->    * **Zero-Auth Fallback:** If government Bhashini API keys are empty in .env, the engine **automatically falls back to the high-speed MyMemory translation API**. No login or API keys are required for local testing or judge demos!
->    * **Contract:**
->      `json
->      // Request: POST /ml/bhashini/translate
->      {
->        "text": "Avoid Zone C staircase. Use Zone D corridor instead.",
->        "source_language": "en",
->        "target_language": "hi"
->      }
+> * **Feature Name:** **Multilingual Translator Feature** (Formerly referred to as Bhashini).
+> * **Engine Used:** High-speed open translation engine (**MyMemory**) covering 13 Indian languages (hi, 	a, 	e, n, mr, gu, kn, ml, pa, or, s, ur).
+> * **Why the Name Change?** Since government Bhashini registration portal required external logins that were inaccessible, we transitioned to a dedicated, zero-configuration open translation engine. Renaming prevents team confusion.
+> * **Clean Endpoint:** POST /ml/translate
+> * **Backward Compatibility:** POST /ml/bhashini/translate and POST /ml/translator/translate are also active as route aliases, so **existing backend/frontend code will NOT break**.
+> * **Zero-Auth:** **No API keys or logins required.** Works immediately on local dev and during judge demos!
 > 
->      // Response: HTTP 200 OK
->      {
->        "success": true,
->        "data": {
->          "translated_text": "ज़ोन सी सीढ़ी से बचें। इसके बजाय ज़ोन डी कॉरिडोर का उपयोग करें।",
->          "source_language": "en",
->          "target_language": "hi"
->        },
->        "message": "Translation complete"
->      }
->      `
-> 2. **TTS / STT Scoped Out for Stability:**
->    * Synthetic Text-to-Speech (TTS) and Speech-to-Text (STT) audio endpoints were **scoped out** to guarantee 100% stable, low-latency performance during the demo and avoid synthetic voice artifacts.
->    * All frontend language toggles (components/language/) and notification banners should consume /ml/bhashini/translate directly.
+> **Standard Request & Response Shape:**
+> `json
+> // POST /ml/translate (or /ml/bhashini/translate)
+> {
+>   "text": "Avoid Zone C staircase. Use Zone D corridor instead.",
+>   "source_language": "en",
+>   "target_language": "hi"
+> }
+> 
+> // Response: HTTP 200 OK
+> {
+>   "success": true,
+>   "data": {
+>     "translated_text": "ज़ोन सी सीढ़ी से बचें। इसके बजाय ज़ोन डी कॉरिडोर का उपयोग करें।",
+>     "source_language": "en",
+>     "target_language": "hi"
+>   },
+>   "message": "Translation complete"
+> }
+> `
 
 ---
 
@@ -89,9 +90,7 @@
 | /ml/weather/current | GET | 🟢 LIVE | Shreyashi | Current IMD weather, 24h forecast & 10m cache |
 | /ml/weather/hazards | POST | 🟢 LIVE | Shreyashi | Multi-hazard rule matrix (flood, landslide, lightning, heat) |
 | /ml/anomaly/detect | POST | 🟢 LIVE | Diya | IsolationForest + 2-tier crush precursor pattern rules |
-| /ml/bhashini/translate | POST | 🟢 LIVE | Diya | Live Bhashini + MyMemory zero-auth fallback (13 Indian languages) |
-| /ml/bhashini/tts | POST | ⚪ SCOPED OUT | Diya | Audio generation dropped to ensure zero-latency text demo reliability |
-| /ml/bhashini/stt | POST | ⚪ SCOPED OUT | Diya | Voice STT dropped in favor of direct UI inputs |
+| /ml/translate | POST | 🟢 LIVE | Diya | 13-language open translation engine (also aliases /ml/bhashini/translate) |
 
 ### Backend API Endpoints (Pod B → Pod A consumes)
 | Endpoint | Method | Status | Owner | Notes / Contract |
@@ -145,7 +144,7 @@
 | Backend (NestJS) | 🟢 LIVE | All 18 endpoints + WebSocket Gateway on port 3001 |
 | Frontend (Next.js PWA) | 🟢 LIVE | Running on port 3000 |
 | Swagger API Docs | 🟢 LIVE | Interactive docs at http://localhost:3001/api/docs |
-| Bhashini Translation | 🟢 LIVE | Multi-engine (MeitY Bhashini API + MyMemory Zero-Auth Fallback) for 13 Indian languages |
+| Multilingual Translator | 🟢 LIVE | Zero-Auth 13-language translation active on /ml/translate |
 | IMD Weather Fallback | 🟢 LIVE | Real-time realistic weather synthesis active |
 
 ---
@@ -153,7 +152,7 @@
 ## 📝 CONTRACT CHANGES LOG
 | Date | What Changed | Changed By | All Pods Notified? |
 |---|---|---|---|
-| 2026-08-23 | Streamlined Bhashini module to pure text translation (/ml/bhashini/translate); removed /ml/bhashini/tts & /ml/bhashini/stt to ensure zero-latency demo reliability | Diya | ✅ Yes |
+| 2026-08-23 | Refactored Bhashini naming to generic Multilingual Translator (/ml/translate) with backward-compatible alias /ml/bhashini/translate to eliminate naming confusion | Diya | ✅ Yes |
 | 2026-08-23 | Recorded temporary team reallocation for Yashasvi to Aditya, Shreyashi, and Akshat | Aditya | ✅ Yes |
 | 2026-08-23 | Added start.sh and stop.sh one-click automation scripts and cleaned .gitignore | Akshat | ✅ Yes |
 | 2026-08-23 | Unified all 4 AI/ML router groups in pi/main.py and added Dockerfile | Shreyashi & Diya | ✅ Yes |

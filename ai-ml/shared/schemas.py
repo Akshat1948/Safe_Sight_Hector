@@ -1,4 +1,4 @@
-﻿from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field
 from typing import Optional
 from enum import Enum
 from datetime import datetime
@@ -120,7 +120,7 @@ class HazardResponse(BaseModel):
     affected_zone_types: list[str] = []
 
 
-# --- Bhashini (Diya) ---
+# --- Multilingual Translator (Diya) ---
 
 class TranslateRequest(BaseModel):
     text: str

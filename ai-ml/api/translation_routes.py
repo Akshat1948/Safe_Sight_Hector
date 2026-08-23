@@ -1,13 +1,11 @@
 ﻿"""
-bhashini_routes.py — FastAPI router for Bhashini multilingual endpoints.
+translation_routes.py — FastAPI router for Multilingual Translation Feature.
 
 Owner: Diya (Pod C)
-Base prefix: /ml/bhashini  (registered in api/main.py by Shreyashi)
-
 Endpoints:
-  POST /ml/bhashini/translate   — Text translation between Indian languages
-
-Note: TTS and STT are out of scope for this hackathon submission.
+  POST /ml/translate            — Primary clean translation endpoint
+  POST /ml/translator/translate — Alternate alias
+  POST /ml/bhashini/translate   — Backward-compatible alias for legacy calls
 """
 
 import logging
@@ -15,11 +13,11 @@ from fastapi import APIRouter, HTTPException, status
 
 from shared.schemas import TranslateRequest, TranslateResponse
 from shared.config import SUPPORTED_LANGUAGES
-from bhashini.translate import translate
+from translator.translate import translate
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/bhashini", tags=["Bhashini Multilingual"])
+router = APIRouter(tags=["Multilingual Translator Feature"])
 
 
 def _validate_language(lang: str, field_name: str = "language") -> None:
@@ -37,16 +35,20 @@ def _validate_language(lang: str, field_name: str = "language") -> None:
 @router.post(
     "/translate",
     summary="Translate text between Indian languages",
-    description=(
-        "Translate text from source_language to target_language. "
-        "Uses Bhashini API if keys are configured, otherwise falls back "
-        "to MyMemory free API. Supports 13 Indian languages."
-    ),
+    description="Translate text across 13 Indian languages using the multilingual translator service.",
     status_code=status.HTTP_200_OK,
+)
+@router.post(
+    "/translator/translate",
+    include_in_schema=False,
+)
+@router.post(
+    "/bhashini/translate",
+    include_in_schema=False,
 )
 async def translate_text(request: TranslateRequest) -> dict:
     """
-    POST /ml/bhashini/translate
+    POST /ml/translate (also aliases /ml/bhashini/translate)
 
     Request body: TranslateRequest
     Response envelope: { success, data: TranslateResponse, message }
