@@ -45,9 +45,9 @@ app.include_router(weather_router, prefix="/ml")
 
 # Diya's routes
 from api.anomaly_routes import router as anomaly_router
-from api.bhashini_routes import router as bhashini_router
+from api.translation_routes import router as translation_router
 app.include_router(anomaly_router, prefix="/ml")
-app.include_router(bhashini_router, prefix="/ml")
+app.include_router(translation_router, prefix="/ml")
 
 
 @app.get("/ml/health")

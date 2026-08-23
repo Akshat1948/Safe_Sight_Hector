@@ -1,8 +1,9 @@
 import './globals.css';
+import { LanguageProvider } from '@/i18n';
 
 export const metadata = {
-  title: 'SafeSight',
-  description: 'AI-Based Visitor Safety & Crowd Coordination',
+  title: 'SafeSight — AI Visitor Safety & Crowd Intelligence',
+  description: 'AI-Based Visitor Safety, Crowd & Incident Coordination for Eco and Pilgrimage Sites',
 };
 
 export default function RootLayout({
@@ -12,7 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased bg-slate-50 text-slate-900 min-h-screen">
+        <LanguageProvider>{children}</LanguageProvider>
+      </body>
     </html>
   );
 }

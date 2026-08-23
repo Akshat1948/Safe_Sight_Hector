@@ -1,4 +1,4 @@
-node_modules/
+﻿node_modules/
 .env
 .env.*
 **/__pycache__/
@@ -10,3 +10,10 @@ dist/
 build/
 .vscode/
 .idea/
+
+# Test artifacts (Diya)
+ai-ml/server.log
+ai-ml/server_err.log
+ai-ml/translation_test_results.json
+ai-ml/tts_test_output/
+ai-ml/test_server.py

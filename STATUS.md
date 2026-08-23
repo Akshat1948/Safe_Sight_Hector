@@ -1,20 +1,58 @@
 # SafeSight — Root Project Status
 
-> **Last updated:** 2026-08-23 20:33 by Akshat & Aditya (Pod A & B Cross-Integration)
+> **Last updated:** 2026-08-23 22:52 by Team Blueprint (Diya, Aditya, Ayush, Akshat, Shreyashi)
+
+---
+
+## 📢 IMPORTANT ANNOUNCEMENT: TRANSLATION FEATURE UPDATE (POD C)
+> **To All Pods (Frontend, Backend, AI/ML):**
+> 
+> * **1. Name Change (Bhashini ➔ Multilingual Translator):**
+>   We have renamed the module from **Bhashini** to **Multilingual Translator Feature**. Because the MeitY Bhashini government portal was inaccessible for account registration, we transitioned to the **MyMemory Open Translation Engine**.
+> 
+> * **2. Zero Setup / No API Keys Required:**
+>   The translation engine works **100% out of the box**. Nobody on the team needs to register, login, or configure any API keys in `.env` for local testing or judge presentations.
+> 
+> * **3. Scope Refinement (Text-Only):**
+>   Synthetic audio generation (TTS / STT) has been **removed** to eliminate synthetic voice glitches, latency, and system dependencies. We are delivering 100% stable, instant **text translation** across 13 scheduled Indian languages.
+> 
+> * **4. Endpoints & 100% Backward Compatibility:**
+>   * **New Clean Endpoint:** `POST /ml/translate`
+>   * **Legacy Aliases (Will NOT break existing code):** `POST /ml/bhashini/translate` and `POST /ml/translator/translate` are active aliases that route to the exact same engine.
+>   * **Payload Contract:**
+>     ```json
+>     // Request: POST /ml/translate
+>     {
+>       "text": "Avoid Zone C staircase. Use Zone D corridor instead.",
+>       "source_language": "en",
+>       "target_language": "hi"
+>     }
+> 
+>     // Response: HTTP 200 OK
+>     {
+>       "success": true,
+>       "data": {
+>         "translated_text": "ज़ोन सी सीढ़ी से बचें। इसके बजाय ज़ोन डी कॉरिडोर का उपयोग करें।",
+>         "source_language": "en",
+>         "target_language": "hi"
+>       },
+>       "message": "Translation complete"
+>     }
+>     ```
 
 ---
 
 ## ⚠️ TEMPORARY TEAM REALLOCATION NOTE
 > **Status:** Active (Effective Aug 23, 2026)  
 > **Notice:** **Yashasvi** is currently unavailable for a temporary period. To maintain delivery momentum, his responsibilities were temporarily distributed among **Aditya**, **Shreyashi**, and **Akshat**:
-> * **Aditya (Pod A Co-Lead):** Visitor Landing Page (`app/page.tsx`, `(visitor)/`), Root Layout & Styling, Service Worker & PWA Shell.
-> * **Shreyashi (Pod C):** Weather & Hazard Overlays (`components/weather/`), Multilingual i18n & Bhashini UI integration (`components/language/`, `i18n/`).
+> * **Aditya (Pod A Co-Lead):** 🟢 **100% COMPLETE** — Visitor Landing Page (`app/page.tsx`, `(visitor)/`), Root Layout & Styling, Service Worker & PWA Shell.
+> * **Shreyashi (Pod C):** 🟢 **100% COMPLETE** — Weather & Hazard Overlays (`components/weather/`), Multilingual i18n & Translator UI integration (`components/language/`, `i18n/`).
 > * **Akshat (Pod B):** 🟢 **100% COMPLETE** — Interactive Leaflet Map & GeoJSON Overlays (`components/map/`), Transport Widgets (`components/transport/`), Public SOS & Safety Essentials (`components/visitor/`), and Visitor Portal (`app/(visitor)/visitor/page.tsx`).
 
 ---
 
 ## 📊 CURRENT CHECKPOINT
-**Day 3 of 6 — Full Cross-Pod Integration & Component Execution**
+**Day 3 of 6 — Full Integration & End-to-End Testing (Pods A, B, C 100% LIVE)**
 
 ---
 
@@ -32,23 +70,24 @@
 │   - Incidents & Evidence│   - Zones & Density CRUD     │   - IMD Weather Client        │
 │   - Alerts & Banner     │   - Geofences & Weather Proxy│   - Multi-Hazard Scoring      │
 │   - SOS Distress Queue  │   - PostGIS Seeding & Infra  │   - Synthetic Crowd Dataset   │
-│   - Responder Console   │   - Swagger Docs (/api/docs) │   - [Interim: Weather/i18n UI]│
-│   - Tactical Light Theme│   - Demo Simulation Script   │                               │
-│   - [Interim: Visitor]  │                              │ • Diya:                       │
-│                         │ • Akshat:                    │   🟢 100% COMPLETE & LIVE     │
-│ • Yashasvi (On Leave):  │   🟢 100% COMPLETE & LIVE    │   - Isolation Forest Anomaly  │
-│   🟡 REALLOCATED        │   - Incidents & Verification │   - Bhashini Translate & TTS  │
-│   (Handed to Aditya,    │   - Alerts & Auto-Escalation │   - MyMemory & gTTS Fallbacks │
-│    Shreyashi & Akshat)  │   - SOS & Auto-Incident Flow │                               │
-│                         │   - Transport Status         │                               │
+│   - Responder Console   │   - Swagger Docs (/api/docs) │   - Weather & Hazard Widget   │
+│   - Tactical Light Theme│   - Demo Simulation Script   │   - Multilingual i18n UI      │
+│   - Visitor PWA Shell   │                              │                               │
+│                         │ • Akshat:                    │ • Diya:                       │
+│ • Yashasvi (On Leave):  │   🟢 100% COMPLETE & LIVE    │   🟢 100% COMPLETE & LIVE     │
+│   🟡 REALLOCATED        │   - Incidents & Verification │   - Isolation Forest Anomaly  │
+│   (Handed to Aditya,    │   - Alerts & Auto-Escalation │   - Multilingual Translator   │
+│    Shreyashi & Akshat)  │   - SOS & Auto-Incident Flow │   - MyMemory 13-Language Eng  │
+│                         │   - Transport Status         │   - Zero-Auth Setup Live      │
 │                         │   - WebSocket Gateway (:3001)│                               │
-│                         │   - [Interim: 100% COMPLETED]│                               │
+│                         │   - Map & Transport UI       │                               │
+│                         │   - SOS & Visitor Portal     │                               │
 └─────────────────────────┴──────────────────────────────┴───────────────────────────────┘
 ```
 
 ---
 
-## 🟢 POD A (FRONTEND — ADITYA & AKSHAT) WORK ACCOMPLISHED
+## 🟢 POD A (FRONTEND — ADITYA, SHREYASHI & AKSHAT) WORK ACCOMPLISHED
 
 All core Site Manager, Emergency Responder, and Visitor components are **100% built, typed, styled, and production-compiled** (`next build` passing with 0 errors across 11 routes).
 
@@ -64,6 +103,8 @@ All core Site Manager, Emergency Responder, and Visitor components are **100% bu
 | **Public Transport Tracker** | `src/components/transport/*` | 🟢 100% COMPLETE | Akshat | `ParkingStatus.tsx` & `ShuttleInfo.tsx` with live capacity progress bars, occupancy meters, and countdown departure timers |
 | **Visitor 1-Tap SOS Console** | `src/components/visitor/*` | 🟢 100% COMPLETE | Akshat | Radial pulsing 1-tap SOS button with geolocation dispatch, 108 ambulance speed-dials, and safety essentials |
 | **Public Visitor Portal Page** | `/visitor` | 🟢 100% COMPLETE | Akshat | Full visitor page combining map, SOS, parking, shuttles, and live safety alert banner |
+| **Weather & Hazard Overlay** | `src/components/weather/*` | 🟢 100% COMPLETE | Shreyashi | `WeatherWidget.tsx` & `HazardOverlay.tsx` with live temperature, humidity, wind, rainfall, and hazard indicators |
+| **Multilingual i18n Switcher** | `src/components/language/*`, `src/i18n/*` | 🟢 100% COMPLETE | Shreyashi | `LanguageSwitcher.tsx` with 13-language translations and global `LanguageProvider` |
 | **API & Realtime Client** | `src/shared/api/*` | 🟢 100% COMPLETE | Aditya & Akshat | Centralized REST client with automatic JWT token refresh, Socket.io room hooks, and resilient mock fallbacks |
 
 ---
@@ -102,7 +143,7 @@ All 18 REST endpoints and the real-time WebSocket Gateway are **100% COMPLETE, T
 
 ### 2. Diya — 🟢 100% COMPLETE & LIVE
 * **Crowd Crush Anomaly Detection (`POST /ml/anomaly/detect`)**: Isolation Forest model with flow velocity checks for precursor crush detection.
-* **Bhashini Indic Localization (`POST /ml/bhashini/*`)**: Translation, Text-to-Speech (TTS), and Speech-to-Text (STT) via Bhashini ULCA API with MyMemory and gTTS fallbacks.
+* **Multilingual Translator (`POST /ml/translate`)**: 13-language open translation engine powered by MyMemory with backward-compatible `/ml/bhashini/translate` alias and zero-auth setup.
 
 ---
 
@@ -131,7 +172,6 @@ All 18 REST endpoints and the real-time WebSocket Gateway are **100% COMPLETE, T
 | `/ml/weather/current` | GET | 🟢 LIVE | Shreyashi | Live IMD weather data with cache |
 | `/ml/weather/hazards` | POST | 🟢 LIVE | Shreyashi | Multi-hazard assessment logic |
 | `/ml/anomaly/detect` | POST | 🟢 LIVE | Diya | Isolation Forest crush detection |
-| `/ml/bhashini/translate` | POST | 🟢 LIVE | Diya | Bhashini translation API |
-| `/ml/bhashini/tts` | POST | 🟢 LIVE | Diya | Text-to-speech API |
+| `/ml/translate` | POST | 🟢 LIVE | Diya | 13-language open translation engine (alias: `/ml/bhashini/translate`) |
 | One-Click Startup (`./start.sh`) | Script | 🟢 LIVE | Akshat | Auto-launches full stack & opens Swagger |
 | One-Click Shutdown (`./stop.sh`) | Script | 🟢 LIVE | Akshat | Terminates background services |

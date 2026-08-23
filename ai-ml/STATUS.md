@@ -1,105 +1,82 @@
-# Pod C — AI/ML STATUS LOG
+﻿# Pod C — AI/ML STATUS LOG
 
-> **Last updated:** 2026-08-21 17:43 by Diya
+> **Last updated:** 2026-08-23 22:30 by Diya
 
 ---
 
 ## COMPLETED
 
-| # | Feature / Task | Files Created/Modified | Done By | Date | Notes |
-|---|---------------|----------------------|---------|------|-------|
-| 1 | Shared Pydantic v2 schemas | `shared/schemas.py` | Diya | Aug 21 | All schemas per MASTER.md Section 10: AnomalyRequest/Response, TranslateRequest/Response, TTSRequest/Response, STTRequest/Response, ApiEnvelope |
-| 2 | Shared config | `shared/config.py` | Diya | Aug 21 | All env vars per MASTER.md Section 11: BHASHINI_*, BACKEND_API_URL, DENSITY_THRESHOLDS, SUPPORTED_LANGUAGES |
-| 3 | Anomaly pattern definitions | `anomaly/patterns.py` | Diya | Aug 21 | 4 patterns: crush_precursor (2-tier), reverse_flow, stationary_crowd, density_spike. Two-tier crush precursor catches run-up phase (>=70% + decelerating + slow) |
-| 4 | Isolation Forest detector | `anomaly/detector.py` | Diya | Aug 21 | Fits IsolationForest on incoming window, scores latest reading, applies pattern overlay. Uses trailing 5-reading window for pattern stats |
-| 5 | Anomaly sample datasets | `anomaly/data/generate_samples.py`, `anomaly/data/normal_readings.json`, `anomaly/data/crush_precursor_readings.json`, `anomaly/data/reverse_flow_readings.json` | Diya | Aug 21 | Simulated datasets for demo and testing |
-| 6 | Anomaly FastAPI router | `api/anomaly_routes.py` | Diya | Aug 21 | POST /ml/anomaly/detect — exact contract per MASTER.md Section 6.3 |
-| 7 | Bhashini translate wrapper | `bhashini/translate.py` | Diya | Aug 21 | Two-step Bhashini flow: /pipeline/config then /pipeline/predict. Graceful fallback if keys not set |
-| 8 | Bhashini TTS wrapper | `bhashini/tts.py` | Diya | Aug 21 | Returns base64 WAV. Silent WAV stub fallback for dev |
-| 9 | Bhashini STT wrapper | `bhashini/stt.py` | Diya | Aug 21 | ASR pipeline, returns text + confidence. Stub fallback if unconfigured |
-| 10 | Bhashini FastAPI router | `api/bhashini_routes.py` | Diya | Aug 21 | POST /ml/bhashini/translate, /tts, /stt — exact contracts per MASTER.md Section 6.4 |
-| 11 | Python venv + deps | `requirements.txt`, `venv/` | Diya & Shreyashi | Aug 23 | Python 3.11-3.14 compatible: fastapi, pydantic, prophet, scikit-learn, numpy, pandas, httpx, gTTS |
-| 12 | Register anomaly + bhashini routers | `api/main.py` | Shreyashi | Aug 23 | All 4 routers (forecast, weather, anomaly, bhashini) unified and verified |
-| 13 | Dockerfile & container setup | `Dockerfile`, `.dockerignore`, `../docker-compose.yml` | Shreyashi | Aug 23 | Multi-stage slim Dockerfile and docker-compose aiml service entry |
+| # | Feature | Files | Done By | Date | Notes |
+|---|---------|-------|---------|------|-------|
+| 1 | Python venv + dependencies | `requirements.txt`, `venv/` | Diya | Aug 21 | Python 3.14 compatible. fastapi, pydantic v2, scikit-learn, numpy, httpx, uvicorn |
+| 2 | Shared Pydantic v2 schemas | `shared/schemas.py` | Diya | Aug 21 | All schemas per MASTER.md s10 |
+| 3 | Shared config | `shared/config.py` | Diya | Aug 21 | All env vars per MASTER.md s11 |
+| 4 | Anomaly pattern rules | `anomaly/patterns.py` | Diya | Aug 21 | 4 patterns: crush_precursor (2-tier), reverse_flow, stationary_crowd, density_spike |
+| 5 | Isolation Forest detector | `anomaly/detector.py` | Diya | Aug 21 | Fits IsolationForest on window, scores latest reading, applies pattern overlay |
+| 6 | Simulated anomaly datasets | `anomaly/data/` | Diya | Aug 21 | 3 datasets: normal (20), crush_precursor (20), reverse_flow (20) |
+| 7 | Anomaly FastAPI router | `api/anomaly_routes.py` | Diya | Aug 21 | POST /ml/anomaly/detect — exact contract per MASTER.md s6.3 |
+| 8 | Multilingual Translator Feature | `translator/translate.py` | Diya | Aug 23 | Renamed from Bhashini -> Translator. Uses MyMemory open translation engine across 13 Indian languages |
+| 9 | Translation FastAPI router | `api/translation_routes.py` | Diya | Aug 23 | Primary route: POST /ml/translate. Supports legacy alias /ml/bhashini/translate |
+| 10 | Router registration in main.py | `api/main.py` | Shreyashi & Diya | Aug 23 | Registered translation_router under /ml |
+| 11 | STATUS files updated | `ai-ml/STATUS.md`, `STATUS.md` | Diya | Aug 23 | Clear naming and instructions for team |
 
 ---
 
 ## IN PROGRESS
 
-| # | Feature / Task | Files Being Touched | Being Done By | Approach / Notes |
-|---|---------------|--------------------|--------------|-----------------| 
-| — | — | — | — | — |
-
-> No files currently in progress.
+Nothing in progress — all Diya modules complete and live tested.
 
 ---
 
 ## PENDING / TODO
 
-| # | Feature / Task | Priority | Assigned To | Dependencies |
-|---|---------------|----------|-------------|-------------|
-| 1 | Register anomaly + bhashini routers in main.py | HIGH | Shreyashi | Shreyashi must add `include_router` calls in `api/main.py` |
-| 2 | Fill BHASHINI_API_KEY + BHASHINI_USER_ID in .env | HIGH | Diya | Need team Bhashini API credentials from MeitY dashboard |
-| 3 | Integration test with Backend (POST /ml/anomaly/detect end-to-end) | HIGH | Diya + Akshat | Needs Akshat's incidents endpoint live |
-| 4 | Stationary crowd + reverse flow scenario tests | MEDIUM | Diya | Can do independently |
+| # | Feature | Priority | Assigned To | Notes |
+|---|---------|----------|-------------|-------|
+| 1 | Integration with Backend POST /api/incidents | HIGH | Akshat + Diya | Anomaly endpoint triggers incident creation |
 
 ---
 
 ## ARCHITECTURE DECISIONS
 
-| # | Decision | Why | Decided By | Date |
-|---|---------|-----|-----------|------|
-| 1 | Isolation Forest fitted on incoming window (self-calibrating) | No pre-labeled crush data available at hackathon; IF is unsupervised and works on small batches | Diya | Aug 21 |
-| 2 | Two-tier crush precursor pattern | Trailing 5-reading window average is below peak, so a second tier (>=70% + both decel + slow) catches dangerous run-up phase | Diya | Aug 21 |
-| 3 | Trailing 5-reading window for pattern stats | Current zone state matters more than historical average for real-time anomaly classification | Diya | Aug 21 |
-| 4 | Graceful fallback when Bhashini keys not set | Allows local dev and demo without live API credentials; returns clearly marked stub responses | Diya | Aug 21 |
-
----
-
-## INTERFACE CHANGES (CROSS-POD IMPACT)
-
-| # | What Changed | Old | New | Affects | Notified? |
-|---|-------------|-----|-----|---------|----------|
-| — | No contract changes — all endpoints follow MASTER.md exactly | — | — | — | — |
+| # | Decision | Why | By | Date |
+|---|---------|-----|----|------|
+| 1 | Renamed feature to Multilingual Translator | Since Bhashini portal registration was unavailable, using MyMemory open translation engine. Renamed to remove confusion across pods | Diya | Aug 23 |
+| 2 | Backward-compatible route aliases | Main route is /ml/translate, with legacy /ml/bhashini/translate alias so Frontend/Backend never break | Diya | Aug 23 |
+| 3 | Isolation Forest fitted on incoming window | No pre-labeled crush data. IF is unsupervised, works on small batches | Diya | Aug 21 |
+| 4 | TTS/STT removed from scope | Audio synthesis unstable; pure text translation provides 100% demo stability | Diya | Aug 23 |
 
 ---
 
 ## FILE MAP
 
-```
+`
 ai-ml/
 ├── shared/
-│   ├── schemas.py         — All Pydantic v2 request/response models (per MASTER.md Section 10)
-│   └── config.py          — All env vars and constants (per MASTER.md Section 11)
-│
+│   ├── schemas.py          — Pydantic models
+│   └── config.py           — Constants & settings
 ├── anomaly/
-│   ├── detector.py        — IsolationForest detection engine, main entry: detect(request)
-│   ├── patterns.py        — Rule-based pattern classifier: crush_precursor, reverse_flow, stationary, spike
-│   └── data/
-│       ├── generate_samples.py          — Script to regenerate sample datasets
-│       ├── normal_readings.json         — 20 normal crowd readings
-│       ├── crush_precursor_readings.json — 20 crush scenario readings
-│       └── reverse_flow_readings.json   — 20 reverse flow readings
-│
-├── bhashini/
-│   ├── translate.py       — Bhashini translate API wrapper: translate(request)
-│   ├── tts.py             — Bhashini TTS API wrapper: text_to_speech(request)
-│   └── stt.py             — Bhashini ASR API wrapper: speech_to_text(request)
-│
+│   ├── detector.py         — IsolationForest engine. Entry: detect(request)
+│   ├── patterns.py         — Rule-based classifier: 4 pattern types
+│   └── data/               — Simulated JSON datasets
+├── translator/
+│   ├── translate.py        — MyMemory 13-language translation engine
+│   └── __init__.py
 ├── api/
-│   ├── anomaly_routes.py  — FastAPI router: POST /ml/anomaly/detect
-│   └── bhashini_routes.py — FastAPI router: POST /ml/bhashini/translate, /tts, /stt
-│
-├── .env                   — Env vars (not committed) — fill BHASHINI_API_KEY + USER_ID
-├── requirements.txt       — Python 3.14-compatible dependencies
-└── venv/                  — Virtual environment
-```
+│   ├── anomaly_routes.py     — POST /ml/anomaly/detect
+│   └── translation_routes.py — POST /ml/translate (and /ml/bhashini/translate)
+├── .env                    — Env settings
+└── requirements.txt        — Dependencies
+`
 
 ---
 
-## KNOWN ISSUES
+## LIVE ENDPOINTS (Port 8000)
 
-| # | Issue | Severity | Workaround | Filed By |
-|---|-------|----------|-----------|----------|
-| 1 | Bhashini API keys not yet configured | Medium | Endpoints return clearly-labelled stub responses | Diya |
-| 2 | Git not installed on dev machine | Low | Code downloaded via GitHub API; will commit once Git installed | Diya |
+| Endpoint | Method | Description |
+|---|---|---|
+| /ml/translate | POST | Primary translation across 13 Indian languages |
+| /ml/bhashini/translate | POST | Backward-compatible alias for existing frontend/backend calls |
+| /ml/anomaly/detect | POST | Crowd anomaly & crush precursor detection |
+| /ml/forecast | POST | Shreyashi crowd forecast |
+| /ml/weather/current | GET | Shreyashi weather current |
+| /ml/health | GET | AI/ML service health |
