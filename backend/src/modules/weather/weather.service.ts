@@ -6,6 +6,8 @@ import { WeatherDataEntity } from '../../database/entities/weather-data.entity';
 import { SiteEntity } from '../../database/entities/site.entity';
 import { HazardLevel, HazardType, IWeatherData } from '../../common/interfaces/weather.interface';
 
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 @Injectable()
 export class WeatherService {
   private readonly logger = new Logger(WeatherService.name);
@@ -18,26 +20,39 @@ export class WeatherService {
     private configService: ConfigService,
   ) {}
 
-  async getWeatherForSite(siteId: string): Promise<IWeatherData> {
-    // Check if we have recent cached weather (within 15 minutes)
-    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
-    const cached = await this.weatherRepository.findOne({
-      where: { siteId },
-      order: { fetchedAt: 'DESC' },
-    });
+  async getWeatherForSite(siteIdInput: string): Promise<IWeatherData> {
+    const targetSite = await this.resolveSite(siteIdInput);
+    const siteId = targetSite ? targetSite.id : siteIdInput;
 
-    if (cached && cached.fetchedAt > fifteenMinutesAgo) {
-      return this.mapEntityToResponse(cached);
+    // If siteId is a valid UUID, check recent cached weather (within 15 minutes)
+    if (UUID_REGEX.test(siteId)) {
+      const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+      const cached = await this.weatherRepository.findOne({
+        where: { siteId },
+        order: { fetchedAt: 'DESC' },
+      });
+
+      if (cached && cached.fetchedAt > fifteenMinutesAgo) {
+        return this.mapEntityToResponse(cached);
+      }
     }
 
-    // Try fetching from AI/ML weather service (or generate realistic IMD data for demo)
-    const weatherData = await this.fetchOrGenerateWeatherData(siteId);
-    return weatherData;
+    // Fetch from AI/ML weather service (or fallback gracefully)
+    return this.fetchOrGenerateWeatherData(targetSite, siteIdInput);
   }
 
-  private async fetchOrGenerateWeatherData(siteId: string): Promise<IWeatherData> {
+  private async resolveSite(siteIdInput: string): Promise<SiteEntity | null> {
+    if (UUID_REGEX.test(siteIdInput)) {
+      const site = await this.siteRepository.findOne({ where: { id: siteIdInput } });
+      if (site) return site;
+    }
+    // Fallback to first active site (e.g. Prayagraj Sangam)
+    return this.siteRepository.findOne({ where: { isActive: true } });
+  }
+
+  private async fetchOrGenerateWeatherData(site: SiteEntity | null, siteIdInput: string): Promise<IWeatherData> {
     const mlBaseUrl = this.configService.get<string>('AI_ML_SERVICE_URL', 'http://localhost:8000/ml');
-    const site = await this.siteRepository.findOne({ where: { id: siteId } });
+    const realSiteId = site ? site.id : null;
 
     let lat = 25.4358;
     let lon = 81.8463;
@@ -70,7 +85,7 @@ export class WeatherService {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                site_id: siteId,
+                site_id: realSiteId || siteIdInput,
                 weather: {
                   temperature: w.temperature,
                   precipitation: w.precipitation,
@@ -98,23 +113,40 @@ export class WeatherService {
             this.logger.warn(`AI/ML hazard scoring failed, using defaults: ${hazardErr.message}`);
           }
 
-          const record = await this.weatherRepository.save({
-            siteId,
-            temperature: w.temperature,
-            humidity: w.humidity,
-            windSpeed: w.wind_speed,
-            windDirection: w.wind_direction,
-            condition: w.condition,
-            precipitation: w.precipitation,
-            visibility: w.visibility,
-            hazardLevel: hazardLevel || HazardLevel.LOW,
-            hazardType: hazardType || HazardType.FLOOD,
-            advisory: advisory || 'Pilgrimage site water levels monitored regularly.',
-            forecastJson: w.forecast_24h || [],
-            fetchedAt: new Date(),
-          });
+          if (realSiteId) {
+            const record = await this.weatherRepository.save({
+              siteId: realSiteId,
+              temperature: w.temperature,
+              humidity: w.humidity,
+              windSpeed: w.wind_speed,
+              windDirection: w.wind_direction,
+              condition: w.condition,
+              precipitation: w.precipitation,
+              visibility: w.visibility,
+              hazardLevel: hazardLevel || HazardLevel.LOW,
+              hazardType: hazardType || HazardType.FLOOD,
+              advisory: advisory || 'Pilgrimage site water levels monitored regularly.',
+              forecastJson: w.forecast_24h || [],
+              fetchedAt: new Date(),
+            });
+            return this.mapEntityToResponse(record);
+          }
 
-          return this.mapEntityToResponse(record);
+          return {
+            siteId: siteIdInput,
+            current: {
+              temperature: w.temperature,
+              humidity: w.humidity,
+              windSpeed: w.wind_speed,
+              windDirection: w.wind_direction,
+              condition: w.condition,
+              precipitation: w.precipitation,
+              visibility: w.visibility,
+            },
+            hazard: { level: hazardLevel, type: hazardType, advisory },
+            forecast: w.forecast_24h || [],
+            fetchedAt: new Date(),
+          };
         }
       }
     } catch (err) {
@@ -122,28 +154,52 @@ export class WeatherService {
     }
 
     // Graceful fallback for offline AI/ML service
-    const fallbackRecord = await this.weatherRepository.save({
-      siteId,
-      temperature: 29.4,
-      humidity: 78,
-      windSpeed: 14.2,
-      windDirection: 'NW',
-      condition: 'partly_cloudy',
-      precipitation: 12.5,
-      visibility: 8.0,
-      hazardLevel: HazardLevel.MODERATE,
-      hazardType: HazardType.FLOOD,
-      advisory: 'Monsoon surge in river basin: Water levels near riverside ghats rising. Keep alert.',
-      forecastJson: [
+    if (realSiteId) {
+      const fallbackRecord = await this.weatherRepository.save({
+        siteId: realSiteId,
+        temperature: 29.4,
+        humidity: 78,
+        windSpeed: 14.2,
+        windDirection: 'NW',
+        condition: 'partly_cloudy',
+        precipitation: 12.5,
+        visibility: 8.0,
+        hazardLevel: HazardLevel.MODERATE,
+        hazardType: HazardType.FLOOD,
+        advisory: 'Monsoon surge in river basin: Water levels near riverside ghats rising. Keep alert.',
+        forecastJson: [
+          { time: '12:00', temperature: 29.4, condition: 'partly_cloudy', precipitation: 0 },
+          { time: '15:00', temperature: 31.0, condition: 'thunderstorm', precipitation: 25 },
+          { time: '18:00', temperature: 27.5, condition: 'rain', precipitation: 18 },
+          { time: '21:00', temperature: 26.0, condition: 'cloudy', precipitation: 5 },
+        ],
+        fetchedAt: new Date(),
+      });
+      return this.mapEntityToResponse(fallbackRecord);
+    }
+
+    return {
+      siteId: siteIdInput,
+      current: {
+        temperature: 29.4,
+        humidity: 78,
+        windSpeed: 14.2,
+        windDirection: 'NW',
+        condition: 'partly_cloudy',
+        precipitation: 12.5,
+        visibility: 8.0,
+      },
+      hazard: {
+        level: HazardLevel.MODERATE,
+        type: HazardType.FLOOD,
+        advisory: 'Monsoon surge in river basin: Water levels near riverside ghats rising. Keep alert.',
+      },
+      forecast: [
         { time: '12:00', temperature: 29.4, condition: 'partly_cloudy', precipitation: 0 },
         { time: '15:00', temperature: 31.0, condition: 'thunderstorm', precipitation: 25 },
-        { time: '18:00', temperature: 27.5, condition: 'rain', precipitation: 18 },
-        { time: '21:00', temperature: 26.0, condition: 'cloudy', precipitation: 5 },
       ],
       fetchedAt: new Date(),
-    });
-
-    return this.mapEntityToResponse(fallbackRecord);
+    };
   }
 
   private mapEntityToResponse(entity: WeatherDataEntity): IWeatherData {

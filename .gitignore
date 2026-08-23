@@ -1,6 +1,16 @@
-node_modules/
+﻿node_modules/
 .env
-__pycache__/
+.env.*
+**/__pycache__/
+*.pyc
+*.log
+*.pid
+.DS_Store
+dist/
+build/
+.vscode/
+.idea/
+
 # Test artifacts (Diya)
 ai-ml/server.log
 ai-ml/server_err.log
