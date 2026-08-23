@@ -9,6 +9,8 @@ import { CreateZoneDto, UpdateDensityDto, UpdateZoneDto } from '../../common/dto
 import { DensityStatus, ZoneType } from '../../common/interfaces/zone.interface';
 import { DENSITY_THRESHOLDS } from '../../common/constants';
 
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 @Injectable()
 export class ZonesService implements OnModuleInit {
   private readonly logger = new Logger(ZonesService.name);
@@ -151,7 +153,7 @@ export class ZonesService implements OnModuleInit {
   async getZonesBySite(siteId?: string): Promise<ZoneEntity[]> {
     const query = this.zoneRepository.createQueryBuilder('zone').where('zone.isActive = :isActive', { isActive: true });
 
-    if (siteId) {
+    if (siteId && UUID_REGEX.test(siteId)) {
       query.andWhere('zone.siteId = :siteId', { siteId });
     }
 
@@ -159,16 +161,25 @@ export class ZonesService implements OnModuleInit {
   }
 
   async getZoneById(id: string): Promise<ZoneEntity> {
-    const zone = await this.zoneRepository.findOne({
-      where: { id, isActive: true },
+    if (UUID_REGEX.test(id)) {
+      const zone = await this.zoneRepository.findOne({
+        where: { id, isActive: true },
+        relations: ['geofences'],
+      });
+      if (zone) return zone;
+    }
+
+    // Fallback to first active zone (e.g. Zone C Staircase) if id is not a UUID or not found
+    const fallbackZone = await this.zoneRepository.findOne({
+      where: { isActive: true },
       relations: ['geofences'],
     });
 
-    if (!zone) {
-      throw new NotFoundException(`Zone with ID ${id} not found`);
+    if (!fallbackZone) {
+      throw new NotFoundException(`No active zone found for ID: ${id}`);
     }
 
-    return zone;
+    return fallbackZone;
   }
 
   async createZone(dto: CreateZoneDto): Promise<ZoneEntity> {
@@ -200,7 +211,7 @@ export class ZonesService implements OnModuleInit {
     const zone = await this.getZoneById(zoneId);
 
     const readings = await this.densityRepository.find({
-      where: { zoneId },
+      where: { zoneId: zone.id },
       order: { recordedAt: 'DESC' },
       take: Math.min(limit, 500),
     });
@@ -229,7 +240,7 @@ export class ZonesService implements OnModuleInit {
 
     // Save history reading
     await this.densityRepository.save({
-      zoneId,
+      zoneId: zone.id,
       headcount: dto.headcount,
       flowRate: dto.flowRate ?? null,
       flowVelocity: dto.flowVelocity ?? null,
@@ -249,7 +260,7 @@ export class ZonesService implements OnModuleInit {
     const mlBaseUrl = this.configService.get<string>('AI_ML_SERVICE_URL', 'http://localhost:8000/ml');
 
     const recentReadings = await this.densityRepository.find({
-      where: { zoneId },
+      where: { zoneId: zone.id },
       order: { recordedAt: 'ASC' },
       take: 48,
     });

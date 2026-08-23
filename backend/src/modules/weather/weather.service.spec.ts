@@ -6,6 +6,8 @@ import { WeatherDataEntity } from '../../database/entities/weather-data.entity';
 import { SiteEntity } from '../../database/entities/site.entity';
 import { HazardLevel, HazardType } from '../../common/interfaces/weather.interface';
 
+const VALID_SITE_UUID = '123e4567-e89b-12d3-a456-426614174000';
+
 describe('WeatherService (Ayush Module)', () => {
   let service: WeatherService;
   let weatherRepository: any;
@@ -19,7 +21,12 @@ describe('WeatherService (Ayush Module)', () => {
     };
 
     siteRepository = {
-      findOne: jest.fn(),
+      findOne: jest.fn().mockResolvedValue({
+        id: VALID_SITE_UUID,
+        name: 'Demo Site',
+        location: { latitude: 25.4358, longitude: 81.8463 },
+        isActive: true,
+      }),
     };
 
     configService = {
@@ -57,7 +64,7 @@ describe('WeatherService (Ayush Module)', () => {
 
       const cachedEntity = {
         id: 'weather-1',
-        siteId: 'site-123',
+        siteId: VALID_SITE_UUID,
         temperature: 30.2,
         humidity: 70,
         windSpeed: 10,
@@ -74,7 +81,7 @@ describe('WeatherService (Ayush Module)', () => {
 
       weatherRepository.findOne.mockResolvedValue(cachedEntity);
 
-      const result = await service.getWeatherForSite('site-123');
+      const result = await service.getWeatherForSite(VALID_SITE_UUID);
       expect(result.current.temperature).toBe(30.2);
       expect(result.hazard.level).toBe(HazardLevel.NONE);
     });
@@ -82,7 +89,7 @@ describe('WeatherService (Ayush Module)', () => {
     it('should generate/fetch fresh weather if no cache exists', async () => {
       weatherRepository.findOne.mockResolvedValue(null);
 
-      const result = await service.getWeatherForSite('site-123');
+      const result = await service.getWeatherForSite(VALID_SITE_UUID);
       expect(result).toHaveProperty('current');
       expect(result).toHaveProperty('hazard');
       expect(weatherRepository.save).toHaveBeenCalled();
