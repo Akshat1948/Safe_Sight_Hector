@@ -1,6 +1,9 @@
 node_modules/
 .env
-__pycache__/*.log
+.env.*
+**/__pycache__/
+*.pyc
+*.log
 *.pid
 .DS_Store
 dist/
