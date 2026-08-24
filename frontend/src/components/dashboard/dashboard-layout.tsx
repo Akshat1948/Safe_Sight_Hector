@@ -385,77 +385,72 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Premium Right-Anchored Smooth Expanding Search Component */}
             <div
               ref={searchContainerRef}
-              className="relative h-8 w-8 shrink-0 flex items-center justify-end z-20"
+              className="relative h-8 w-8 shrink-0 flex items-center justify-end z-30 select-auto"
             >
-              <form
-                onSubmit={handleSearchSubmit}
+              <div
                 style={{
                   transition:
-                    'width 700ms cubic-bezier(0.22, 1, 0.36, 1), border-color 500ms ease, box-shadow 500ms ease, background-color 500ms ease',
+                    'width 450ms cubic-bezier(0.22, 1, 0.36, 1), border-color 300ms ease, box-shadow 300ms ease, background-color 300ms ease',
                 }}
                 className={`absolute right-0 top-0 h-8 flex items-center rounded-md border box-border motion-reduce:transition-none overflow-hidden ${
                   searchExpanded
                     ? 'w-52 sm:w-60 md:w-72 bg-surface border-primary shadow-md shadow-primary/10'
                     : 'w-8 bg-surface-container-low border-outline-variant hover:border-primary/60 hover:bg-surface-container cursor-pointer'
                 }`}
-                onClick={(e) => {
-                  if (!searchExpanded) {
-                    e.preventDefault();
-                    setSearchExpanded(true);
-                    setTimeout(() => searchInputRef.current?.focus(), 150);
-                  }
-                }}
               >
-                {/* Input Container: completely zero width when collapsed so icon is 100% centered */}
-                <div
-                  className={`flex items-center h-full min-w-0 transition-all duration-500 ease-out ${
-                    searchExpanded
-                      ? 'flex-1 opacity-100 pl-2.5 translate-x-0 pointer-events-auto delay-150'
-                      : 'w-0 opacity-0 translate-x-2 pointer-events-none p-0 overflow-hidden'
-                  }`}
-                >
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search incidents, sectors..."
-                    className="w-full bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full"
-                    tabIndex={searchExpanded ? 0 : -1}
-                  />
-
-                  {searchQuery && searchExpanded && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSearchQuery('');
-                        searchInputRef.current?.focus();
-                      }}
-                      className="p-1 text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer"
-                      title="Clear search"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">close</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* Right-Anchored Search Magnifying Glass Icon Button */}
-                <button
-                  type={searchExpanded ? 'submit' : 'button'}
-                  className="w-8 h-8 flex items-center justify-center shrink-0 p-0 text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent"
-                  title={searchExpanded ? 'Submit search' : 'Search'}
-                  aria-label="Search"
-                >
-                  <span
-                    className={`material-symbols-outlined text-[18px] transition-colors leading-none ${
-                      searchExpanded ? 'text-primary' : 'text-on-surface-variant'
-                    }`}
+                {searchExpanded ? (
+                  <form
+                    onSubmit={handleSearchSubmit}
+                    className="flex items-center w-full h-full min-w-0 pl-2.5 pr-0.5 animate-in fade-in duration-200"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    search
-                  </span>
-                </button>
-              </form>
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search incidents, sectors..."
+                      className="flex-1 bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full min-w-0 select-text"
+                      autoFocus
+                    />
+
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSearchQuery('');
+                          searchInputRef.current?.focus();
+                        }}
+                        className="p-1 text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer"
+                        title="Clear search"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">close</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="submit"
+                      className="w-7 h-7 flex items-center justify-center shrink-0 text-primary hover:text-primary-container transition-colors cursor-pointer"
+                      title="Submit search"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">search</span>
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchExpanded(true);
+                      setTimeout(() => searchInputRef.current?.focus(), 60);
+                    }}
+                    className="w-full h-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent"
+                    title="Open Search"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">search</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* System Status Pill */}
