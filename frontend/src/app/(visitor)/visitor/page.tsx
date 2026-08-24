@@ -7,6 +7,9 @@ import ParkingStatus from '@/components/transport/parking-status';
 import ShuttleInfo from '@/components/transport/shuttle-info';
 import SOSButton from '@/components/visitor/sos-button';
 import SafetyEssentials from '@/components/visitor/safety-essentials';
+import { WeatherWidget } from '@/components/weather';
+import { LanguageSwitcher } from '@/components/language';
+import { useLanguage } from '@/i18n';
 import { getZones } from '@/shared/api';
 import { IZone } from '@/shared/types';
 
@@ -14,6 +17,7 @@ export default function VisitorPortalPage() {
   const [zones, setZones] = useState<IZone[]>([]);
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
   const [activeSiteId] = useState<string>('cb9e2dc0-bff7-4dea-9507-8591e5f6e7c3');
+  const { t } = useLanguage();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -46,7 +50,7 @@ export default function VisitorPortalPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-extrabold tracking-tight text-white">SAFESIGHT</h1>
+              <h1 className="text-base font-extrabold tracking-tight text-white">{t('app_title')}</h1>
               <span className="text-[10px] font-mono font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full">
                 VISITOR PORTAL
               </span>
@@ -56,9 +60,10 @@ export default function VisitorPortalPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <LanguageSwitcher variant="compact" />
           <Link
             href="/dashboard"
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors hidden sm:inline-block"
           >
             Manager Console →
           </Link>
@@ -77,7 +82,7 @@ export default function VisitorPortalPage() {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
         </span>
-        <span className="font-bold uppercase text-red-400">Live Safety Notice:</span>
+        <span className="font-bold uppercase text-red-400">{t('safety_advisory')}:</span>
         <div className="overflow-hidden whitespace-nowrap text-xs text-red-200 font-semibold flex-1">
           <span className="inline-block animate-marquee">
             High pilgrim density at Sangam Ghat Steps (Zone B). Please divert toward Safe Assembly Grounds (Zone D) via East Corridor C.
@@ -89,9 +94,9 @@ export default function VisitorPortalPage() {
         {/* Hero Section: 1-Tap SOS & Safe Status */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
           <div className="md:col-span-2 p-6 rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-920 shadow-xl space-y-2">
-            <span className="text-xs font-mono uppercase font-bold text-cyan-400">Crowd Intelligence &amp; Safety</span>
+            <span className="text-xs font-mono uppercase font-bold text-cyan-400">{t('crowd_density')} &amp; Safety</span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              Stay Safe &amp; Navigate with Live Crowd Insights
+              {t('app_subtitle')}
             </h2>
             <p className="text-sm text-slate-300">
               Real-time zone capacity meters, interactive pilgrimage maps, automated crowd diversion guidance, and 1-tap emergency medical dispatch.
@@ -111,7 +116,7 @@ export default function VisitorPortalPage() {
               <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-cyan-400">
                 Geospatial Density Heatmap
               </span>
-              <h3 className="text-xl font-bold text-white">🗺️ Live Pilgrimage Zones &amp; Congestion Map</h3>
+              <h3 className="text-xl font-bold text-white">🗺️ {t('live_map')} &amp; Congestion Status</h3>
             </div>
             <span className="text-xs font-mono text-slate-400">Auto-updating every 15s</span>
           </div>
@@ -123,6 +128,11 @@ export default function VisitorPortalPage() {
             showHeatmap={true}
             className="h-[460px]"
           />
+        </section>
+
+        {/* Weather & Multi-Hazard Intelligence */}
+        <section>
+          <WeatherWidget siteId={activeSiteId} />
         </section>
 
         {/* Smart Mobility & Public Transport Section */}
