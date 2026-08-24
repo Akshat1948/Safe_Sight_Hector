@@ -8,6 +8,7 @@ import { SiteEntity } from '../../database/entities/site.entity';
 import { CreateZoneDto, UpdateDensityDto, UpdateZoneDto } from '../../common/dto';
 import { DensityStatus, ZoneType } from '../../common/interfaces/zone.interface';
 import { DENSITY_THRESHOLDS } from '../../common/constants';
+import { SafeSightGateway } from '../../gateway/safesight.gateway';
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
@@ -23,6 +24,7 @@ export class ZonesService implements OnModuleInit {
     @InjectRepository(SiteEntity)
     private siteRepository: Repository<SiteEntity>,
     private configService: ConfigService,
+    private readonly gateway: SafeSightGateway,
   ) {}
 
   async onModuleInit() {
@@ -248,7 +250,19 @@ export class ZonesService implements OnModuleInit {
       recordedAt: new Date(),
     });
 
-    return this.zoneRepository.save(zone);
+    const savedZone = await this.zoneRepository.save(zone);
+
+    // Emit real-time WebSocket update to all dashboard monitors and clients
+    this.gateway.emitZoneDensityUpdate(zone.siteId, {
+      zoneId: zone.id,
+      currentDensity: zone.currentDensity,
+      densityStatus: zone.densityStatus,
+      flowRate: dto.flowRate ?? 0,
+      flowVelocity: dto.flowVelocity ?? 0,
+      updatedAt: new Date(),
+    });
+
+    return savedZone;
   }
 
   /**

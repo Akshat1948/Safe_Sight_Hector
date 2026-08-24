@@ -1,5 +1,8 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-export default function HomePage() {
-  redirect('/visitor');
+import React from 'react';
+import DashboardPage from './(dashboard)/dashboard/page';
+
+export default function RootPage() {
+  return <DashboardPage />;
 }

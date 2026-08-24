@@ -1,35 +1,20 @@
 import { apiClient } from './client';
 import { CreateAlertRequest, IAlert, AlertSeverity, AlertStatus, AlertChannel } from '@/shared/types';
 
-let localDemoAlerts: IAlert[] = [
-  {
-    id: 'alert-demo-1',
-    incidentId: 'inc-demo-1',
-    siteId: 'demo-site-prayagraj-01',
-    targetZoneId: 'zone-c-staircase',
-    targetZoneName: 'Zone C — Main Staircase Chokepoint',
-    severity: AlertSeverity.CRITICAL,
-    title: 'Hold Position: Avoid Zone C Staircase',
-    message: 'High density detected at main staircase. Hold position and use Zone D assembly ground corridor.',
-    messageHi: 'ज़ोन C सीढ़ियों पर भारी भीड़ है। कृपया वहीं रुकें और ज़ोन D कॉरिडोर का प्रयोग करें।',
-    channels: [AlertChannel.PUSH, AlertChannel.DASHBOARD, AlertChannel.PA_SYSTEM],
-    status: AlertStatus.DISPATCHED,
-    createdBy: 'demo-manager-uuid-01',
-    acknowledgedBy: null,
-    acknowledgedAt: null,
-    createdAt: new Date().toISOString(),
-  },
-];
+let localDemoAlerts: IAlert[] = [];
+
 
 export async function getAlerts(
-  siteId: string,
+  siteId?: string | null,
   params?: { status?: string; severity?: string },
 ) {
-  const query = new URLSearchParams({ siteId });
+  const query = new URLSearchParams();
+  if (siteId && !siteId.startsWith('demo-')) query.set('siteId', siteId);
   if (params?.status) query.set('status', params.status);
   if (params?.severity) query.set('severity', params.severity);
 
-  const res = await apiClient<IAlert[]>(`/alerts?${query}`);
+  const qs = query.toString() ? `?${query.toString()}` : '';
+  const res = await apiClient<IAlert[]>(`/alerts${qs}`);
   if (res.success && res.data && res.data.length > 0) {
     return res;
   }

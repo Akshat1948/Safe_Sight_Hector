@@ -4,7 +4,108 @@
 
 @layer base {
   body {
-    background-color: #F3F4F1;
-    color: #0f172a;
+    background-color: #f7f9fb;
+    color: #191c1e;
   }
 }
+
+.hud-panel {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.hud-border {
+  border: 1px solid #e2e8f0;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid #e2e8f0;
+}
+
+.neon-border-active {
+  border-left: 4px solid #855300;
+}
+
+.neon-glow-amber {
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3), inset 0 0 4px rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+.neon-glow-red {
+  box-shadow: 0 0 8px rgba(186, 26, 26, 0.3), inset 0 0 4px rgba(186, 26, 26, 0.2);
+  border-color: rgba(186, 26, 26, 0.5);
+}
+
+.tech-glow:focus-within {
+  box-shadow: 0 0 8px 0 rgba(133, 83, 0, 0.2);
+  border-color: #855300;
+}
+
+.neon-border-focus:focus-within {
+  border-color: #855300;
+  box-shadow: inset 0 0 8px rgba(245, 158, 11, 0.2);
+}
+
+.radar-pulse {
+  animation: radarPulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes radarPulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.pulse-dot {
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 101, 139, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 101, 139, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 101, 139, 0); }
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Minimal custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f2f4f6; 
+}
+::-webkit-scrollbar-thumb {
+  background: #d8dadc; 
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #534434; 
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

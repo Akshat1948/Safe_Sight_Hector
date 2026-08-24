@@ -5,9 +5,13 @@ import { DensityReadingEntity } from '../../database/entities/density-reading.en
 import { SiteEntity } from '../../database/entities/site.entity';
 import { ZonesService } from './zones.service';
 import { ZonesController } from './zones.controller';
+import { GatewayModule } from '../../gateway/gateway.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ZoneEntity, DensityReadingEntity, SiteEntity])],
+  imports: [
+    TypeOrmModule.forFeature([ZoneEntity, DensityReadingEntity, SiteEntity]),
+    GatewayModule,
+  ],
   controllers: [ZonesController],
   providers: [ZonesService],
   exports: [ZonesService],
