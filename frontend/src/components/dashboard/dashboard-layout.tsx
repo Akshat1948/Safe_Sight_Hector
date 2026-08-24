@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       setSearchExpanded(true);
       setTimeout(() => {
         searchInputRef.current?.focus();
-      }, 50);
+      }, 150);
     } else if (searchQuery.trim()) {
       router.push(`/dashboard/incidents?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchExpanded(false);
@@ -391,7 +391,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onSubmit={handleSearchSubmit}
                 style={{
                   transition:
-                    'width 400ms cubic-bezier(0.22, 1, 0.36, 1), border-color 300ms ease, box-shadow 300ms ease, background-color 300ms ease',
+                    'width 700ms cubic-bezier(0.22, 1, 0.36, 1), border-color 500ms ease, box-shadow 500ms ease, background-color 500ms ease',
                 }}
                 className={`absolute right-0 top-0 h-8 flex items-center rounded-md border box-border motion-reduce:transition-none overflow-hidden ${
                   searchExpanded
@@ -402,16 +402,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   if (!searchExpanded) {
                     e.preventDefault();
                     setSearchExpanded(true);
-                    setTimeout(() => searchInputRef.current?.focus(), 60);
+                    setTimeout(() => searchInputRef.current?.focus(), 150);
                   }
                 }}
               >
                 {/* Input Container: completely zero width when collapsed so icon is 100% centered */}
                 <div
-                  className={`flex items-center h-full min-w-0 transition-all duration-300 ${
+                  className={`flex items-center h-full min-w-0 transition-all duration-500 ease-out ${
                     searchExpanded
-                      ? 'flex-1 opacity-100 pl-2.5 pointer-events-auto'
-                      : 'w-0 opacity-0 pointer-events-none p-0 overflow-hidden'
+                      ? 'flex-1 opacity-100 pl-2.5 translate-x-0 pointer-events-auto delay-150'
+                      : 'w-0 opacity-0 translate-x-2 pointer-events-none p-0 overflow-hidden'
                   }`}
                 >
                   <input
@@ -461,7 +461,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* System Status Pill */}
             <button
               onClick={() => router.push('/dashboard')}
-              className="hidden sm:flex items-center border border-outline-variant text-on-surface-variant px-2.5 py-1 rounded hover:text-primary hover:border-primary transition-colors text-[11px] font-body-bold bg-surface cursor-pointer whitespace-nowrap"
+              className="hidden sm:flex items-center h-8 border border-outline-variant text-on-surface-variant px-3 rounded hover:text-primary hover:border-primary transition-colors text-[11px] font-body-bold bg-surface cursor-pointer whitespace-nowrap"
             >
               <span className="w-2 h-2 rounded-full bg-status-nominal mr-1.5 animate-pulse"></span>
               <span className="hidden md:inline">System </span>Status
@@ -470,7 +470,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Emergency Lockdown Button */}
             <button
               onClick={handleEmergencyLockdown}
-              className={`px-2 sm:px-3 py-1.5 rounded transition-all text-xs font-body-bold shadow-md cursor-pointer whitespace-nowrap ${
+              className={`h-8 flex items-center px-2.5 sm:px-3.5 rounded transition-all text-xs font-body-bold shadow-md cursor-pointer whitespace-nowrap ${
                 lockdownActive
                   ? 'bg-status-critical text-white animate-pulse shadow-status-critical/30'
                   : 'bg-error text-on-error hover:bg-error/90 shadow-error/20'
@@ -480,10 +480,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </button>
 
             {/* Profile Avatar with Dropdown */}
-            <div className="relative">
+            <div className="relative flex items-center h-8">
               <button
                 onClick={() => setShowProfileMenu((prev) => !prev)}
-                className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full border border-outline-variant overflow-hidden flex items-center justify-center bg-primary text-white font-bold text-xs hover:ring-2 hover:ring-primary/40 transition-all cursor-pointer"
+                className="w-8 h-8 rounded-full border border-outline-variant overflow-hidden flex items-center justify-center bg-primary text-white font-bold text-xs hover:ring-2 hover:ring-primary/40 transition-all cursor-pointer"
               >
                 {user?.name ? user.name[0].toUpperCase() : 'M'}
               </button>
