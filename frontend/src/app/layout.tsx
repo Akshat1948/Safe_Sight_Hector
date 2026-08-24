@@ -1,8 +1,9 @@
 import './globals.css';
 import { LanguageProvider } from '@/i18n';
+import { AuthProvider } from '@/shared/hooks';
 
 export const metadata = {
-  title: 'SafeSight HECTOR — Operational Command & Visitor Safety',
+  title: 'SafeSight HECTOR — Operational Command',
   description: 'AI-Based Visitor Safety, Crowd & Incident Coordination for Eco and Pilgrimage Sites',
 };
 
@@ -22,9 +23,10 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased bg-[#f7f9fb] text-[#191c1e] min-h-screen font-body-base">
-        <LanguageProvider>{children}</LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>{children}</LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   );
 }
-
