@@ -391,25 +391,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onSubmit={handleSearchSubmit}
                 style={{
                   transition:
-                    'width 420ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 300ms ease, border-color 300ms ease',
+                    'width 400ms cubic-bezier(0.22, 1, 0.36, 1), border-color 300ms ease, box-shadow 300ms ease, background-color 300ms ease',
                 }}
-                className={`absolute right-0 top-0 h-8 flex items-center rounded-md border motion-reduce:transition-none overflow-hidden ${
+                className={`absolute right-0 top-0 h-8 flex items-center rounded-md border box-border motion-reduce:transition-none overflow-hidden ${
                   searchExpanded
                     ? 'w-52 sm:w-60 md:w-72 bg-surface border-primary shadow-md shadow-primary/10'
                     : 'w-8 bg-surface-container-low border-outline-variant hover:border-primary/60 hover:bg-surface-container cursor-pointer'
                 }`}
-                onClick={() => {
+                onClick={(e) => {
                   if (!searchExpanded) {
-                    handleSearchToggle();
+                    e.preventDefault();
+                    setSearchExpanded(true);
+                    setTimeout(() => searchInputRef.current?.focus(), 60);
                   }
                 }}
               >
-                {/* Input Container (fades/slides in as it expands towards the left) */}
+                {/* Input Container: completely zero width when collapsed so icon is 100% centered */}
                 <div
-                  className={`flex-1 flex items-center h-full min-w-0 pl-2.5 transition-all duration-300 ${
+                  className={`flex items-center h-full min-w-0 transition-all duration-300 ${
                     searchExpanded
-                      ? 'opacity-100 translate-x-0 pointer-events-auto delay-75'
-                      : 'opacity-0 translate-x-3 pointer-events-none'
+                      ? 'flex-1 opacity-100 pl-2.5 pointer-events-auto'
+                      : 'w-0 opacity-0 pointer-events-none p-0 overflow-hidden'
                   }`}
                 >
                   <input
@@ -422,8 +424,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     tabIndex={searchExpanded ? 0 : -1}
                   />
 
-                  {/* Clear Button (appears when query text exists) */}
-                  {searchQuery && (
+                  {searchQuery && searchExpanded && (
                     <button
                       type="button"
                       onClick={(e) => {
@@ -442,18 +443,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {/* Right-Anchored Search Magnifying Glass Icon Button */}
                 <button
                   type={searchExpanded ? 'submit' : 'button'}
-                  onClick={(e) => {
-                    if (!searchExpanded) {
-                      e.preventDefault();
-                      handleSearchToggle();
-                    }
-                  }}
-                  className="w-8 h-8 flex items-center justify-center shrink-0 text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
+                  className="w-8 h-8 flex items-center justify-center shrink-0 p-0 text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent"
                   title={searchExpanded ? 'Submit search' : 'Search'}
                   aria-label="Search"
                 >
                   <span
-                    className={`material-symbols-outlined text-[18px] transition-colors ${
+                    className={`material-symbols-outlined text-[18px] transition-colors leading-none ${
                       searchExpanded ? 'text-primary' : 'text-on-surface-variant'
                     }`}
                   >
