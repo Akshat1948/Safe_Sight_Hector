@@ -390,7 +390,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div
                 style={{
                   transition:
-                    'width 450ms cubic-bezier(0.22, 1, 0.36, 1), border-color 300ms ease, box-shadow 300ms ease, background-color 300ms ease',
+                    'width 700ms cubic-bezier(0.22, 1, 0.36, 1), border-color 450ms ease, box-shadow 450ms ease, background-color 450ms ease',
                 }}
                 className={`absolute right-0 top-0 h-8 flex items-center rounded-md border box-border motion-reduce:transition-none overflow-hidden ${
                   searchExpanded
@@ -401,7 +401,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {searchExpanded ? (
                   <form
                     onSubmit={handleSearchSubmit}
-                    className="flex items-center w-full h-full min-w-0 pl-2.5 pr-0.5 animate-in fade-in duration-200"
+                    className="flex items-center w-full h-full min-w-0 pl-2.5 pr-0.5 animate-in fade-in duration-300"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <input
