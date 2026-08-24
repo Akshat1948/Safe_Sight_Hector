@@ -1,12 +1,24 @@
 # SafeSight — Root Project Status
 
-> **Last updated:** 2026-08-24 12:53 by Team Blueprint (Diya, Aditya, Ayush, Akshat, Shreyashi)
+> **Last updated:** 2026-08-24 20:15 by Team Blueprint (Diya, Aditya, Ayush, Akshat, Shreyashi)
+
+---
+
+## ⚡ REAL-TIME WEBSOCKET TELEMETRY & LIVE DEMO INTEGRATION (PODS A & B)
+> **Status:** 🟢 **100% COMPLETE & LIVE**
+> * **Zero-Latency WebSocket Gateway:** Connected `ZonesModule` & `ZonesService` directly to `SafeSightGateway` (`backend/src/gateway/safesight.gateway.ts`). Real-time headcount patches immediately broadcast `zone:density:update` globally to all connected dashboards and map clients.
+> * **Race-Condition-Free Socket Hook (`use-socket.ts`):** Client-side listener queueing ensures zero lost events upon page load, reconnection, or route navigation.
+> * **Live Sector & KPI Gauges (`/dashboard`):** Real-time headcount counters, density percentage bars, status pills, and high-priority event telemetry feed update instantly without requiring page reloads or tab changes.
+> * **Reactive GIS Tactical Map (`/dashboard/map`):** Zone polygons dynamically shift colors (🟢 Green $\rightarrow$ 🟡 Yellow $\rightarrow$ 🟠 Orange $\rightarrow$ 🔴 Pulsing Red) and update headcount popup badges without re-initializing Leaflet DOM layers.
+> * **Live Demo Simulator Script (`backend/scripts/simulate-demo.ts`):** Interactive Step Mode (`npm run simulate:step`), Automated Crush Precursor (`npm run simulate:crush`), Fast Mode (`npm run simulate:fast`), and Instant Reset (`npm run simulate:reset`) fully tested and ready for demo recording.
 
 ---
 
 ## 🎨 UI REDESIGN UPDATE: CLEARPOINT COMMAND & SAFESIGHT HECTOR (POD A)
 > **Status:** 🟢 **100% COMPLETE & LIVE**
 > * **Design System:** High-Contrast Light Theme with Inter & JetBrains Mono typography, SafeSight Amber (`#855300` / `#f59e0b`), 1px `#e2e8f0` HUD panels, and subtle tonal layering.
+> * **Unified Top Navbar:** Perfect vertical centerline alignment (`display: flex; align-items: center`) across brand logo (`SafeSight HECTOR`), navigation links (`OVERVIEW` to `SOS QUEUE`), System Status pill, Emergency Lockdown button, and profile avatar.
+> * **E-Commerce Style Expanding Search Bar:** Right-anchored compact square button `[ 🔍 ]` that smoothly expands leftward over `400ms` (`cubic-bezier(0.22, 1, 0.36, 1)`) with dedicated input autofocus, inline clear button (<kbd>✕</kbd>), and constrained width preventing overlap with `SOS QUEUE`.
 > * **Root Page (`/`) & `/dashboard`:** Real-time System Performance Overview with 24h Incident Trends Bar Chart, 4 KPI Telemetry Cards (Alerts, Response Time, Uptime, Patrols), Inflow Rate meters, and Live Incident Triage Queue.
 > * **Real-Time Map (`/dashboard/map`):** Split-screen command stack, Live Event Feed (CCTV-45, Zone 3, Sensor Alerts), Leaflet GIS Map, Sector 7 Command Hub, and animated Perimeter Breach popups.
 > * **Asset Tracking (`/dashboard/assets`):** Roster tracking Tactical Units, Surveillance Drones, Armored Transports, and Thermal Sensors with live battery %, speed gauges, and encrypted Comms Link / Issue Orders actions.
