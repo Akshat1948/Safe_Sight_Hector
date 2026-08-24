@@ -39,25 +39,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   };
 
-  const handleSearchToggle = () => {
-    if (!searchExpanded) {
-      setSearchExpanded(true);
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 150);
-    } else if (searchQuery.trim()) {
-      router.push(`/dashboard/incidents?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchExpanded(false);
-    } else {
-      setSearchExpanded(false);
-    }
-  };
-
-  const closeSearch = () => {
-    setSearchExpanded(false);
-    setSearchQuery('');
-  };
-
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -340,23 +321,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* TopNavBar */}
         <nav className="h-topbar-height bg-surface border-b border-border-subtle flex justify-between items-center px-3 sm:px-4 md:px-6 z-40 shrink-0 shadow-sm">
           {/* Left: Mobile Hamburger + Brand + Desktop Nav Tabs */}
-          <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-5 h-full min-w-0">
+          <div className="flex items-center space-x-3 lg:space-x-6 h-full min-w-0">
             {/* Hamburger Button (Mobile only) */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-1.5 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container transition-colors"
+              className="md:hidden p-1.5 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container transition-colors flex items-center justify-center"
               title="Open Menu"
             >
               <span className="material-symbols-outlined text-[24px]">menu</span>
             </button>
 
             {/* Brand Title */}
-            <span className="font-headline-md text-sm sm:text-base md:text-headline-md font-extrabold text-on-surface tracking-tighter whitespace-nowrap">
+            <span className="font-headline-md text-sm sm:text-base md:text-headline-md font-extrabold text-on-surface tracking-tighter whitespace-nowrap flex items-center leading-none">
               SafeSight HECTOR
             </span>
 
-            {/* Top Navigation Tabs (Horizontal scroll on tablets/laptops) */}
-            <div className="hidden lg:flex space-x-2 xl:space-x-4 h-full items-end overflow-x-auto scrollbar-hide shrink-0 pb-1">
+            {/* Top Navigation Tabs (Vertically Centered with Active Bottom Indicator) */}
+            <div className="hidden lg:flex items-center space-x-1.5 xl:space-x-3 h-full shrink-0">
               {TOP_NAV_TABS.map((tab) => {
                 const isActive =
                   tab.href === '/dashboard'
@@ -367,10 +348,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Link
                     key={tab.href}
                     href={tab.href}
-                    className={`font-label-caps text-label-caps pb-1 transition-all duration-200 border-b-2 uppercase whitespace-nowrap ${
+                    className={`relative flex items-center h-full px-2.5 font-label-caps text-label-caps uppercase whitespace-nowrap transition-colors duration-150 ${
                       isActive
-                        ? 'text-primary border-primary font-bold'
-                        : 'text-on-surface-variant hover:text-on-surface border-transparent'
+                        ? 'text-primary font-bold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary'
+                        : 'text-on-surface-variant hover:text-on-surface hover:text-primary/90'
                     }`}
                   >
                     {tab.label}
@@ -381,7 +362,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           {/* Right: Actions, Status & Profile */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2.5 md:space-x-3 shrink-0">
+          <div className="flex items-center space-x-2 sm:space-x-2.5 md:space-x-3 shrink-0 h-full">
             {/* Premium Right-Anchored Smooth Expanding Search Component */}
             <div
               ref={searchContainerRef}
@@ -390,11 +371,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div
                 style={{
                   transition:
-                    'width 700ms cubic-bezier(0.22, 1, 0.36, 1), border-color 450ms ease, box-shadow 450ms ease, background-color 450ms ease',
+                    'width 400ms cubic-bezier(0.22, 1, 0.36, 1), border-color 300ms ease, box-shadow 300ms ease, background-color 300ms ease',
                 }}
                 className={`absolute right-0 top-0 h-8 flex items-center rounded-md border box-border motion-reduce:transition-none overflow-hidden ${
                   searchExpanded
-                    ? 'w-52 sm:w-60 md:w-72 bg-surface border-primary shadow-md shadow-primary/10'
+                    ? 'w-36 sm:w-40 md:w-44 bg-surface border-primary shadow-md shadow-primary/10'
                     : 'w-8 bg-surface-container-low border-outline-variant hover:border-primary/60 hover:bg-surface-container cursor-pointer'
                 }`}
               >
@@ -409,7 +390,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search incidents, sectors..."
+                      placeholder="Search incidents..."
                       className="flex-1 bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full min-w-0 select-text"
                       autoFocus
                     />

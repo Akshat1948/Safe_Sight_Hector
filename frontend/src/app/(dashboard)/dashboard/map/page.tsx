@@ -40,18 +40,52 @@ export default function RealTimeMapPage() {
       }
     };
 
+    const handleDensityUpdate = (data: any) => {
+      if (data?.zoneId) {
+        setZones((prev) => {
+          const exists = prev.some((z) => z.id === data.zoneId);
+          if (exists) {
+            return prev.map((z) =>
+              z.id === data.zoneId
+                ? {
+                    ...z,
+                    currentDensity: data.currentDensity,
+                    densityStatus: data.densityStatus,
+                    flowRate: data.flowRate,
+                    flowVelocity: data.flowVelocity,
+                  }
+                : z
+            );
+          }
+          return prev.map((z) =>
+            z.name.toLowerCase().includes('zone c') || z.name.toLowerCase().includes('staircase')
+              ? {
+                  ...z,
+                  currentDensity: data.currentDensity,
+                  densityStatus: data.densityStatus,
+                  flowRate: data.flowRate,
+                  flowVelocity: data.flowVelocity,
+                }
+              : z
+          );
+        });
+      }
+    };
+
     on('incident:new', handleNewIncident);
     on('incident:verified', handleNewIncident);
+    on('zone:density:update', handleDensityUpdate);
 
     return () => {
       off('incident:new', handleNewIncident);
       off('incident:verified', handleNewIncident);
+      off('zone:density:update', handleDensityUpdate);
     };
   }, [on, off]);
 
   const activeIncidentsCount = incidents.filter(
     (i) => i.status !== 'resolved' && i.status !== 'dismissed'
-  ).length || 1241;
+  ).length;
 
   return (
     <DashboardLayout>

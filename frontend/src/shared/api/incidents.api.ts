@@ -88,16 +88,18 @@ let localDemoIncidents: IIncident[] = [
 ];
 
 export async function getIncidents(
-  siteId: string,
+  siteId?: string | null,
   params?: { status?: string; severity?: string; limit?: number; offset?: number },
 ) {
-  const query = new URLSearchParams({ siteId });
+  const query = new URLSearchParams();
+  if (siteId && !siteId.startsWith('demo-')) query.set('siteId', siteId);
   if (params?.status) query.set('status', params.status);
   if (params?.severity) query.set('severity', params.severity);
   if (params?.limit) query.set('limit', String(params.limit));
   if (params?.offset) query.set('offset', String(params.offset));
 
-  const res = await apiClient<IncidentListResponse>(`/incidents?${query}`);
+  const qs = query.toString() ? `?${query.toString()}` : '';
+  const res = await apiClient<IncidentListResponse>(`/incidents${qs}`);
   if (res.success && res.data && res.data.incidents?.length > 0) {
     return res;
   }

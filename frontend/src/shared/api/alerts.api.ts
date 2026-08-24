@@ -5,14 +5,16 @@ let localDemoAlerts: IAlert[] = [];
 
 
 export async function getAlerts(
-  siteId: string,
+  siteId?: string | null,
   params?: { status?: string; severity?: string },
 ) {
-  const query = new URLSearchParams({ siteId });
+  const query = new URLSearchParams();
+  if (siteId && !siteId.startsWith('demo-')) query.set('siteId', siteId);
   if (params?.status) query.set('status', params.status);
   if (params?.severity) query.set('severity', params.severity);
 
-  const res = await apiClient<IAlert[]>(`/alerts?${query}`);
+  const qs = query.toString() ? `?${query.toString()}` : '';
+  const res = await apiClient<IAlert[]>(`/alerts${qs}`);
   if (res.success && res.data && res.data.length > 0) {
     return res;
   }

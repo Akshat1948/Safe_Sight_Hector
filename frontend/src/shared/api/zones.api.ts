@@ -96,8 +96,9 @@ const DEMO_ZONES: IZone[] = [
   },
 ];
 
-export async function getZones(siteId: string) {
-  const res = await apiClient<IZone[]>(`/zones?siteId=${siteId}`);
+export async function getZones(siteId?: string | null) {
+  const query = siteId && !siteId.startsWith('demo-') ? `?siteId=${siteId}` : '';
+  const res = await apiClient<IZone[]>(`/zones${query}`);
   if (res.success && res.data && res.data.length > 0) {
     return res;
   }

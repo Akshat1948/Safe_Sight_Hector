@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { IZone } from '@/shared/types';
 import { getZones, getIncidents, getAlerts } from '@/shared/api';
+import { useSocket } from '@/shared/hooks';
 
 interface AnalyticsPanelProps {
   siteId?: string | null;
@@ -20,6 +21,24 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
     activePatrols: 124,
     patrolCapacity: 150,
   });
+  const [recentEvents, setRecentEvents] = useState([
+    {
+      id: 'e1',
+      type: 'CONSTRAINT VIOLATION',
+      time: '10:42 AM',
+      description: 'Unauthorized access detected at Perimeter North-West Gate.',
+      critical: true,
+    },
+    {
+      id: 'e2',
+      type: 'SENSOR ANOMALY',
+      time: '10:15 AM',
+      description: 'Environmental temp drop in Sector 9.',
+      critical: false,
+    },
+  ]);
+
+  const { on, off } = useSocket(siteId || 'demo-site-prayagraj-01');
 
   useEffect(() => {
     if (!siteId) return;
@@ -46,6 +65,79 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
       })
       .catch(console.error);
   }, [siteId]);
+
+  useEffect(() => {
+    const handleDensityUpdate = (data: any) => {
+      if (data?.zoneId) {
+        setZones((prev) => {
+          const exists = prev.some((z) => z.id === data.zoneId);
+          if (exists) {
+            return prev.map((z) =>
+              z.id === data.zoneId
+                ? {
+                    ...z,
+                    currentDensity: data.currentDensity,
+                    densityStatus: data.densityStatus,
+                    flowRate: data.flowRate,
+                    flowVelocity: data.flowVelocity,
+                  }
+                : z
+            );
+          }
+          return prev.map((z) =>
+            z.name.toLowerCase().includes('zone c') || z.name.toLowerCase().includes('staircase')
+              ? {
+                  ...z,
+                  currentDensity: data.currentDensity,
+                  densityStatus: data.densityStatus,
+                  flowRate: data.flowRate,
+                  flowVelocity: data.flowVelocity,
+                }
+              : z
+          );
+        });
+      }
+    };
+
+    const handleNewIncident = (data: any) => {
+      setStats((prev) => ({
+        ...prev,
+        activeIncidents: prev.activeIncidents + 1,
+        criticalIncidents:
+          data?.severity === 'critical' ? prev.criticalIncidents + 1 : prev.criticalIncidents,
+      }));
+
+      if (data?.title) {
+        setRecentEvents((prev) => [
+          {
+            id: data.id || String(Date.now()),
+            type: (data.incidentType || 'CRUSH PRECURSOR').toUpperCase().replace('_', ' '),
+            time: 'JUST NOW',
+            description: data.description || data.title,
+            critical: data.severity === 'critical',
+          },
+          ...prev.slice(0, 3),
+        ]);
+      }
+    };
+
+    const handleNewAlert = () => {
+      setStats((prev) => ({
+        ...prev,
+        totalAlerts: prev.totalAlerts + 1,
+      }));
+    };
+
+    on('zone:density:update', handleDensityUpdate);
+    on('incident:new', handleNewIncident);
+    on('alert:new', handleNewAlert);
+
+    return () => {
+      off('zone:density:update', handleDensityUpdate);
+      off('incident:new', handleNewIncident);
+      off('alert:new', handleNewAlert);
+    };
+  }, [on, off]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -291,24 +383,23 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
               <span className="material-symbols-outlined text-on-surface-variant text-[16px]">priority_high</span>
             </div>
             <ul className="divide-y divide-border-subtle">
-              <li className="p-3 hover:bg-surface-container transition-colors">
-                <div className="flex justify-between items-start mb-1">
-                  <span className="font-body-bold text-[12px] text-status-critical">CONSTRAINT VIOLATION</span>
-                  <span className="font-telemetry-md text-[10px] text-on-surface-variant">10:42 AM</span>
-                </div>
-                <p className="text-[12px] text-on-surface font-body-base leading-tight">
-                  Unauthorized access detected at Perimeter North-West Gate.
-                </p>
-              </li>
-              <li className="p-3 hover:bg-surface-container transition-colors">
-                <div className="flex justify-between items-start mb-1">
-                  <span className="font-body-bold text-[12px] text-status-warning">SENSOR ANOMALY</span>
-                  <span className="font-telemetry-md text-[10px] text-on-surface-variant">10:15 AM</span>
-                </div>
-                <p className="text-[12px] text-on-surface font-body-base leading-tight">
-                  Environmental temp drop in Sector 9.
-                </p>
-              </li>
+              {recentEvents.map((evt) => (
+                <li key={evt.id} className="p-3 hover:bg-surface-container transition-colors animate-in fade-in duration-200">
+                  <div className="flex justify-between items-start mb-1">
+                    <span
+                      className={`font-body-bold text-[12px] ${
+                        evt.critical ? 'text-status-critical font-extrabold' : 'text-status-warning'
+                      }`}
+                    >
+                      {evt.type}
+                    </span>
+                    <span className="font-telemetry-md text-[10px] text-on-surface-variant">{evt.time}</span>
+                  </div>
+                  <p className="text-[12px] text-on-surface font-body-base leading-tight">
+                    {evt.description}
+                  </p>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
