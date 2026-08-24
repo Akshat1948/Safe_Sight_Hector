@@ -287,8 +287,9 @@ export default function MapView({
     // Render Incident Markers
     if (incidents && incidents.length > 0) {
       incidents.forEach((inc) => {
-        const lat = inc.location?.latitude || (inc.location as any)?.[1] || 25.4358;
-        const lng = inc.location?.longitude || (inc.location as any)?.[0] || 81.8463;
+        const loc = inc.location as any;
+        const lat = loc?.coordinates?.[1] ?? loc?.latitude ?? loc?.[1] ?? 25.4358;
+        const lng = loc?.coordinates?.[0] ?? loc?.longitude ?? loc?.[0] ?? 81.8463;
         const isCritical = inc.severity === 'critical';
 
         const incIcon = L.divIcon({
