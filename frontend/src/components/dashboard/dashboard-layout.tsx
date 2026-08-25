@@ -74,13 +74,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     };
 
     const timer = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-    }, 10);
+      document.addEventListener('click', handleClickOutside);
+    }, 100);
     document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       clearTimeout(timer);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [searchExpanded]);
@@ -397,7 +397,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Rebuilt Clean Search Component */}
             <div
               ref={searchContainerRef}
-              className="relative h-8 flex items-center justify-end z-30"
+              className="relative h-8 flex items-center justify-end z-30 shrink-0"
               style={{
                 width: searchExpanded ? 250 : 32,
                 transition: 'width 400ms cubic-bezier(0.22, 1, 0.36, 1)',
@@ -451,7 +451,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       setSearchExpanded(true);
                       setTimeout(() => searchInputRef.current?.focus(), 60);
                     }}
