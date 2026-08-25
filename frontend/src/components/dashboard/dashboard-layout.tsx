@@ -71,6 +71,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // ⌘K or Ctrl+K to open search
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchExpanded(true);
+        setTimeout(() => searchInputRef.current?.focus(), 60);
+      }
       if (e.key === 'Escape' && searchExpanded) {
         setSearchExpanded(false);
         setSearchQuery('');
@@ -380,37 +386,37 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </div>
 
-          {/* Right: Actions, Status & Profile */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2.5 md:space-x-3 shrink-0">
-            {/* Premium Right-Anchored Smooth Expanding Search Component */}
+          {/* Right: Fluid Animated Search Bar, Status & Profile */}
+          <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3 shrink-0 h-full">
+            {/* Animated Expandable Search Bar Component (Takes up real layout space when expanded so it NEVER overlaps) */}
             <div
               ref={searchContainerRef}
-              className="relative h-8 w-8 shrink-0 flex items-center justify-end z-30 select-auto"
+              className={`relative h-8 flex items-center transition-all duration-300 ease-out ${
+                searchExpanded ? 'w-40 sm:w-52 md:w-60' : 'w-8'
+              }`}
             >
               <div
-                style={{
-                  transition:
-                    'width 700ms cubic-bezier(0.22, 1, 0.36, 1), border-color 450ms ease, box-shadow 450ms ease, background-color 450ms ease',
-                }}
-                className={`absolute right-0 top-0 h-8 flex items-center rounded-md border box-border motion-reduce:transition-none overflow-hidden ${
+                className={`w-full h-full flex items-center rounded-md border transition-all duration-300 overflow-hidden ${
                   searchExpanded
-                    ? 'w-52 sm:w-60 md:w-72 bg-surface border-primary shadow-md shadow-primary/10'
-                    : 'w-8 bg-surface-container-low border-outline-variant hover:border-primary/60 hover:bg-surface-container cursor-pointer'
+                    ? 'bg-surface border-primary ring-2 ring-primary/20 shadow-md shadow-primary/10'
+                    : 'bg-surface-container-low border-outline-variant hover:border-primary hover:bg-surface cursor-pointer'
                 }`}
               >
                 {searchExpanded ? (
                   <form
                     onSubmit={handleSearchSubmit}
-                    className="flex items-center w-full h-full min-w-0 pl-2.5 pr-0.5 animate-in fade-in duration-300"
-                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center w-full h-full min-w-0 px-2.5 gap-1.5 animate-in fade-in duration-200"
                   >
+                    <span className="material-symbols-outlined text-primary text-[18px] shrink-0 animate-pulse">
+                      search
+                    </span>
                     <input
                       ref={searchInputRef}
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search incidents, sectors..."
-                      className="flex-1 bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full min-w-0 select-text"
+                      placeholder="Search incidents, zones..."
+                      className="flex-1 bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full min-w-0"
                       autoFocus
                     />
 
@@ -422,8 +428,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           setSearchQuery('');
                           searchInputRef.current?.focus();
                         }}
-                        className="p-1 text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer"
-                        title="Clear search"
+                        className="p-0.5 text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer"
+                        title="Clear"
                       >
                         <span className="material-symbols-outlined text-[15px]">close</span>
                       </button>
@@ -431,10 +437,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
                     <button
                       type="submit"
-                      className="w-7 h-7 flex items-center justify-center shrink-0 text-primary hover:text-primary-container transition-colors cursor-pointer"
-                      title="Submit search"
+                      className="text-primary hover:text-primary-container p-0.5 shrink-0 transition-transform active:scale-95 cursor-pointer"
+                      title="Search"
                     >
-                      <span className="material-symbols-outlined text-[18px]">search</span>
+                      <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                     </button>
                   </form>
                 ) : (
@@ -444,10 +450,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       setSearchExpanded(true);
                       setTimeout(() => searchInputRef.current?.focus(), 60);
                     }}
-                    className="w-full h-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent"
-                    title="Open Search"
+                    className="w-full h-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent group"
+                    title="Search (⌘K)"
                   >
-                    <span className="material-symbols-outlined text-[18px]">search</span>
+                    <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">
+                      search
+                    </span>
                   </button>
                 )}
               </div>
