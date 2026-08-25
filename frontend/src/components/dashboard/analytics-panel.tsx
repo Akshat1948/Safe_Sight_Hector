@@ -5,13 +5,75 @@ import { IZone } from '@/shared/types';
 import { getZones, getIncidents, getAlerts } from '@/shared/api';
 import { useSocket } from '@/shared/hooks';
 
+type TrendRange = '1D' | '1W' | '1M';
+
+interface TrendDataPoint {
+  label: string;
+  value: number;
+  heightPercent: number;
+  isSpike?: boolean;
+  isCurrent?: boolean;
+}
+
+interface TrendDataset {
+  title: string;
+  subtitle: string;
+  yAxis: string[];
+  points: TrendDataPoint[];
+}
+
+const TREND_DATASETS: Record<TrendRange, TrendDataset> = {
+  '1D': {
+    title: 'Incident Trends (Last 24h)',
+    subtitle: 'Sector activity and density spikes over time',
+    yAxis: ['400', '300', '200', '100', '0'],
+    points: [
+      { label: '00:00', value: 80, heightPercent: 20 },
+      { label: '03:00', value: 140, heightPercent: 35 },
+      { label: '06:00', value: 100, heightPercent: 25 },
+      { label: '09:00', value: 200, heightPercent: 50 },
+      { label: '12:00', value: 320, heightPercent: 80, isSpike: true },
+      { label: '15:00', value: 240, heightPercent: 60 },
+      { label: '18:00', value: 160, heightPercent: 40 },
+      { label: '21:00', value: 110, heightPercent: 28 },
+      { label: 'NOW', value: 180, heightPercent: 45, isCurrent: true },
+    ],
+  },
+  '1W': {
+    title: 'Incident Trends (Last 7 Days)',
+    subtitle: 'Daily sector activity and density spikes',
+    yAxis: ['400', '300', '200', '100', '0'],
+    points: [
+      { label: 'Mon', value: 145, heightPercent: 36 },
+      { label: 'Tue', value: 190, heightPercent: 48 },
+      { label: 'Wed', value: 125, heightPercent: 31 },
+      { label: 'Thu', value: 230, heightPercent: 58 },
+      { label: 'Fri', value: 310, heightPercent: 78 },
+      { label: 'Sat', value: 380, heightPercent: 95, isSpike: true },
+      { label: 'Sun', value: 215, heightPercent: 54, isCurrent: true },
+    ],
+  },
+  '1M': {
+    title: 'Incident Trends (Last 30 Days)',
+    subtitle: 'Weekly sector activity and density spikes',
+    yAxis: ['1.6k', '1.2k', '800', '400', '0'],
+    points: [
+      { label: 'Week 1', value: 780, heightPercent: 49 },
+      { label: 'Week 2', value: 1140, heightPercent: 71 },
+      { label: 'Week 3', value: 1490, heightPercent: 93, isSpike: true },
+      { label: 'Week 4', value: 920, heightPercent: 58, isCurrent: true },
+    ],
+  },
+};
+
 interface AnalyticsPanelProps {
   siteId?: string | null;
 }
 
 export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
   const [zones, setZones] = useState<IZone[]>([]);
-  const [timeRange, setTimeRange] = useState<'1D' | '1W' | '1M'>('1D');
+  const [trendRange, setTrendRange] = useState<TrendRange>('1D');
+  const currentTrendData = TREND_DATASETS[trendRange] || TREND_DATASETS['1D'];
   const [stats, setStats] = useState({
     totalAlerts: 3492,
     activeIncidents: 12,
@@ -238,16 +300,16 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
         <div className="col-span-12 lg:col-span-8 hud-panel rounded-lg p-4 flex flex-col min-h-[380px]">
           <div className="flex justify-between items-center border-b border-border-subtle pb-3 mb-4">
             <div>
-              <h2 className="font-body-bold text-body-bold text-on-surface">Incident Trends (Last 24h)</h2>
-              <p className="text-xs text-on-surface-variant font-telemetry-md">Sector activity and density spikes over time</p>
+              <h2 className="font-body-bold text-body-bold text-on-surface">{currentTrendData.title}</h2>
+              <p className="text-xs text-on-surface-variant font-telemetry-md">{currentTrendData.subtitle}</p>
             </div>
             <div className="flex space-x-1">
               {(['1D', '1W', '1M'] as const).map((range) => (
                 <button
                   key={range}
-                  onClick={() => setTimeRange(range)}
+                  onClick={() => setTrendRange(range)}
                   className={`px-2.5 py-1 text-[10px] font-label-caps rounded transition-colors ${
-                    timeRange === range
+                    trendRange === range
                       ? 'bg-surface-container text-primary font-bold border border-border-subtle'
                       : 'text-on-surface-variant hover:text-on-surface'
                   }`}
@@ -259,72 +321,73 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
           </div>
 
           {/* Chart Area with Y-axis & Bars */}
-          <div className="flex-1 w-full bg-surface-container-lowest rounded border border-border-subtle flex items-end justify-between p-4 relative overflow-hidden group min-h-[240px]">
+          <div className="flex-1 w-full bg-surface-container-lowest rounded border border-border-subtle flex flex-col justify-between p-4 relative overflow-hidden group min-h-[240px]">
             {/* Y Axis labels */}
             <div className="absolute left-4 top-4 bottom-8 flex flex-col justify-between text-[10px] font-telemetry-md text-on-surface-variant select-none">
-              <span>400</span>
-              <span>300</span>
-              <span>200</span>
-              <span>100</span>
-              <span>0</span>
+              {currentTrendData.yAxis.map((val, idx) => (
+                <span key={idx}>{val}</span>
+              ))}
             </div>
 
             {/* Grid Lines */}
             <div className="absolute left-12 right-4 top-4 bottom-8 flex flex-col justify-between pointer-events-none">
-              <div className="w-full h-px bg-border-subtle/50"></div>
-              <div className="w-full h-px bg-border-subtle/50"></div>
-              <div className="w-full h-px bg-border-subtle/50"></div>
-              <div className="w-full h-px bg-border-subtle/50"></div>
-              <div className="w-full h-px bg-border-subtle/50"></div>
+              {currentTrendData.yAxis.map((_, idx) => (
+                <div key={idx} className="w-full h-px bg-border-subtle/50"></div>
+              ))}
             </div>
 
             {/* Simulated Bar Chart with Telemetry values */}
-            <div className="w-full h-full pl-10 pt-2 flex items-end justify-around space-x-2 z-10">
-              <div className="w-full flex flex-col items-center gap-1 group/bar h-full justify-end">
-                <div className="w-full bg-primary/30 hover:bg-primary transition-all duration-200 h-[20%] rounded-t-sm"></div>
-                <span className="text-[9px] font-telemetry-md text-on-surface-variant opacity-0 group-hover/bar:opacity-100">80</span>
-              </div>
-              <div className="w-full flex flex-col items-center gap-1 group/bar h-full justify-end">
-                <div className="w-full bg-primary/30 hover:bg-primary transition-all duration-200 h-[35%] rounded-t-sm"></div>
-                <span className="text-[9px] font-telemetry-md text-on-surface-variant opacity-0 group-hover/bar:opacity-100">140</span>
-              </div>
-              <div className="w-full flex flex-col items-center gap-1 group/bar h-full justify-end">
-                <div className="w-full bg-primary/30 hover:bg-primary transition-all duration-200 h-[25%] rounded-t-sm"></div>
-                <span className="text-[9px] font-telemetry-md text-on-surface-variant opacity-0 group-hover/bar:opacity-100">100</span>
-              </div>
-              <div className="w-full flex flex-col items-center gap-1 group/bar h-full justify-end">
-                <div className="w-full bg-primary/30 hover:bg-primary transition-all duration-200 h-[50%] rounded-t-sm"></div>
-                <span className="text-[9px] font-telemetry-md text-on-surface-variant opacity-0 group-hover/bar:opacity-100">200</span>
-              </div>
-              {/* Spike Bar */}
-              <div className="w-full flex flex-col items-center gap-1 group/bar h-full justify-end">
-                <div className="w-full bg-status-critical/80 hover:bg-status-critical transition-all duration-200 h-[80%] rounded-t-sm shadow-sm shadow-status-critical/30 relative">
-                  <span className="absolute -top-5 left-1/2 -translate-x-1/2 px-1 py-0.5 bg-status-critical text-white text-[8px] font-label-caps rounded">SPIKE</span>
+            <div className="w-full flex-1 pl-10 pt-4 pb-1 flex items-end justify-around space-x-2 z-10">
+              {currentTrendData.points.map((point) => (
+                <div key={point.label} className="flex-1 flex flex-col items-center gap-1 group/bar h-full justify-end">
+                  <div
+                    className={`w-full rounded-t-sm transition-all duration-300 ease-out relative ${
+                      point.isSpike
+                        ? 'bg-status-critical/80 hover:bg-status-critical shadow-sm shadow-status-critical/30'
+                        : point.isCurrent
+                        ? 'bg-primary/60 hover:bg-primary border-t-2 border-primary'
+                        : 'bg-primary/30 hover:bg-primary'
+                    }`}
+                    style={{ height: `${point.heightPercent}%` }}
+                  >
+                    {point.isSpike && (
+                      <span className="absolute -top-5 left-1/2 -translate-x-1/2 px-1 py-0.5 bg-status-critical text-white text-[8px] font-label-caps rounded whitespace-nowrap z-20">
+                        SPIKE
+                      </span>
+                    )}
+                  </div>
+                  <span
+                    className={`text-[9px] font-telemetry-md transition-opacity duration-200 ${
+                      point.isSpike
+                        ? 'text-status-critical font-bold'
+                        : point.isCurrent
+                        ? 'text-primary font-bold'
+                        : 'text-on-surface-variant opacity-0 group-hover/bar:opacity-100'
+                    }`}
+                  >
+                    {point.value}
+                  </span>
                 </div>
-                <span className="text-[9px] font-telemetry-md text-status-critical font-bold">320</span>
-              </div>
-              <div className="w-full flex flex-col items-center gap-1 group/bar h-full justify-end">
-                <div className="w-full bg-primary/30 hover:bg-primary transition-all duration-200 h-[60%] rounded-t-sm"></div>
-                <span className="text-[9px] font-telemetry-md text-on-surface-variant opacity-0 group-hover/bar:opacity-100">240</span>
-              </div>
-              <div className="w-full flex flex-col items-center gap-1 group/bar h-full justify-end">
-                <div className="w-full bg-primary/30 hover:bg-primary transition-all duration-200 h-[40%] rounded-t-sm"></div>
-                <span className="text-[9px] font-telemetry-md text-on-surface-variant opacity-0 group-hover/bar:opacity-100">160</span>
-              </div>
-              {/* Current / NOW Bar */}
-              <div className="w-full flex flex-col items-center gap-1 group/bar h-full justify-end">
-                <div className="w-full bg-primary/60 hover:bg-primary transition-all duration-200 h-[45%] rounded-t-sm border-t-2 border-primary"></div>
-                <span className="text-[9px] font-telemetry-md text-primary font-bold">NOW</span>
-              </div>
+              ))}
             </div>
 
             {/* X Axis Labels */}
-            <div className="absolute left-14 right-4 bottom-2 flex justify-between text-[10px] font-telemetry-md text-on-surface-variant select-none">
-              <span>00:00</span>
-              <span>06:00</span>
-              <span>12:00</span>
-              <span>18:00</span>
-              <span>NOW</span>
+            <div className="w-full pl-10 pt-1 flex items-center justify-around space-x-2 select-none z-10">
+              {currentTrendData.points.map((point) => (
+                <div key={point.label} className="flex-1 text-center">
+                  <span
+                    className={`text-[10px] font-telemetry-md truncate block ${
+                      point.isCurrent
+                        ? 'text-primary font-bold'
+                        : point.isSpike
+                        ? 'text-status-critical font-bold'
+                        : 'text-on-surface-variant'
+                    }`}
+                  >
+                    {point.label}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
