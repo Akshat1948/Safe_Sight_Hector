@@ -40,62 +40,50 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const handleSearchToggle = () => {
-    setSearchExpanded((prev) => {
-      const next = !prev;
-      if (next) {
-        setTimeout(() => {
-          searchInputRef.current?.focus();
-        }, 50);
-      }
-      return next;
-    });
+    if (!searchExpanded) {
+      setSearchExpanded(true);
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 150);
+    } else if (searchQuery.trim()) {
+      router.push(`/dashboard/incidents?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchExpanded(false);
+    } else {
+      setSearchExpanded(false);
+    }
+  };
+
+  const closeSearch = () => {
+    setSearchExpanded(false);
+    setSearchQuery('');
   };
 
   useEffect(() => {
-    if (!searchExpanded) return;
-
     const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (!target || !document.body.contains(target)) return;
-
       if (
         searchContainerRef.current &&
-        !searchContainerRef.current.contains(target)
+        !searchContainerRef.current.contains(e.target as Node)
       ) {
-        setSearchExpanded(false);
+        if (!searchQuery.trim()) {
+          setSearchExpanded(false);
+        }
       }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && searchExpanded) {
         setSearchExpanded(false);
         setSearchQuery('');
       }
     };
 
-    const timer = setTimeout(() => {
-      document.addEventListener('click', handleClickOutside);
-    }, 100);
+    document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
-
     return () => {
-      clearTimeout(timer);
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [searchExpanded]);
-
-  useEffect(() => {
-    const handleGlobalShortcut = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setSearchExpanded(true);
-        setTimeout(() => searchInputRef.current?.focus(), 60);
-      }
-    };
-    document.addEventListener('keydown', handleGlobalShortcut);
-    return () => document.removeEventListener('keydown', handleGlobalShortcut);
-  }, []);
+  }, [searchExpanded, searchQuery]);
 
   const handleEmergencyLockdown = () => {
     const confirm = window.confirm(
@@ -393,27 +381,28 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           {/* Right: Actions, Status & Profile */}
-          <div className="flex items-center space-x-2 sm:space-x-2.5 md:space-x-3 shrink-0 h-full">
-            {/* Rebuilt Clean Search Component */}
+          <div className="flex items-center space-x-1.5 sm:space-x-2.5 md:space-x-3 shrink-0">
+            {/* Premium Right-Anchored Smooth Expanding Search Component */}
             <div
               ref={searchContainerRef}
-              className="relative h-8 flex items-center justify-end z-30 shrink-0"
-              style={{
-                width: searchExpanded ? 250 : 32,
-                transition: 'width 400ms cubic-bezier(0.22, 1, 0.36, 1)',
-              }}
+              className="relative h-8 w-8 shrink-0 flex items-center justify-end z-30 select-auto"
             >
               <div
-                className={`w-full h-full flex items-center rounded-md border box-border overflow-hidden transition-colors duration-200 ${
+                style={{
+                  transition:
+                    'width 700ms cubic-bezier(0.22, 1, 0.36, 1), border-color 450ms ease, box-shadow 450ms ease, background-color 450ms ease',
+                }}
+                className={`absolute right-0 top-0 h-8 flex items-center rounded-md border box-border motion-reduce:transition-none overflow-hidden ${
                   searchExpanded
-                    ? 'bg-surface border-primary ring-2 ring-primary/20 shadow-md shadow-primary/10'
-                    : 'bg-surface-container-low border-outline-variant hover:border-primary hover:bg-surface'
+                    ? 'w-52 sm:w-60 md:w-72 bg-surface border-primary shadow-md shadow-primary/10'
+                    : 'w-8 bg-surface-container-low border-outline-variant hover:border-primary/60 hover:bg-surface-container cursor-pointer'
                 }`}
               >
                 {searchExpanded ? (
                   <form
                     onSubmit={handleSearchSubmit}
-                    className="flex items-center w-full h-full min-w-0 pl-2.5 pr-1 gap-1"
+                    className="flex items-center w-full h-full min-w-0 pl-2.5 pr-0.5 animate-in fade-in duration-300"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <input
                       ref={searchInputRef}
@@ -421,7 +410,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search incidents, sectors..."
-                      className="flex-1 bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full min-w-0"
+                      className="flex-1 bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full min-w-0 select-text"
                       autoFocus
                     />
 
@@ -433,7 +422,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           setSearchQuery('');
                           searchInputRef.current?.focus();
                         }}
-                        className="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer"
+                        className="p-1 text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer"
                         title="Clear search"
                       >
                         <span className="material-symbols-outlined text-[15px]">close</span>
@@ -442,8 +431,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
                     <button
                       type="submit"
-                      className="w-7 h-7 flex items-center justify-center text-primary hover:text-primary-container transition-colors shrink-0 cursor-pointer"
-                      title="Search"
+                      className="w-7 h-7 flex items-center justify-center shrink-0 text-primary hover:text-primary-container transition-colors cursor-pointer"
+                      title="Submit search"
                     >
                       <span className="material-symbols-outlined text-[18px]">search</span>
                     </button>
@@ -451,19 +440,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 ) : (
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
+                    onClick={() => {
                       setSearchExpanded(true);
                       setTimeout(() => searchInputRef.current?.focus(), 60);
                     }}
                     className="w-full h-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent"
-                    title="Search (⌘K)"
-                    aria-label="Open search"
+                    title="Open Search"
                   >
-                    <span className="material-symbols-outlined text-[18px] leading-none">
-                      search
-                    </span>
+                    <span className="material-symbols-outlined text-[18px]">search</span>
                   </button>
                 )}
               </div>
