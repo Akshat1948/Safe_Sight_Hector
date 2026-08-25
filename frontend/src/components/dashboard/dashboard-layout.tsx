@@ -52,6 +52,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // ⌘K or Ctrl+K to open search
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchExpanded(true);
+        setTimeout(() => searchInputRef.current?.focus(), 60);
+      }
       if (e.key === 'Escape' && searchExpanded) {
         setSearchExpanded(false);
         setSearchQuery('');
@@ -78,7 +84,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="font-body-base min-h-screen h-screen overflow-hidden flex bg-background text-text-main antialiased select-none">
-      {/* Mobile Drawer Overlay */}
+      {/* Mobile Drawer Backdrop */}
       {mobileMenuOpen && (
         <div
           onClick={() => setMobileMenuOpen(false)}
@@ -118,7 +124,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Close drawer button on mobile */}
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="md:hidden p-1.5 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container"
+            className="md:hidden p-1.5 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
@@ -316,28 +322,28 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </aside>
 
-      {/* Main Content Area & TopNavBar (Full width on mobile, offset on desktop) */}
+      {/* Main Content Area & TopNavBar */}
       <div className="flex flex-col flex-1 h-full min-w-0 overflow-hidden relative md:ml-64">
         {/* TopNavBar */}
-        <nav className="h-topbar-height bg-surface border-b border-border-subtle flex justify-between items-center px-3 sm:px-4 md:px-6 z-40 shrink-0 shadow-sm">
-          {/* Left: Mobile Hamburger + Brand + Desktop Nav Tabs */}
-          <div className="flex items-center space-x-3 lg:space-x-6 h-full min-w-0">
+        <nav className="h-topbar-height bg-surface border-b border-border-subtle flex justify-between items-center px-3 sm:px-4 md:px-6 z-40 shrink-0 shadow-sm gap-2">
+          {/* Left: Hamburger + Brand + Tabs */}
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-5 h-full min-w-0 flex-1 overflow-hidden">
             {/* Hamburger Button (Mobile only) */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-1.5 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container transition-colors flex items-center justify-center"
+              className="md:hidden p-1.5 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container transition-colors flex items-center justify-center shrink-0"
               title="Open Menu"
             >
               <span className="material-symbols-outlined text-[24px]">menu</span>
             </button>
 
             {/* Brand Title */}
-            <span className="font-headline-md text-sm sm:text-base md:text-headline-md font-extrabold text-on-surface tracking-tighter whitespace-nowrap flex items-center leading-none">
+            <span className="font-headline-md text-sm sm:text-base md:text-headline-md font-extrabold text-on-surface tracking-tighter whitespace-nowrap flex items-center leading-none shrink-0">
               SafeSight HECTOR
             </span>
 
-            {/* Top Navigation Tabs (Vertically Centered with Active Bottom Indicator) */}
-            <div className="hidden lg:flex items-center space-x-1.5 xl:space-x-3 h-full shrink-0">
+            {/* Top Navigation Tabs */}
+            <div className="hidden xl:flex items-center space-x-1 h-full shrink-0 overflow-x-auto scrollbar-hide">
               {TOP_NAV_TABS.map((tab) => {
                 const isActive =
                   tab.href === '/dashboard'
@@ -361,37 +367,37 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </div>
 
-          {/* Right: Actions, Status & Profile */}
-          <div className="flex items-center space-x-2 sm:space-x-2.5 md:space-x-3 shrink-0 h-full">
-            {/* Premium Right-Anchored Smooth Expanding Search Component */}
+          {/* Right: Fluid Animated Search Bar, Status & Profile */}
+          <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3 shrink-0 h-full">
+            {/* Animated Expandable Search Bar Component (Takes up real layout space when expanded so it NEVER overlaps) */}
             <div
               ref={searchContainerRef}
-              className="relative h-8 w-8 shrink-0 flex items-center justify-end z-30 select-auto"
+              className={`relative h-8 flex items-center transition-all duration-300 ease-out ${
+                searchExpanded ? 'w-40 sm:w-52 md:w-60' : 'w-8'
+              }`}
             >
               <div
-                style={{
-                  transition:
-                    'width 400ms cubic-bezier(0.22, 1, 0.36, 1), border-color 300ms ease, box-shadow 300ms ease, background-color 300ms ease',
-                }}
-                className={`absolute right-0 top-0 h-8 flex items-center rounded-md border box-border motion-reduce:transition-none overflow-hidden ${
+                className={`w-full h-full flex items-center rounded-md border transition-all duration-300 overflow-hidden ${
                   searchExpanded
-                    ? 'w-36 sm:w-40 md:w-44 bg-surface border-primary shadow-md shadow-primary/10'
-                    : 'w-8 bg-surface-container-low border-outline-variant hover:border-primary/60 hover:bg-surface-container cursor-pointer'
+                    ? 'bg-surface border-primary ring-2 ring-primary/20 shadow-md shadow-primary/10'
+                    : 'bg-surface-container-low border-outline-variant hover:border-primary hover:bg-surface cursor-pointer'
                 }`}
               >
                 {searchExpanded ? (
                   <form
                     onSubmit={handleSearchSubmit}
-                    className="flex items-center w-full h-full min-w-0 pl-2.5 pr-0.5 animate-in fade-in duration-300"
-                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center w-full h-full min-w-0 px-2.5 gap-1.5 animate-in fade-in duration-200"
                   >
+                    <span className="material-symbols-outlined text-primary text-[18px] shrink-0 animate-pulse">
+                      search
+                    </span>
                     <input
                       ref={searchInputRef}
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search incidents..."
-                      className="flex-1 bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full min-w-0 select-text"
+                      placeholder="Search incidents, zones..."
+                      className="flex-1 bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full min-w-0"
                       autoFocus
                     />
 
@@ -403,8 +409,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           setSearchQuery('');
                           searchInputRef.current?.focus();
                         }}
-                        className="p-1 text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer"
-                        title="Clear search"
+                        className="p-0.5 text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer"
+                        title="Clear"
                       >
                         <span className="material-symbols-outlined text-[15px]">close</span>
                       </button>
@@ -412,10 +418,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
                     <button
                       type="submit"
-                      className="w-7 h-7 flex items-center justify-center shrink-0 text-primary hover:text-primary-container transition-colors cursor-pointer"
-                      title="Submit search"
+                      className="text-primary hover:text-primary-container p-0.5 shrink-0 transition-transform active:scale-95 cursor-pointer"
+                      title="Search"
                     >
-                      <span className="material-symbols-outlined text-[18px]">search</span>
+                      <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                     </button>
                   </form>
                 ) : (
@@ -425,10 +431,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       setSearchExpanded(true);
                       setTimeout(() => searchInputRef.current?.focus(), 60);
                     }}
-                    className="w-full h-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent"
-                    title="Open Search"
+                    className="w-full h-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent group"
+                    title="Search (⌘K)"
                   >
-                    <span className="material-symbols-outlined text-[18px]">search</span>
+                    <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">
+                      search
+                    </span>
                   </button>
                 )}
               </div>
@@ -437,7 +445,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* System Status Pill */}
             <button
               onClick={() => router.push('/dashboard')}
-              className="hidden sm:flex items-center h-8 border border-outline-variant text-on-surface-variant px-3 rounded hover:text-primary hover:border-primary transition-colors text-[11px] font-body-bold bg-surface cursor-pointer whitespace-nowrap"
+              className="hidden sm:flex items-center h-8 border border-outline-variant text-on-surface-variant px-2.5 rounded hover:text-primary hover:border-primary transition-colors text-[11px] font-body-bold bg-surface cursor-pointer whitespace-nowrap shrink-0"
             >
               <span className="w-2 h-2 rounded-full bg-status-nominal mr-1.5 animate-pulse"></span>
               <span className="hidden md:inline">System </span>Status
@@ -446,7 +454,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Emergency Lockdown Button */}
             <button
               onClick={handleEmergencyLockdown}
-              className={`h-8 flex items-center px-2.5 sm:px-3.5 rounded transition-all text-xs font-body-bold shadow-md cursor-pointer whitespace-nowrap ${
+              className={`h-8 flex items-center px-2.5 sm:px-3 rounded transition-all text-xs font-body-bold shadow-md cursor-pointer whitespace-nowrap shrink-0 ${
                 lockdownActive
                   ? 'bg-status-critical text-white animate-pulse shadow-status-critical/30'
                   : 'bg-error text-on-error hover:bg-error/90 shadow-error/20'
@@ -456,7 +464,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </button>
 
             {/* Profile Avatar with Dropdown */}
-            <div className="relative flex items-center h-8">
+            <div className="relative flex items-center h-8 shrink-0">
               <button
                 onClick={() => setShowProfileMenu((prev) => !prev)}
                 className="w-8 h-8 rounded-full border border-outline-variant overflow-hidden flex items-center justify-center bg-primary text-white font-bold text-xs hover:ring-2 hover:ring-primary/40 transition-all cursor-pointer"
@@ -465,7 +473,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </button>
 
               {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-surface rounded-lg shadow-xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-2 top-8 w-48 bg-surface rounded-lg shadow-xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-4 py-2 border-b border-border-subtle">
                     <p className="font-body-bold text-xs text-on-surface">
                       {user?.name || 'Site Commander'}
