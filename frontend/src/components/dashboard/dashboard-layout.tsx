@@ -394,87 +394,77 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Right: Actions, Status & Profile */}
           <div className="flex items-center space-x-2 sm:space-x-2.5 md:space-x-3 shrink-0 h-full">
-            {/* Premium Right-Anchored Smooth Expanding Search Component */}
+            {/* Rebuilt Clean Search Component */}
             <div
               ref={searchContainerRef}
-              className="relative h-8 w-8 shrink-0 flex items-center justify-end z-30"
+              className="relative h-8 flex items-center justify-end z-30"
+              style={{
+                width: searchExpanded ? 250 : 32,
+                transition: 'width 400ms cubic-bezier(0.22, 1, 0.36, 1)',
+              }}
             >
-              <form
-                onSubmit={handleSearchSubmit}
-                style={{
-                  width: searchExpanded ? 240 : 32,
-                  transition:
-                    'width 400ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 300ms ease, border-color 300ms ease, background-color 300ms ease',
-                }}
-                className={`absolute right-0 top-0 h-8 flex items-center rounded-md border box-border motion-reduce:transition-none overflow-hidden ${
+              <div
+                className={`w-full h-full flex items-center rounded-md border box-border overflow-hidden transition-colors duration-200 ${
                   searchExpanded
                     ? 'bg-surface border-primary ring-2 ring-primary/20 shadow-md shadow-primary/10'
-                    : 'bg-surface-container-low border-outline-variant hover:border-primary hover:bg-surface cursor-pointer'
+                    : 'bg-surface-container-low border-outline-variant hover:border-primary hover:bg-surface'
                 }`}
-                onClick={() => {
-                  if (!searchExpanded) {
-                    handleSearchToggle();
-                  }
-                }}
               >
-                {/* Search Input Container */}
-                <div
-                  className={`flex-1 flex items-center h-full min-w-0 pl-2.5 pr-1 transition-all duration-300 ${
-                    searchExpanded
-                      ? 'opacity-100 translate-x-0 pointer-events-auto delay-75'
-                      : 'opacity-0 translate-x-3 pointer-events-none'
-                  }`}
-                >
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search incidents, sectors..."
-                    className="w-full bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full select-text"
-                    tabIndex={searchExpanded ? 0 : -1}
-                  />
-
-                  {/* Clear Button */}
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSearchQuery('');
-                        searchInputRef.current?.focus();
-                      }}
-                      className="p-1 text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer"
-                      title="Clear search"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">close</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* Right-Anchored Always-Clickable Search Magnifying Glass Icon Button */}
-                <button
-                  type={searchExpanded ? 'submit' : 'button'}
-                  onClick={(e) => {
-                    if (!searchExpanded) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleSearchToggle();
-                    }
-                  }}
-                  className="w-8 h-8 flex items-center justify-center shrink-0 p-0 text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent"
-                  title={searchExpanded ? 'Submit search' : 'Search (⌘K)'}
-                  aria-label="Search"
-                >
-                  <span
-                    className={`material-symbols-outlined text-[18px] transition-colors leading-none ${
-                      searchExpanded ? 'text-primary' : 'text-on-surface-variant'
-                    }`}
+                {searchExpanded ? (
+                  <form
+                    onSubmit={handleSearchSubmit}
+                    className="flex items-center w-full h-full min-w-0 pl-2.5 pr-1 gap-1"
                   >
-                    search
-                  </span>
-                </button>
-              </form>
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search incidents, sectors..."
+                      className="flex-1 bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full min-w-0"
+                      autoFocus
+                    />
+
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSearchQuery('');
+                          searchInputRef.current?.focus();
+                        }}
+                        className="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer"
+                        title="Clear search"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">close</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="submit"
+                      className="w-7 h-7 flex items-center justify-center text-primary hover:text-primary-container transition-colors shrink-0 cursor-pointer"
+                      title="Search"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">search</span>
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchExpanded(true);
+                      setTimeout(() => searchInputRef.current?.focus(), 60);
+                    }}
+                    className="w-full h-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent"
+                    title="Search (⌘K)"
+                    aria-label="Open search"
+                  >
+                    <span className="material-symbols-outlined text-[18px] leading-none">
+                      search
+                    </span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* System Status Pill */}
