@@ -22,7 +22,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased bg-[#f7f9fb] text-[#191c1e] min-h-screen font-body-base">
+      <body className="antialiased min-h-screen font-body-base">
         <AuthProvider>
           <LanguageProvider>{children}</LanguageProvider>
         </AuthProvider>
