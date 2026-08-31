@@ -88,16 +88,17 @@ const DEFAULT_INCIDENTS: IIncident[] = [
 
 export default function IncidentsPage() {
   const { user } = useAuth();
+  const siteId = user?.siteId || 'demo-site-prayagraj-01';
   const [incidents, setIncidents] = useState<IIncident[]>(DEFAULT_INCIDENTS);
   const [selectedIncident, setSelectedIncident] = useState<IIncident>(DEFAULT_INCIDENTS[0]);
   const [severityFilter, setSeverityFilter] = useState<string>('All Severities');
   const [sectorFilter, setSectorFilter] = useState<string>('All Sectors');
-  const { on, off } = useSocket(user?.siteId || null);
+  const { on, off } = useSocket(siteId);
 
   useEffect(() => {
-    if (!user?.siteId) return;
+    if (!siteId) return;
 
-    getIncidents(user.siteId).then((res) => {
+    getIncidents(siteId).then((res) => {
       if (res.success && res.data?.incidents && res.data.incidents.length > 0) {
         setIncidents((prev) => {
           const apiIds = new Set(res.data!.incidents.map((i) => i.id));
@@ -107,7 +108,7 @@ export default function IncidentsPage() {
         setSelectedIncident(res.data.incidents[0]);
       }
     });
-  }, [user?.siteId]);
+  }, [siteId]);
 
   useEffect(() => {
     const handleUpdate = (data: unknown) => {
@@ -158,8 +159,6 @@ export default function IncidentsPage() {
       return true;
     });
   }, [incidents, severityFilter]);
-
-  if (!user) return null;
 
   return (
     <RoleGuard allowedRoles={['manager', 'admin', 'responder']}>

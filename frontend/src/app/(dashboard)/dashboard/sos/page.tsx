@@ -16,14 +16,15 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function SosPage() {
   const { user } = useAuth();
+  const siteId = user?.siteId || 'demo-site-prayagraj-01';
   const [requests, setRequests] = useState<ISosRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const { on, off } = useSocket(user?.siteId || null);
+  const { on, off } = useSocket(siteId);
 
   useEffect(() => {
-    if (!user?.siteId) return;
+    if (!siteId) return;
 
-    getSosRequests(user.siteId)
+    getSosRequests(siteId)
       .then((res) => {
         if (res.success && res.data) {
           setRequests(res.data);
@@ -32,7 +33,7 @@ export default function SosPage() {
           setRequests([
             {
               id: 'SOS-2026-001',
-              siteId: user.siteId,
+              siteId: siteId,
               location: { type: 'Point', coordinates: [81.8463, 25.4358] },
               message: 'Elderly person collapsed near Sangam River Ghat Steps. High surge pressure detected.',
               contactPhone: '+919876500001',
@@ -43,7 +44,7 @@ export default function SosPage() {
             },
             {
               id: 'SOS-2026-002',
-              siteId: user.siteId,
+              siteId: siteId,
               location: { type: 'Point', coordinates: [81.8425, 25.4335] },
               message: 'Child separated from family near Main Entry Gate 4. Requesting security assistance.',
               contactPhone: '+919876500002',
@@ -59,7 +60,7 @@ export default function SosPage() {
         setRequests([]);
       })
       .finally(() => setLoading(false));
-  }, [user?.siteId]);
+  }, [siteId]);
 
   useEffect(() => {
     const handleNewSos = (data: unknown) => {
@@ -87,8 +88,6 @@ export default function SosPage() {
       );
     }
   };
-
-  if (!user) return null;
 
   return (
     <RoleGuard allowedRoles={['manager', 'admin', 'responder']}>

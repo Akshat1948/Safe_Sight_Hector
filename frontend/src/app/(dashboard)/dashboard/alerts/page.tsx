@@ -10,8 +10,7 @@ import { useAuth } from '@/shared/hooks';
 export default function AlertsPage() {
   const { user } = useAuth();
   const [showComposer, setShowComposer] = useState(true);
-
-  if (!user) return null;
+  const siteId = user?.siteId || 'demo-site-prayagraj-01';
 
   return (
     <RoleGuard allowedRoles={['manager', 'admin', 'responder']}>
@@ -40,12 +39,12 @@ export default function AlertsPage() {
           </div>
 
           {/* Active Alert Banner */}
-          <AlertBanner siteId={user.siteId} />
+          <AlertBanner siteId={siteId} />
 
           {/* AI Multilingual Alert Composer */}
           {showComposer && (
             <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-              <AlertComposer siteId={user.siteId} />
+              <AlertComposer siteId={siteId} />
             </div>
           )}
         </div>

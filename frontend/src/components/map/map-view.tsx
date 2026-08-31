@@ -170,6 +170,13 @@ export default function MapView({
     };
   }, [isMounted]);
 
+  // Update map view if center or zoom changes
+  useEffect(() => {
+    if (mapInstanceRef.current && center) {
+      mapInstanceRef.current.setView(center, zoom || 15);
+    }
+  }, [center, zoom]);
+
   // Update Layers reactively when zones/incidents change
   useEffect(() => {
     const L = leafletRef.current;

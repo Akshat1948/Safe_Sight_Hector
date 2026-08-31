@@ -348,7 +348,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </span>
 
             {/* Top Navigation Tabs */}
-            <div className="hidden xl:flex items-center space-x-1 h-full shrink-0 overflow-x-auto scrollbar-hide">
+            <div className="hidden lg:flex items-center space-x-1 h-full shrink-0 overflow-x-auto scrollbar-hide">
               {TOP_NAV_TABS.map((tab) => {
                 const isActive =
                   tab.href === '/dashboard'
@@ -359,7 +359,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Link
                     key={tab.href}
                     href={tab.href}
-                    className={`relative flex items-center h-full px-2.5 font-label-caps text-label-caps uppercase whitespace-nowrap transition-colors duration-150 ${
+                    className={`relative flex items-center h-full px-2 sm:px-2.5 font-label-caps text-[11px] lg:text-label-caps uppercase whitespace-nowrap transition-colors duration-150 cursor-pointer ${
                       isActive
                         ? 'text-primary font-bold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary'
                         : 'text-on-surface-variant hover:text-on-surface hover:text-primary/90'

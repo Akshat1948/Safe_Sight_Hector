@@ -1,9 +1,9 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { IUser } from '@/shared/types';
+import { IUser, UserRole } from '@/shared/types';
 import { login as apiLogin, getMe, logout as apiLogout } from '@/shared/api/auth.api';
-import { getAccessToken } from '@/shared/api/client';
+import { getAccessToken, getCachedUser, clearTokens } from '@/shared/api/client';
 
 interface AuthContextType {
   user: IUser | null;
@@ -12,6 +12,15 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; user?: IUser; error?: string }>;
   logout: () => void;
 }
+
+const DEFAULT_DEMO_USER: IUser = {
+  id: 'demo-commander-01',
+  email: 'manager@safesight.local',
+  name: 'Site Commander',
+  role: UserRole.MANAGER,
+  siteId: 'demo-site-prayagraj-01',
+  phone: '+919876543210',
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -26,10 +35,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .then((res) => {
           if (res.success && res.data) {
             setUser(res.data);
+          } else {
+            const cached = getCachedUser<IUser>();
+            setUser(cached || DEFAULT_DEMO_USER);
           }
+        })
+        .catch(() => {
+          const cached = getCachedUser<IUser>();
+          setUser(cached || DEFAULT_DEMO_USER);
         })
         .finally(() => setLoading(false));
     } else {
+      const cached = getCachedUser<IUser>();
+      setUser(cached || DEFAULT_DEMO_USER);
       setLoading(false);
     }
   }, []);
@@ -45,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     apiLogout();
+    clearTokens();
     setUser(null);
     window.location.href = '/login';
   }, []);
@@ -69,3 +88,4 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
+

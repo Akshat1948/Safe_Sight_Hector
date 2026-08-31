@@ -11,14 +11,15 @@ import { getIncidents, updateIncidentStatus } from '@/shared/api';
 
 export default function ResponderPage() {
   const { user, logout } = useAuth();
+  const siteId = user?.siteId || 'demo-site-prayagraj-01';
   const [incidents, setIncidents] = useState<IIncident[]>([]);
   const [selectedIncident, setSelectedIncident] = useState<IIncident | null>(null);
-  const { on, off } = useSocket(user?.siteId || null);
+  const { on, off } = useSocket(siteId);
 
   useEffect(() => {
-    if (!user?.siteId) return;
+    if (!siteId) return;
 
-    getIncidents(user.siteId).then((res) => {
+    getIncidents(siteId).then((res) => {
       if (res.success && res.data?.incidents) {
         const active = res.data.incidents.filter(
           (i) => i.status === 'verified' || i.status === 'responding'
@@ -29,7 +30,7 @@ export default function ResponderPage() {
         }
       }
     });
-  }, [user?.siteId]);
+  }, [siteId]);
 
   useEffect(() => {
     const handleUpdate = (updatedData: unknown) => {
@@ -81,8 +82,6 @@ export default function ResponderPage() {
       console.error(err);
     }
   };
-  
-  if (!user) return null;
 
   return (
     <RoleGuard allowedRoles={['responder', 'manager', 'admin']}>
@@ -117,8 +116,8 @@ export default function ResponderPage() {
               Command Center
             </Link>
             <div className="text-right">
-              <div className="text-xs font-body-bold text-on-surface">{user.name}</div>
-              <div className="text-[10px] font-label-caps text-primary uppercase">{user.role}</div>
+              <div className="text-xs font-body-bold text-on-surface">{user?.name || 'Tactical Unit 1'}</div>
+              <div className="text-[10px] font-label-caps text-primary uppercase">{user?.role || 'responder'}</div>
             </div>
             <button 
               onClick={logout}
@@ -135,7 +134,7 @@ export default function ResponderPage() {
           {/* Left: Feed */}
           <div className="w-full md:w-[380px] lg:w-[440px] bg-surface-container-low border-r border-border-subtle overflow-y-auto shrink-0 flex flex-col">
             <ResponderFeed 
-              siteId={user.siteId} 
+              siteId={siteId} 
               incidents={incidents}
               onIncidentsChange={setIncidents}
               onSelectIncident={setSelectedIncident}
