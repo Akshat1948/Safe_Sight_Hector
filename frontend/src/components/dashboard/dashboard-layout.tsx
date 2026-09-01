@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/shared/hooks';
+import AlertBanner from '@/components/alerts/alert-banner';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -539,6 +540,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Content View with fluid padding */}
         <div className="flex-1 overflow-y-auto h-full p-3 sm:p-4 md:p-6">
+          {/* Global Alert Banner — visible across all tabs */}
+          <div className="max-w-7xl mx-auto mb-4">
+            <AlertBanner siteId={user?.siteId || 'demo-site-prayagraj-01'} />
+          </div>
           {children}
         </div>
       </div>

@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/dashboard/dashboard-layout';
 import RoleGuard from '@/components/auth/role-guard';
-import AlertBanner from '@/components/alerts/alert-banner';
 import AlertComposer from '@/components/alerts/alert-composer';
 import AlertHistory from '@/components/alerts/alert-history';
 import { useAuth } from '@/shared/hooks';
@@ -39,8 +38,6 @@ export default function AlertsPage() {
             </button>
           </div>
 
-          {/* Active Alert Banner */}
-          <AlertBanner siteId={siteId} />
 
           {/* AI Multilingual Alert Composer */}
           {showComposer && (
