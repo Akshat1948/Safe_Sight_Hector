@@ -35,9 +35,6 @@ export class SosController {
   }
 
   @Get()
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.MANAGER, UserRole.RESPONDER)
   @ApiQuery({ name: 'siteId', required: false, type: String })
   @ApiQuery({ name: 'status', required: false, type: String })
   async getSosRequests(
@@ -55,7 +52,7 @@ export class SosController {
   @Patch(':id/status')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.RESPONDER, UserRole.MANAGER)
+  @Roles(UserRole.RESPONDER, UserRole.MANAGER, UserRole.ADMIN)
   async updateSosStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateSosStatusDto: UpdateSosStatusDto,

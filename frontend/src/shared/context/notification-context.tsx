@@ -183,12 +183,51 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     on('sos:new', handleNewSos);
     on('sos:status:update', handleSosStatusUpdate);
 
+    // Cross-tab broadcast channel
+    let bc: BroadcastChannel | null = null;
+    try {
+      if (typeof window !== 'undefined') {
+        bc = new BroadcastChannel('safesight_sos_channel');
+        bc.onmessage = (event) => {
+          if (event.data?.type === 'sos:new' && event.data?.data) {
+            handleNewSos(event.data.data);
+          } else if (event.data?.type === 'sos:status:update' && event.data?.data) {
+            handleSosStatusUpdate(event.data.data);
+          }
+        };
+      }
+    } catch {}
+
+    const handleCustomSosNew = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        handleNewSos(customEvent.detail);
+      }
+    };
+
+    const handleCustomSosUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        handleSosStatusUpdate(customEvent.detail);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('safesight:sos:new', handleCustomSosNew);
+      window.addEventListener('safesight:sos:status:update', handleCustomSosUpdate);
+    }
+
     return () => {
       off('alert:new', handleNewAlert);
       off('alert:acknowledged', handleAckAlert);
       off('alert:escalated', handleEscalateAlert);
       off('sos:new', handleNewSos);
       off('sos:status:update', handleSosStatusUpdate);
+      if (bc) bc.close();
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('safesight:sos:new', handleCustomSosNew);
+        window.removeEventListener('safesight:sos:status:update', handleCustomSosUpdate);
+      }
     };
   }, [on, off]);
 
