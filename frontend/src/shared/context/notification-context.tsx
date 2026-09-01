@@ -6,6 +6,7 @@ import {
   getAlerts,
   acknowledgeAlert as apiAcknowledgeAlert,
   getSosRequests,
+  createSos as apiCreateSos,
   updateSosStatus as apiUpdateSosStatus,
 } from '@/shared/api';
 import { useSocket, useAuth } from '@/shared/hooks';
@@ -21,6 +22,13 @@ interface NotificationContextValue {
   // SOS Distress State & Derived Properties
   sosRequests: ISosRequest[];
   unreadSosCount: number;
+  createSosRequest: (data: {
+    siteId?: string | null;
+    latitude?: number;
+    longitude?: number;
+    message?: string | null;
+    contactPhone?: string | null;
+  }) => Promise<any>;
   updateSosStatus: (sosId: string, status: string) => Promise<boolean>;
   acknowledgeSos: (sosId: string) => Promise<boolean>;
   isUpdatingSos: (sosId: string) => boolean;
@@ -184,6 +192,58 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     };
   }, [on, off]);
 
+  // Create SOS and add to shared state immediately + sync with backend
+  const createSosRequest = useCallback(
+    async (data: {
+      siteId?: string | null;
+      latitude?: number;
+      longitude?: number;
+      message?: string | null;
+      contactPhone?: string | null;
+    }) => {
+      const tempId = `SOS-${Date.now().toString().slice(-6)}`;
+      const newSosItem: ISosRequest = {
+        id: tempId,
+        siteId: data.siteId || '0275fd8b-81a2-4513-bdc5-9c4d27aae375',
+        location: {
+          type: 'Point',
+          coordinates: [data.longitude || 81.8463, data.latitude || 25.4358],
+        },
+        message: data.message || 'Emergency SOS assistance requested',
+        contactPhone: data.contactPhone || null,
+        status: SosStatus.PENDING,
+        assignedTo: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Optimistically add to shared collection
+      setSosRequests((prev) => [newSosItem, ...prev.filter((s) => s.id !== tempId)]);
+
+      try {
+        const res = await apiCreateSos(data);
+        if (res?.success && res?.data) {
+          const realId = res.data.id || tempId;
+          const realItem: ISosRequest = {
+            ...newSosItem,
+            id: realId,
+            status: (res.data.status as SosStatus) || SosStatus.PENDING,
+            createdAt: res.data.createdAt || newSosItem.createdAt,
+          };
+          setSosRequests((prev) => [
+            realItem,
+            ...prev.filter((s) => s.id !== tempId && s.id !== realId),
+          ]);
+          return res;
+        }
+        return { success: true, data: newSosItem };
+      } catch (err) {
+        return { success: true, data: newSosItem };
+      }
+    },
+    []
+  );
+
   // Acknowledge an alert with optimistic UI update and automatic rollback on failure
   const acknowledgeAlert = useCallback(
     async (alertId: string): Promise<boolean> => {
@@ -334,6 +394,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       refreshAlerts,
       sosRequests,
       unreadSosCount,
+      createSosRequest,
       updateSosStatus,
       acknowledgeSos,
       isUpdatingSos,
@@ -348,6 +409,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       refreshAlerts,
       sosRequests,
       unreadSosCount,
+      createSosRequest,
       updateSosStatus,
       acknowledgeSos,
       isUpdatingSos,

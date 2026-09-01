@@ -52,11 +52,11 @@ export default function SosPage() {
             </div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container border border-border-subtle rounded text-xs font-telemetry-md text-primary font-bold self-start sm:self-auto">
               <span className="w-2 h-2 rounded-full bg-error animate-pulse"></span>
-              {requests.filter((r) => r.status === 'pending').length} ACTIVE DISTRESS CALLS
+              {requests.filter((r) => (r.status || '').toLowerCase() === 'pending').length} ACTIVE DISTRESS CALLS
             </span>
           </div>
 
-          {loading ? (
+          {loading && requests.length === 0 ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-28 bg-surface-container animate-pulse rounded-lg border border-border-subtle" />
@@ -71,8 +71,8 @@ export default function SosPage() {
           ) : (
             <div className="flex flex-col gap-4">
               {requests.map((sos) => {
-                const isPending = sos.status === 'pending';
-                const statusClass = STATUS_COLORS[sos.status] || STATUS_COLORS.pending;
+                const isPending = (sos.status || '').toLowerCase() === 'pending';
+                const statusClass = STATUS_COLORS[(sos.status || '').toLowerCase()] || STATUS_COLORS.pending;
                 const timeStr = new Date(sos.createdAt).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',

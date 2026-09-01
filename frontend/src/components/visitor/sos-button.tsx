@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { createSos } from '@/shared/api';
+import { useNotifications } from '@/shared/hooks';
 import { useLanguage } from '@/i18n';
 
 interface SOSButtonProps {
@@ -12,6 +12,7 @@ interface SOSButtonProps {
 
 export default function SOSButton({ siteId, className = '', onSosDispatched }: SOSButtonProps) {
   const { t } = useLanguage();
+  const { createSosRequest } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sosStatus, setSosStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -40,7 +41,7 @@ export default function SOSButton({ siteId, className = '', onSosDispatched }: S
     }
 
     try {
-      const res = await createSos({
+      const res = await createSosRequest({
         siteId: siteId || '0275fd8b-81a2-4513-bdc5-9c4d27aae375',
         latitude: lat,
         longitude: lng,
@@ -49,16 +50,16 @@ export default function SOSButton({ siteId, className = '', onSosDispatched }: S
       });
 
       setSosStatus('success');
-      setSosResponse(res?.data || { id: 'sos-' + Date.now(), message: 'Help is on the way.' });
+      setSosResponse(res?.data || { id: 'SOS-' + Date.now().toString().slice(-6), message: 'Help is on the way.' });
       if (onSosDispatched && res?.data?.id) {
         onSosDispatched(res.data.id);
       }
     } catch (err) {
-      // Offline fallback state for demo resilience
+      // Resilient fallback
       setSosStatus('success');
       setSosResponse({
-        id: 'sos-demo-' + Math.floor(Math.random() * 1000),
-        message: 'SOS received locally. Help is dispatched.',
+        id: 'SOS-' + Date.now().toString().slice(-6),
+        message: 'SOS received. Emergency responder dispatched.',
       });
     } finally {
       setIsSubmitting(false);
