@@ -103,7 +103,7 @@ export default function AlertHistory({ siteId }: AlertHistoryProps) {
   };
 
   const filteredAlerts = alerts.filter((alert) => {
-    if (filterSeverity !== 'all' && alert.severity !== filterSeverity) return false;
+    if (filterSeverity !== 'all' && alert.severity?.toLowerCase() !== filterSeverity.toLowerCase()) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
@@ -186,7 +186,7 @@ export default function AlertHistory({ siteId }: AlertHistoryProps) {
               {filteredAlerts.map((alert) => (
                 <tr key={alert.id} className="hover:bg-surface-container/50 transition-colors">
                   <td className="py-3 font-label-caps">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${SEVERITY_BADGES[alert.severity] || SEVERITY_BADGES.informational}`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${SEVERITY_BADGES[alert.severity?.toLowerCase()] || SEVERITY_BADGES.informational}`}>
                       {alert.severity}
                     </span>
                   </td>
@@ -212,7 +212,7 @@ export default function AlertHistory({ siteId }: AlertHistoryProps) {
                     </div>
                   </td>
                   <td className="py-3 font-label-caps">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${STATUS_BADGES[alert.status] || STATUS_BADGES.dispatched}`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${STATUS_BADGES[alert.status?.toLowerCase()] || STATUS_BADGES.dispatched}`}>
                       {alert.status}
                     </span>
                   </td>

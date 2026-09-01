@@ -15,7 +15,7 @@ export async function getAlerts(
 
   const qs = query.toString() ? `?${query.toString()}` : '';
   const res = await apiClient<IAlert[]>(`/alerts${qs}`);
-  if (res.success && res.data && res.data.length > 0) {
+  if (res.success && Array.isArray(res.data)) {
     return res;
   }
 

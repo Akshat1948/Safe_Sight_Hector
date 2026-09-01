@@ -62,7 +62,7 @@ export default function AlertBanner({ siteId }: AlertBannerProps) {
 
   // Global Alert Banner: Only CRITICAL emergency alerts appear globally across the application.
   // Moderate / advisory / warning alerts are displayed exclusively in Alert History (/dashboard/alerts).
-  const criticalAlerts = alerts.filter((a) => a.severity === 'critical');
+  const criticalAlerts = alerts.filter((a) => a.severity?.toLowerCase() === 'critical');
 
   // Deduplicate active critical alerts by zone so repeated runs do not stack duplicates
   const displayedAlerts: IAlert[] = [];
