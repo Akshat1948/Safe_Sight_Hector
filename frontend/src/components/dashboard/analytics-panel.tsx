@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { IZone } from '@/shared/types';
+import { IZone, ZoneType, DensityStatus } from '@/shared/types';
 import { getZones, getIncidents, getAlerts } from '@/shared/api';
 import { useSocket } from '@/shared/hooks';
 
@@ -70,8 +70,71 @@ interface AnalyticsPanelProps {
   siteId?: string | null;
 }
 
+const DEMO_DEFAULT_ZONES: IZone[] = [
+  {
+    id: 'f787426f-c02c-402f-ae1a-1043f45e4c6e',
+    siteId: 'cb9e2dc0-bff7-4dea-9507-8591e5f6e7c3',
+    name: 'Sector C — Ghat Staircase',
+    zoneType: ZoneType.HIGH_RISK,
+    polygon: {
+      type: 'Polygon',
+      coordinates: [[[81.851, 25.434], [81.854, 25.434], [81.854, 25.438], [81.851, 25.438], [81.851, 25.434]]],
+    },
+    maxCapacity: 500,
+    currentDensity: 150,
+    densityStatus: DensityStatus.GREEN,
+    isActive: true,
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '29db0acf-6d3a-4124-bee1-f8c98a7e3a7d',
+    siteId: 'cb9e2dc0-bff7-4dea-9507-8591e5f6e7c3',
+    name: 'Sector A — Main Entry Plaza',
+    zoneType: ZoneType.ENTRY_EXIT,
+    polygon: {
+      type: 'Polygon',
+      coordinates: [[[81.841, 25.432], [81.845, 25.432], [81.845, 25.436], [81.841, 25.436], [81.841, 25.432]]],
+    },
+    maxCapacity: 1500,
+    currentDensity: 420,
+    densityStatus: DensityStatus.GREEN,
+    isActive: true,
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '529a85ee-1b9a-4598-8ee9-bfebdd83cf78',
+    siteId: 'cb9e2dc0-bff7-4dea-9507-8591e5f6e7c3',
+    name: 'Sector B — East Concourse',
+    zoneType: ZoneType.CORRIDOR,
+    polygon: {
+      type: 'Polygon',
+      coordinates: [[[81.846, 25.433], [81.85, 25.433], [81.85, 25.437], [81.846, 25.437], [81.846, 25.433]]],
+    },
+    maxCapacity: 800,
+    currentDensity: 256,
+    densityStatus: DensityStatus.YELLOW,
+    isActive: true,
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: '3f49eb2d-9b1b-4652-87dd-0b41fdc50e42',
+    siteId: 'cb9e2dc0-bff7-4dea-9507-8591e5f6e7c3',
+    name: 'Sector D — Corridor',
+    zoneType: ZoneType.SAFE_ASSEMBLY,
+    polygon: {
+      type: 'Polygon',
+      coordinates: [[[81.842, 25.439], [81.848, 25.439], [81.848, 25.443], [81.842, 25.443], [81.842, 25.439]]],
+    },
+    maxCapacity: 600,
+    currentDensity: 246,
+    densityStatus: DensityStatus.GREEN,
+    isActive: true,
+    updatedAt: new Date().toISOString(),
+  },
+];
+
 export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
-  const [zones, setZones] = useState<IZone[]>([]);
+  const [zones, setZones] = useState<IZone[]>(DEMO_DEFAULT_ZONES);
   const [trendRange, setTrendRange] = useState<TrendRange>('1D');
   const currentTrendData = TREND_DATASETS[trendRange] || TREND_DATASETS['1D'];
   const [stats, setStats] = useState({
@@ -103,61 +166,77 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
   const { on, off } = useSocket(siteId || 'demo-site-prayagraj-01');
 
   useEffect(() => {
-    if (!siteId) return;
-
-    Promise.all([
-      getZones(siteId),
-      getIncidents(siteId),
-      getAlerts(siteId),
-    ])
-      .then(([zonesRes, incidentsRes, alertsRes]) => {
-        if (zonesRes.success && zonesRes.data) {
+    getZones(siteId)
+      .then((zonesRes) => {
+        if (zonesRes.success && zonesRes.data && zonesRes.data.length > 0) {
           setZones(zonesRes.data);
         }
-
-        const incidents = incidentsRes.success && incidentsRes.data?.incidents ? incidentsRes.data.incidents : [];
-        const alerts = alertsRes.success && alertsRes.data ? alertsRes.data : [];
-
-        setStats((prev) => ({
-          ...prev,
-          totalAlerts: alerts.length > 0 ? alerts.length * 142 : prev.totalAlerts,
-          activeIncidents: incidents.filter((i) => i.status !== 'resolved' && i.status !== 'dismissed').length || 12,
-          criticalIncidents: incidents.filter((i) => i.severity === 'critical' && i.status !== 'resolved').length || 3,
-        }));
       })
-      .catch(console.error);
+      .catch(() => {});
+
+    getIncidents(siteId)
+      .then((incidentsRes) => {
+        const incidents = incidentsRes.success && incidentsRes.data?.incidents ? incidentsRes.data.incidents : [];
+        if (incidents.length > 0) {
+          setStats((prev) => ({
+            ...prev,
+            activeIncidents: incidents.filter((i) => i.status !== 'resolved' && i.status !== 'dismissed').length || 12,
+            criticalIncidents: incidents.filter((i) => i.severity === 'critical' && i.status !== 'resolved').length || 3,
+          }));
+        }
+      })
+      .catch(() => {});
+
+    getAlerts(siteId)
+      .then((alertsRes) => {
+        const alerts = alertsRes.success && alertsRes.data ? alertsRes.data : [];
+        if (alerts.length > 0) {
+          setStats((prev) => ({
+            ...prev,
+            totalAlerts: alerts.length * 142,
+          }));
+        }
+      })
+      .catch(() => {});
   }, [siteId]);
 
   useEffect(() => {
     const handleDensityUpdate = (data: any) => {
-      if (data?.zoneId) {
+      if (data?.zoneId || data?.currentDensity !== undefined) {
         setZones((prev) => {
-          const exists = prev.some((z) => z.id === data.zoneId);
-          if (exists) {
-            return prev.map((z) =>
-              z.id === data.zoneId
+          const currentList = prev.length > 0 ? prev : DEMO_DEFAULT_ZONES;
+          const matchIndex = currentList.findIndex(
+            (z) =>
+              z.id === data.zoneId ||
+              z.name.toLowerCase().includes('zone c') ||
+              z.name.toLowerCase().includes('sector c') ||
+              z.name.toLowerCase().includes('staircase')
+          );
+
+          if (matchIndex >= 0) {
+            return currentList.map((z, idx) =>
+              idx === matchIndex
                 ? {
                     ...z,
                     currentDensity: data.currentDensity,
-                    densityStatus: data.densityStatus,
-                    flowRate: data.flowRate,
-                    flowVelocity: data.flowVelocity,
+                    densityStatus: data.densityStatus || z.densityStatus,
+                    flowRate: data.flowRate ?? z.flowRate,
+                    flowVelocity: data.flowVelocity ?? z.flowVelocity,
                   }
                 : z
             );
           }
-          return prev.map((z) =>
-            z.name.toLowerCase().includes('zone c') || z.name.toLowerCase().includes('staircase')
-              ? {
-                  ...z,
-                  currentDensity: data.currentDensity,
-                  densityStatus: data.densityStatus,
-                  flowRate: data.flowRate,
-                  flowVelocity: data.flowVelocity,
-                }
-              : z
-          );
+
+          return currentList;
         });
+
+        // Dynamically adjust high-level stats when critical surge occurs
+        if (data.densityStatus === 'red') {
+          setStats((prev) => ({
+            ...prev,
+            criticalIncidents: Math.max(prev.criticalIncidents, 4),
+          }));
+        }
       }
     };
 

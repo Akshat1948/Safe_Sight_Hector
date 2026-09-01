@@ -7,6 +7,8 @@ import { SafeSightGateway } from '../../gateway/safesight.gateway';
 import { IncidentStatus, DetectionSource } from '../../common/interfaces';
 import { IUser } from '../../common/interfaces';
 
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 @Injectable()
 export class IncidentsService {
   private readonly logger = new Logger(IncidentsService.name);
@@ -28,7 +30,7 @@ export class IncidentsService {
       .createQueryBuilder('incident')
       .leftJoinAndSelect('incident.zone', 'zone');
 
-    if (siteId && siteId.trim().length > 0) {
+    if (siteId && siteId.trim().length > 0 && UUID_REGEX.test(siteId.trim())) {
       query.andWhere('incident.siteId = :siteId', { siteId: siteId.trim() });
     }
 

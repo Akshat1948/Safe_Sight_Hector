@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/dashboard/dashboard-layout';
 import RoleGuard from '@/components/auth/role-guard';
 import AlertBanner from '@/components/alerts/alert-banner';
 import AlertComposer from '@/components/alerts/alert-composer';
+import AlertHistory from '@/components/alerts/alert-history';
 import { useAuth } from '@/shared/hooks';
 
 export default function AlertsPage() {
@@ -47,6 +48,9 @@ export default function AlertsPage() {
               <AlertComposer siteId={siteId} />
             </div>
           )}
+
+          {/* Live Broadcast Log & Alert History */}
+          <AlertHistory siteId={siteId} />
         </div>
       </DashboardLayout>
     </RoleGuard>

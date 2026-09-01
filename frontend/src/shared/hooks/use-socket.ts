@@ -1,62 +1,75 @@
 'use client';
 
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { WS_URL } from '@/shared/constants';
 
+let globalSocket: Socket | null = null;
+
+function getGlobalSocket(): Socket | null {
+  if (typeof window === 'undefined') return null;
+  if (!globalSocket) {
+    globalSocket = io(WS_URL, {
+      transports: ['websocket', 'polling'],
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+    });
+  }
+  return globalSocket;
+}
+
 export function useSocket(siteId?: string | null) {
-  const socketRef = useRef<Socket | null>(null);
-  const listenersRef = useRef<Map<string, Set<(...args: any[]) => void>>>(new Map());
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const socket = io(WS_URL, {
-      transports: ['websocket', 'polling'],
-      autoConnect: true,
-    });
+    const socket = getGlobalSocket();
+    if (!socket) return;
 
-    socket.on('connect', () => {
+    const handleConnect = () => {
       setIsConnected(true);
       if (siteId) {
         socket.emit('join:site', { siteId });
       }
+    };
 
-      // Re-attach all registered listeners
-      listenersRef.current.forEach((handlers, event) => {
-        handlers.forEach((handler) => {
-          socket.on(event, handler);
-        });
-      });
-    });
-
-    socket.on('disconnect', () => {
+    const handleDisconnect = () => {
       setIsConnected(false);
-    });
+    };
 
-    socketRef.current = socket;
+    if (socket.connected) {
+      setIsConnected(true);
+      if (siteId) {
+        socket.emit('join:site', { siteId });
+      }
+    }
+
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
 
     return () => {
-      if (siteId) {
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+      if (siteId && socket.connected) {
         socket.emit('leave:site', { siteId });
       }
-      socket.disconnect();
-      socketRef.current = null;
-      setIsConnected(false);
     };
   }, [siteId]);
 
   const on = useCallback((event: string, handler: (...args: any[]) => void) => {
-    if (!listenersRef.current.has(event)) {
-      listenersRef.current.set(event, new Set());
+    const socket = getGlobalSocket();
+    if (socket) {
+      socket.on(event, handler);
     }
-    listenersRef.current.get(event)!.add(handler);
-    socketRef.current?.on(event, handler);
   }, []);
 
   const off = useCallback((event: string, handler: (...args: any[]) => void) => {
-    listenersRef.current.get(event)?.delete(handler);
-    socketRef.current?.off(event, handler);
+    const socket = getGlobalSocket();
+    if (socket) {
+      socket.off(event, handler);
+    }
   }, []);
 
-  return { on, off, socket: socketRef.current, isConnected };
+  return { on, off, socket: globalSocket, isConnected };
 }

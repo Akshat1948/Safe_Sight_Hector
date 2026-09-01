@@ -9,6 +9,20 @@ interface NavigationPanelProps {
   onStatusUpdate?: (id: string, status: 'responding' | 'resolved') => void;
 }
 
+function getLatLng(location: any): { lat: number; lng: number } | null {
+  if (!location) return null;
+  if (location.latitude !== undefined && location.longitude !== undefined) {
+    return { lat: Number(location.latitude), lng: Number(location.longitude) };
+  }
+  if (Array.isArray(location.coordinates) && location.coordinates.length >= 2) {
+    return { lat: Number(location.coordinates[1]), lng: Number(location.coordinates[0]) };
+  }
+  if (location.lat !== undefined && location.lng !== undefined) {
+    return { lat: Number(location.lat), lng: Number(location.lng) };
+  }
+  return null;
+}
+
 export default function NavigationPanel({ incident, onStatusUpdate }: NavigationPanelProps) {
   if (!incident) {
     return (
@@ -30,8 +44,9 @@ export default function NavigationPanel({ incident, onStatusUpdate }: Navigation
     }
   };
 
-  const mapUrl = incident.location
-    ? `https://www.google.com/maps/search/?api=1&query=${incident.location.coordinates[1]},${incident.location.coordinates[0]}`
+  const latLng = getLatLng(incident.location);
+  const mapUrl = latLng
+    ? `https://www.google.com/maps/search/?api=1&query=${latLng.lat},${latLng.lng}`
     : '#';
 
   const isCritical = incident.severity === 'critical';
@@ -92,15 +107,15 @@ export default function NavigationPanel({ incident, onStatusUpdate }: Navigation
           <h3 className="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider font-bold">
             Location & GPS Waypoints
           </h3>
-          {incident.location ? (
+          {latLng ? (
             <div className="text-xs font-telemetry-md text-on-surface bg-surface-container p-2.5 rounded border border-border-subtle font-mono">
-              Latitude: {incident.location.coordinates[1].toFixed(6)}° N, Longitude: {incident.location.coordinates[0].toFixed(6)}° E
+              Latitude: {latLng.lat.toFixed(6)}° N, Longitude: {latLng.lng.toFixed(6)}° E
             </div>
           ) : (
             <p className="text-xs font-telemetry-md text-on-surface-variant">GPS coordinates not available.</p>
           )}
 
-          {incident.location && (
+          {latLng && (
             <a
               href={mapUrl}
               target="_blank"

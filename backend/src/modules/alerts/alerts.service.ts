@@ -8,6 +8,8 @@ import { AlertStatus } from '../../common/interfaces';
 import { IUser } from '../../common/interfaces';
 import { AI_ML_SERVICE_URL, ALERT_ESCALATION_TIMEOUT_MS } from '../../common/constants';
 
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 @Injectable()
 export class AlertsService {
   private readonly logger = new Logger(AlertsService.name);
@@ -23,7 +25,7 @@ export class AlertsService {
       .createQueryBuilder('alert')
       .leftJoinAndSelect('alert.targetZone', 'zone');
 
-    if (siteId && siteId.trim().length > 0) {
+    if (siteId && siteId.trim().length > 0 && UUID_REGEX.test(siteId.trim())) {
       query.andWhere('alert.siteId = :siteId', { siteId: siteId.trim() });
     }
 

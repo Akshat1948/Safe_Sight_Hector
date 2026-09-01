@@ -30,6 +30,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +77,33 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isSearchOpen]);
+
+  // Close profile dropdown on click outside or Escape
+  useEffect(() => {
+    if (!showProfileMenu) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(e.target as Node)
+      ) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [showProfileMenu]);
 
   const handleEmergencyLockdown = () => {
     const confirm = window.confirm(
@@ -330,9 +358,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content Area & TopNavBar */}
       <div className="flex flex-col flex-1 h-full min-w-0 overflow-hidden relative md:ml-64">
         {/* TopNavBar */}
-        <nav className="h-topbar-height bg-surface border-b border-border-subtle flex justify-between items-center px-3 sm:px-4 md:px-6 z-40 shrink-0 shadow-sm gap-2">
+        <nav className="h-topbar-height bg-surface border-b border-border-subtle flex justify-between items-center px-3 sm:px-4 md:px-6 z-40 shrink-0 shadow-sm gap-3">
           {/* Left: Hamburger + Brand + Tabs */}
-          <div className="flex items-center gap-2 sm:gap-3 lg:gap-5 h-full min-w-0 flex-1 overflow-hidden">
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 h-full shrink-0 min-w-max">
             {/* Hamburger Button (Mobile only) */}
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -343,12 +371,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </button>
 
             {/* Brand Title */}
-            <span className="font-headline-md text-sm sm:text-base md:text-headline-md font-extrabold text-on-surface tracking-tighter whitespace-nowrap flex items-center leading-none shrink-0">
+            <span className="font-headline-md text-sm sm:text-base md:text-headline-md font-extrabold text-on-surface tracking-tighter whitespace-nowrap flex items-center leading-none shrink-0 mr-1">
               SafeSight HECTOR
             </span>
 
             {/* Top Navigation Tabs */}
-            <div className="hidden lg:flex items-center space-x-1 h-full shrink-0 overflow-x-auto scrollbar-hide">
+            <div className="hidden lg:flex items-center space-x-1 h-full shrink-0">
               {TOP_NAV_TABS.map((tab) => {
                 const isActive =
                   tab.href === '/dashboard'
@@ -359,7 +387,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Link
                     key={tab.href}
                     href={tab.href}
-                    className={`relative flex items-center h-full px-2 sm:px-2.5 font-label-caps text-[11px] lg:text-label-caps uppercase whitespace-nowrap transition-colors duration-150 cursor-pointer ${
+                    className={`relative flex items-center h-full px-2 xl:px-2.5 font-label-caps text-[10.5px] xl:text-label-caps uppercase whitespace-nowrap transition-colors duration-150 cursor-pointer ${
                       isActive
                         ? 'text-primary font-bold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary'
                         : 'text-on-surface-variant hover:text-on-surface hover:text-primary/90'
@@ -373,13 +401,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           {/* Right: Fluid Animated Search Bar, Status & Profile */}
-          <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3 shrink-0 h-full">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 h-full">
             {/* Expandable Search Component */}
             <div
               ref={searchContainerRef}
               style={{
-                width: isSearchOpen ? 260 : 40,
-                transition: 'width 400ms cubic-bezier(0.22, 1, 0.36, 1)',
+                width: isSearchOpen ? 185 : 36,
+                transition: 'width 220ms cubic-bezier(0.22, 1, 0.36, 1)',
               }}
               className={`relative h-8 flex items-center rounded-md border box-border overflow-hidden select-none shrink-0 ${
                 isSearchOpen
@@ -387,89 +415,82 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   : 'bg-surface-container-low border-outline-variant hover:border-primary hover:bg-surface cursor-pointer'
               }`}
             >
-              <form
-                onSubmit={handleSearchSubmit}
-                className="flex items-center w-full h-full min-w-0"
-              >
-                {/* Search Input */}
-                <div
-                  className={`flex items-center h-full transition-all duration-300 ${
-                    isSearchOpen
-                      ? 'flex-1 min-w-0 pl-3 pr-1 opacity-100'
-                      : 'w-0 p-0 opacity-0 pointer-events-none overflow-hidden'
-                  }`}
+              {isSearchOpen ? (
+                <form
+                  onSubmit={handleSearchSubmit}
+                  className="flex items-center w-full h-full min-w-0 overflow-hidden"
                 >
+                  <span className="material-symbols-outlined text-[17px] text-primary shrink-0 pl-2 pr-1 pointer-events-none">
+                    search
+                  </span>
                   <input
                     ref={searchInputRef}
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search incidents, sectors..."
-                    tabIndex={isSearchOpen ? 0 : -1}
-                    className="w-full bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none p-0 h-full min-w-0 select-text"
+                    placeholder="Search..."
+                    tabIndex={0}
+                    className="flex-1 min-w-0 bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none px-1 h-full select-text"
                   />
-
-                  {isSearchOpen && searchQuery && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (searchQuery) {
                         setSearchQuery('');
                         searchInputRef.current?.focus();
-                      }}
-                      className="p-0.5 text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer"
-                      title="Clear"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">close</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* Search Button */}
+                      } else {
+                        setIsSearchOpen(false);
+                      }
+                    }}
+                    className="w-7 h-full flex items-center justify-center text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer pr-1"
+                    title={searchQuery ? 'Clear' : 'Close search (Esc)'}
+                    aria-label="Close search"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                </form>
+              ) : (
                 <button
-                  type={isSearchOpen ? 'submit' : 'button'}
-                  onClick={(e) => {
-                    if (!isSearchOpen) {
-                      e.preventDefault();
-                      setIsSearchOpen(true);
-                    }
-                  }}
-                  className={`w-10 h-8 flex items-center justify-center shrink-0 transition-colors cursor-pointer border-none bg-transparent ${
-                    isSearchOpen ? 'text-primary' : 'text-on-surface-variant hover:text-primary'
-                  }`}
-                  title={isSearchOpen ? 'Search' : 'Search (⌘K)'}
-                  aria-label="Search"
+                  type="button"
+                  onClick={() => setIsSearchOpen(true)}
+                  className="w-full h-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent"
+                  title="Search (⌘K)"
+                  aria-label="Open search"
                 >
                   <span className="material-symbols-outlined text-[18px]">
                     search
                   </span>
                 </button>
-              </form>
+              )}
             </div>
 
             {/* System Status Pill */}
             <button
               onClick={() => router.push('/dashboard')}
               className="hidden sm:flex items-center h-8 border border-outline-variant text-on-surface-variant px-2.5 rounded hover:text-primary hover:border-primary transition-colors text-[11px] font-body-bold bg-surface cursor-pointer whitespace-nowrap shrink-0"
+              title="Operational System Status"
             >
               <span className="w-2 h-2 rounded-full bg-status-nominal mr-1.5 animate-pulse"></span>
-              <span className="hidden md:inline">System </span>Status
+              <span>Status</span>
             </button>
 
             {/* Emergency Lockdown Button */}
             <button
               onClick={handleEmergencyLockdown}
-              className={`h-8 flex items-center px-2.5 sm:px-3 rounded transition-all text-xs font-body-bold shadow-md cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`h-8 flex items-center gap-1 px-2.5 sm:px-3 rounded transition-all text-xs font-body-bold shadow-md cursor-pointer whitespace-nowrap shrink-0 ${
                 lockdownActive
                   ? 'bg-status-critical text-white animate-pulse shadow-status-critical/30'
                   : 'bg-error text-on-error hover:bg-error/90 shadow-error/20'
               }`}
+              title="Trigger Site Emergency Lockdown Protocol"
             >
-              <span className="hidden sm:inline">Emergency </span>Lockdown
+              <span className="material-symbols-outlined text-[14px]">lock</span>
+              <span>Lockdown</span>
             </button>
 
             {/* Profile Avatar with Dropdown */}
-            <div className="relative flex items-center h-8 shrink-0">
+            <div ref={profileMenuRef} className="relative flex items-center h-8 shrink-0">
               <button
                 onClick={() => setShowProfileMenu((prev) => !prev)}
                 className="w-8 h-8 rounded-full border border-outline-variant overflow-hidden flex items-center justify-center bg-primary text-white font-bold text-xs hover:ring-2 hover:ring-primary/40 transition-all cursor-pointer"

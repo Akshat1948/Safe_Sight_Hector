@@ -33,7 +33,7 @@ export default function AlertBanner({ siteId }: AlertBannerProps) {
     getAlerts(siteId)
       .then((res) => {
         if (res.success && res.data) {
-          setAlerts(res.data.filter((a) => a.status === 'dispatched'));
+          setAlerts(res.data.filter((a) => a.status === 'dispatched' || a.status === 'escalated'));
         }
       })
       .catch(console.error);
@@ -42,7 +42,7 @@ export default function AlertBanner({ siteId }: AlertBannerProps) {
   useEffect(() => {
     const handleNewAlert = (alert: unknown) => {
       const a = alert as IAlert;
-      if (a && a.status === 'dispatched') {
+      if (a && (a.status === 'dispatched' || a.status === 'escalated')) {
         setAlerts((prev) => [a, ...prev.filter((item) => item.id !== a.id)]);
       }
     };

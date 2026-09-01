@@ -7,6 +7,8 @@ export interface IZone {
   maxCapacity: number;
   currentDensity: number;
   densityStatus: DensityStatus;
+  flowRate?: number;
+  flowVelocity?: number;
   isActive: boolean;
   updatedAt: string;
 }

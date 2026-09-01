@@ -19,14 +19,11 @@ import { Roles, CurrentUser } from '../../common/decorators';
 import { UserRole, IUser } from '../../common/interfaces';
 
 @ApiTags('incidents')
-@ApiBearerAuth()
 @Controller('incidents')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class IncidentsController {
   constructor(private readonly incidentsService: IncidentsService) {}
 
   @Get()
-  @Roles(UserRole.MANAGER, UserRole.RESPONDER)
   @ApiQuery({ name: 'siteId', required: false, type: String })
   @ApiQuery({ name: 'status', required: false, type: String })
   @ApiQuery({ name: 'severity', required: false, type: String })
@@ -53,14 +50,15 @@ export class IncidentsController {
   }
 
   @Get(':id')
-  @Roles(UserRole.MANAGER, UserRole.RESPONDER)
   async getIncidentById(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.incidentsService.getIncidentById(id);
     return { success: true, data, message: 'Incident retrieved' };
   }
 
   @Post()
-  @Roles(UserRole.MANAGER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles(UserRole.MANAGER, UserRole.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   async createIncident(@Body() createIncidentDto: CreateIncidentDto) {
     const data = await this.incidentsService.createIncident(createIncidentDto);
@@ -68,7 +66,9 @@ export class IncidentsController {
   }
 
   @Patch(':id/verify')
-  @Roles(UserRole.MANAGER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles(UserRole.MANAGER, UserRole.ADMIN)
   async verifyIncident(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() verifyIncidentDto: VerifyIncidentDto,
@@ -79,7 +79,9 @@ export class IncidentsController {
   }
 
   @Patch(':id/status')
-  @Roles(UserRole.RESPONDER, UserRole.MANAGER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles(UserRole.RESPONDER, UserRole.MANAGER, UserRole.ADMIN)
   async updateIncidentStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateStatusDto: UpdateIncidentStatusDto,

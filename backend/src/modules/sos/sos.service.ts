@@ -8,6 +8,8 @@ import { IncidentsService } from '../incidents/incidents.service';
 import { SosStatus, IncidentType, Severity, DetectionSource } from '../../common/interfaces';
 import { IUser } from '../../common/interfaces';
 
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 @Injectable()
 export class SosService {
   private readonly logger = new Logger(SosService.name);
@@ -68,7 +70,7 @@ export class SosService {
 
   async getSosRequests(siteId?: string, status?: string) {
     const where: any = {};
-    if (siteId && siteId.trim().length > 0) {
+    if (siteId && siteId.trim().length > 0 && UUID_REGEX.test(siteId.trim())) {
       where.siteId = siteId.trim();
     }
     if (status) {

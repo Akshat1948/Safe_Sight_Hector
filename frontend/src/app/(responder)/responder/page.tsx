@@ -22,7 +22,7 @@ export default function ResponderPage() {
     getIncidents(siteId).then((res) => {
       if (res.success && res.data?.incidents) {
         const active = res.data.incidents.filter(
-          (i) => i.status === 'verified' || i.status === 'responding'
+          (i) => i.status !== 'resolved' && i.status !== 'dismissed'
         );
         setIncidents(active);
         if (active.length > 0) {
@@ -33,35 +33,39 @@ export default function ResponderPage() {
   }, [siteId]);
 
   useEffect(() => {
-    const handleUpdate = (updatedData: unknown) => {
-      const updated = updatedData as IIncident;
-      if (!updated?.id) return;
+    const handleUpdate = (updatedData: any) => {
+      const targetId = updatedData?.incidentId || updatedData?.id;
+      if (!targetId) return;
 
-      if (updated.status === 'verified' || updated.status === 'responding') {
-        setIncidents((prev) => {
-          const exists = prev.find((i) => i.id === updated.id);
-          if (exists) return prev.map((i) => (i.id === updated.id ? updated : i));
-          return [updated, ...prev];
-        });
-        if (selectedIncident?.id === updated.id) {
-          setSelectedIncident(updated);
-        }
+      const newStatus = updatedData.status;
+      if (newStatus === 'resolved' || newStatus === 'dismissed') {
+        setIncidents((prev) => prev.filter((i) => i.id !== targetId));
+        setSelectedIncident((prev) => (prev?.id === targetId ? null : prev));
       } else {
-        setIncidents((prev) => prev.filter((i) => i.id !== updated.id));
-        if (selectedIncident?.id === updated.id) {
-          setSelectedIncident(null);
-        }
+        getIncidents(siteId).then((res) => {
+          if (res.success && res.data?.incidents) {
+            const active = res.data.incidents.filter(
+              (i) => i.status !== 'resolved' && i.status !== 'dismissed'
+            );
+            setIncidents(active);
+            if (active.length > 0) {
+              setSelectedIncident((prev) => (prev ? prev : active[0]));
+            }
+          }
+        });
       }
     };
 
+    on('incident:new', handleUpdate);
     on('incident:verified', handleUpdate);
     on('incident:status:update', handleUpdate);
 
     return () => {
+      off('incident:new', handleUpdate);
       off('incident:verified', handleUpdate);
       off('incident:status:update', handleUpdate);
     };
-  }, [on, off, selectedIncident?.id]);
+  }, [on, off, siteId]);
 
   const handleStatusUpdate = async (id: string, newStatus: 'responding' | 'resolved') => {
     if (newStatus === 'resolved') {

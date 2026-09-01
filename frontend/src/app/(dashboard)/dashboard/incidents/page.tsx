@@ -100,32 +100,57 @@ export default function IncidentsPage() {
 
     getIncidents(siteId).then((res) => {
       if (res.success && res.data?.incidents && res.data.incidents.length > 0) {
-        setIncidents((prev) => {
-          const apiIds = new Set(res.data!.incidents.map((i) => i.id));
-          const merged = [...res.data!.incidents, ...prev.filter((i) => !apiIds.has(i.id))];
-          return merged;
-        });
+        setIncidents(res.data.incidents);
         setSelectedIncident(res.data.incidents[0]);
       }
     });
   }, [siteId]);
 
   useEffect(() => {
-    const handleUpdate = (data: unknown) => {
-      const inc = data as IIncident;
-      if (inc?.id) {
-        setIncidents((prev) => [inc, ...prev.filter((i) => i.id !== inc.id)]);
+    const handleNewIncident = (data: any) => {
+      if (data?.id) {
+        setIncidents((prev) => [data, ...prev.filter((i) => i.id !== data.id)]);
+        setSelectedIncident(data);
       }
     };
 
-    on('incident:new', handleUpdate);
-    on('incident:verified', handleUpdate);
-    on('incident:status:update', handleUpdate);
+    const handleStatusUpdate = (data: any) => {
+      const targetId = data?.incidentId || data?.id;
+      if (!targetId) return;
+
+      setIncidents((prev) =>
+        prev.map((inc) =>
+          inc.id === targetId
+            ? {
+                ...inc,
+                status: data.status || inc.status,
+                verifiedBy: data.verifiedBy || inc.verifiedBy,
+                verifiedAt: data.verifiedAt || inc.verifiedAt,
+              }
+            : inc
+        )
+      );
+
+      setSelectedIncident((prev) =>
+        prev && prev.id === targetId
+          ? {
+              ...prev,
+              status: data.status || prev.status,
+              verifiedBy: data.verifiedBy || prev.verifiedBy,
+              verifiedAt: data.verifiedAt || prev.verifiedAt,
+            }
+          : prev
+      );
+    };
+
+    on('incident:new', handleNewIncident);
+    on('incident:verified', handleStatusUpdate);
+    on('incident:status:update', handleStatusUpdate);
 
     return () => {
-      off('incident:new', handleUpdate);
-      off('incident:verified', handleUpdate);
-      off('incident:status:update', handleUpdate);
+      off('incident:new', handleNewIncident);
+      off('incident:verified', handleStatusUpdate);
+      off('incident:status:update', handleStatusUpdate);
     };
   }, [on, off]);
 

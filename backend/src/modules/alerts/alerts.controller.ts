@@ -19,14 +19,11 @@ import { Roles, CurrentUser } from '../../common/decorators';
 import { UserRole, IUser } from '../../common/interfaces';
 
 @ApiTags('alerts')
-@ApiBearerAuth()
 @Controller('alerts')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class AlertsController {
   constructor(private readonly alertsService: AlertsService) {}
 
   @Get()
-  @Roles(UserRole.MANAGER, UserRole.RESPONDER)
   @ApiQuery({ name: 'siteId', required: false, type: String })
   @ApiQuery({ name: 'status', required: false, type: String })
   @ApiQuery({ name: 'severity', required: false, type: String })
@@ -40,7 +37,9 @@ export class AlertsController {
   }
 
   @Post()
-  @Roles(UserRole.MANAGER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles(UserRole.MANAGER, UserRole.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   async createAlert(
     @Body() createAlertDto: CreateAlertDto,
@@ -51,7 +50,9 @@ export class AlertsController {
   }
 
   @Patch(':id/acknowledge')
-  @Roles(UserRole.MANAGER, UserRole.RESPONDER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles(UserRole.MANAGER, UserRole.RESPONDER, UserRole.ADMIN)
   async acknowledgeAlert(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: IUser,

@@ -146,8 +146,20 @@ export default function SosPage() {
                   hour: '2-digit',
                   minute: '2-digit',
                 });
-                const mapUrl = sos.location
-                  ? `https://www.google.com/maps/search/?api=1&query=${sos.location.coordinates[1]},${sos.location.coordinates[0]}`
+                const loc = sos.location as any;
+                const latLng = (() => {
+                  if (!loc) return null;
+                  if (loc.latitude !== undefined && loc.longitude !== undefined) {
+                    return { lat: Number(loc.latitude), lng: Number(loc.longitude) };
+                  }
+                  if (Array.isArray(loc.coordinates) && loc.coordinates.length >= 2) {
+                    return { lat: Number(loc.coordinates[1]), lng: Number(loc.coordinates[0]) };
+                  }
+                  return null;
+                })();
+
+                const mapUrl = latLng
+                  ? `https://www.google.com/maps/search/?api=1&query=${latLng.lat},${latLng.lng}`
                   : '#';
 
                 return (
@@ -205,7 +217,7 @@ export default function SosPage() {
                               </a>
                             </div>
                           )}
-                          {sos.location && (
+                          {latLng && (
                             <div className="flex items-center gap-1.5">
                               <span className="material-symbols-outlined text-sm text-tertiary">location_on</span>
                               <a
@@ -214,7 +226,7 @@ export default function SosPage() {
                                 rel="noopener noreferrer"
                                 className="text-tertiary hover:underline font-bold"
                               >
-                                {sos.location.coordinates[1].toFixed(4)}° N, {sos.location.coordinates[0].toFixed(4)}° E
+                                {latLng.lat.toFixed(4)}° N, {latLng.lng.toFixed(4)}° E
                               </a>
                             </div>
                           )}

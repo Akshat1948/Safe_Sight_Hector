@@ -5,6 +5,8 @@ import { TransportStatusEntity, SiteEntity } from '../../database/entities';
 import { UpdateTransportDto } from '../../common/dto';
 import { TransportStatus, TransportType } from '../../common/interfaces/transport.interface';
 
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 @Injectable()
 export class TransportService implements OnModuleInit {
   private readonly logger = new Logger(TransportService.name);
@@ -73,7 +75,7 @@ export class TransportService implements OnModuleInit {
 
   async getParkingStatus(siteId?: string) {
     const where: any = { transportType: TransportType.PARKING };
-    if (siteId && siteId.trim().length > 0) {
+    if (siteId && siteId.trim().length > 0 && UUID_REGEX.test(siteId.trim())) {
       where.siteId = siteId.trim();
     }
     const records = await this.transportRepository.find({
@@ -93,7 +95,7 @@ export class TransportService implements OnModuleInit {
 
   async getShuttleStatus(siteId?: string) {
     const where: any = { transportType: In([TransportType.SHUTTLE, TransportType.BUS]) };
-    if (siteId && siteId.trim().length > 0) {
+    if (siteId && siteId.trim().length > 0 && UUID_REGEX.test(siteId.trim())) {
       where.siteId = siteId.trim();
     }
     const records = await this.transportRepository.find({
