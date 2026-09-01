@@ -102,6 +102,14 @@ export class SosService {
     const saved = await this.sosRepository.save(sosRequest);
     this.logger.log(`SOS ${id} status updated to ${dto.status} by ${user.id}`);
 
+    // Broadcast status change across all clients in real-time
+    this.gateway.emitSosStatusUpdate(saved.siteId || 'all', {
+      id: saved.id,
+      status: saved.status,
+      assignedTo: saved.assignedTo,
+      updatedAt: saved.updatedAt,
+    });
+
     return saved;
   }
 }

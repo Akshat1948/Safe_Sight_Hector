@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { usePathname } from 'next/navigation';
 import { IAlert } from '@/shared/types';
-import { getAlerts, acknowledgeAlert } from '@/shared/api';
-import { useSocket } from '@/shared/hooks';
+import { useNotifications } from '@/shared/hooks';
 
 interface AlertBannerProps {
   siteId?: string | null;
@@ -45,57 +44,17 @@ const MARCHING_BORDER_COLORS: Record<string, string> = {
 
 export default function AlertBanner({ siteId }: AlertBannerProps) {
   const pathname = usePathname();
-  const [alerts, setAlerts] = useState<IAlert[]>([]);
-  const { on, off } = useSocket(siteId || null);
+  const { alerts, acknowledgeAlert } = useNotifications();
 
   const isAlertsPage = pathname === '/dashboard/alerts';
 
-  useEffect(() => {
-    if (!siteId) return;
-
-    getAlerts(siteId)
-      .then((res) => {
-        if (res.success && res.data) {
-          setAlerts(res.data.filter((a) => a.status === 'dispatched' || a.status === 'escalated'));
-        }
-      })
-      .catch(console.error);
-  }, [siteId]);
-
-  // Real-time WebSocket listener: receive live alerts without page reload
-  useEffect(() => {
-    const handleNewAlert = (alert: unknown) => {
-      const a = alert as IAlert;
-      if (a && (a.status === 'dispatched' || a.status === 'escalated')) {
-        setAlerts((prev) => [a, ...prev.filter((item) => item.id !== a.id)]);
-      }
-    };
-
-    const handleAckAlert = (data: unknown) => {
-      const payload = data as { alertId: string };
-      if (payload?.alertId) {
-        setAlerts((prev) => prev.filter((a) => a.id !== payload.alertId));
-      }
-    };
-
-    on('alert:new', handleNewAlert);
-    on('alert:acknowledged', handleAckAlert);
-
-    return () => {
-      off('alert:new', handleNewAlert);
-      off('alert:acknowledged', handleAckAlert);
-    };
-  }, [on, off]);
+  // Active unacknowledged alerts
+  const activeAlerts = alerts.filter(
+    (a) => a.status?.toLowerCase() === 'dispatched' || a.status?.toLowerCase() === 'escalated'
+  );
 
   const handleAcknowledge = async (id: string) => {
-    try {
-      const res = await acknowledgeAlert(id);
-      if (res.success) {
-        setAlerts((prev) => prev.filter((a) => a.id !== id));
-      }
-    } catch (err) {
-      console.error('Failed to acknowledge alert', err);
-    }
+    await acknowledgeAlert(id);
   };
 
   // Visibility Filter:

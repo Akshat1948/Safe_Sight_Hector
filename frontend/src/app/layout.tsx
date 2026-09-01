@@ -1,6 +1,6 @@
 import './globals.css';
 import { LanguageProvider } from '@/i18n';
-import { AuthProvider } from '@/shared/hooks';
+import { AuthProvider, NotificationProvider } from '@/shared/hooks';
 
 export const metadata = {
   title: 'SafeSight HECTOR — Operational Command',
@@ -24,7 +24,9 @@ export default function RootLayout({
       </head>
       <body className="antialiased min-h-screen font-body-base">
         <AuthProvider>
-          <LanguageProvider>{children}</LanguageProvider>
+          <NotificationProvider>
+            <LanguageProvider>{children}</LanguageProvider>
+          </NotificationProvider>
         </AuthProvider>
       </body>
     </html>

@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { IAlert, AlertSeverity, AlertStatus } from '@/shared/types';
-import { getAlerts, acknowledgeAlert } from '@/shared/api';
-import { useSocket } from '@/shared/hooks';
+import { useNotifications } from '@/shared/hooks';
 
 interface AlertHistoryProps {
   siteId?: string | null;
@@ -24,82 +23,12 @@ const STATUS_BADGES: Record<string, string> = {
 };
 
 export default function AlertHistory({ siteId }: AlertHistoryProps) {
-  const [alerts, setAlerts] = useState<IAlert[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { alerts, loading, acknowledgeAlert, refreshAlerts } = useNotifications();
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const { on, off } = useSocket(siteId || null);
-
-  const fetchAlerts = () => {
-    setLoading(true);
-    getAlerts(siteId || undefined)
-      .then((res) => {
-        if (res.success && res.data) {
-          setAlerts(res.data);
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchAlerts();
-  }, [siteId]);
-
-  useEffect(() => {
-    const handleNewAlert = (alert: unknown) => {
-      const a = alert as IAlert;
-      if (a?.id) {
-        setAlerts((prev) => [a, ...prev.filter((item) => item.id !== a.id)]);
-      }
-    };
-
-    const handleAckAlert = (data: unknown) => {
-      const payload = data as { alertId: string; acknowledgedBy?: string; acknowledgedAt?: string };
-      if (payload?.alertId) {
-        setAlerts((prev) =>
-          prev.map((a) =>
-            a.id === payload.alertId
-              ? {
-                  ...a,
-                  status: AlertStatus.ACKNOWLEDGED,
-                  acknowledgedBy: payload.acknowledgedBy || 'Operator',
-                  acknowledgedAt: payload.acknowledgedAt || new Date().toISOString(),
-                }
-              : a
-          )
-        );
-      }
-    };
-
-    on('alert:new', handleNewAlert);
-    on('alert:acknowledged', handleAckAlert);
-
-    return () => {
-      off('alert:new', handleNewAlert);
-      off('alert:acknowledged', handleAckAlert);
-    };
-  }, [on, off]);
 
   const handleAcknowledge = async (id: string) => {
-    try {
-      const res = await acknowledgeAlert(id);
-      if (res.success) {
-        setAlerts((prev) =>
-          prev.map((a) =>
-            a.id === id
-              ? {
-                  ...a,
-                  status: AlertStatus.ACKNOWLEDGED,
-                  acknowledgedAt: new Date().toISOString(),
-                }
-              : a
-          )
-        );
-      }
-    } catch (err) {
-      console.error('Failed to acknowledge alert', err);
-    }
+    await acknowledgeAlert(id);
   };
 
   const filteredAlerts = alerts.filter((alert) => {
@@ -150,7 +79,7 @@ export default function AlertHistory({ siteId }: AlertHistoryProps) {
           </select>
 
           <button
-            onClick={fetchAlerts}
+            onClick={() => refreshAlerts()}
             title="Refresh history"
             className="p-1.5 bg-surface-container border border-border-subtle rounded text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
           >

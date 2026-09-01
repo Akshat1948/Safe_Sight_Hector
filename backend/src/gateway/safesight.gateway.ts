@@ -78,6 +78,10 @@ export class SafeSightGateway implements OnGatewayConnection, OnGatewayDisconnec
     this.emitToSite(siteId, 'sos:new', data);
   }
 
+  emitSosStatusUpdate(siteId: string, data: { id: string; status: string; assignedTo?: string | null; updatedAt: Date }) {
+    this.emitToSite(siteId, 'sos:status:update', data);
+  }
+
   emitResponderStatusUpdate(siteId: string, data: { incidentId: string, responderId: string, status: string, updatedAt: Date }) {
     this.emitToSite(siteId, 'responder:status:update', data);
   }

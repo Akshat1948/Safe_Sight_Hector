@@ -3,8 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth, useSocket } from '@/shared/hooks';
-import { getSosRequests, getAlerts } from '@/shared/api';
+import { useAuth, useNotifications } from '@/shared/hooks';
 import AlertBanner from '@/components/alerts/alert-banner';
 
 interface DashboardLayoutProps {
@@ -16,16 +15,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { unreadSosCount, unreadAlertsCount } = useNotifications();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [lockdownActive, setLockdownActive] = useState(false);
-
-  // Unread badge counters for real-time mobile-style notification pills
-  const [unreadSosCount, setUnreadSosCount] = useState(0);
-  const [unreadAlertsCount, setUnreadAlertsCount] = useState(0);
-  const { on, off } = useSocket(user?.siteId || null);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -103,76 +98,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [showProfileMenu]);
-
-  // Initial fetch of pending unread SOS and active Alert counts
-  useEffect(() => {
-    // Fetch pending SOS count
-    getSosRequests(user?.siteId || undefined)
-      .then((res) => {
-        if (res?.success && Array.isArray(res.data)) {
-          const pending = res.data.filter((s: any) => s.status === 'pending');
-          if (pathname !== '/dashboard/sos') {
-            setUnreadSosCount(pending.length);
-          }
-        }
-      })
-      .catch(console.error);
-
-    // Fetch dispatched / escalated active alerts count
-    getAlerts(user?.siteId || undefined)
-      .then((res) => {
-        if (res?.success && Array.isArray(res.data)) {
-          const active = res.data.filter((a: any) => a.status === 'dispatched' || a.status === 'escalated');
-          if (pathname !== '/dashboard/alerts') {
-            setUnreadAlertsCount(active.length);
-          }
-        }
-      })
-      .catch(console.error);
-  }, [user?.siteId]);
-
-  // When manager visits /dashboard/sos, clear the unread SOS counter
-  useEffect(() => {
-    if (pathname === '/dashboard/sos') {
-      setUnreadSosCount(0);
-    }
-  }, [pathname]);
-
-  // When manager visits /dashboard/alerts, clear the unread Alerts counter
-  useEffect(() => {
-    if (pathname === '/dashboard/alerts') {
-      setUnreadAlertsCount(0);
-    }
-  }, [pathname]);
-
-  // Real-time WebSocket listeners for incoming SOS distress and new Alerts
-  useEffect(() => {
-    const handleNewSos = () => {
-      if (pathname !== '/dashboard/sos') {
-        setUnreadSosCount((prev) => prev + 1);
-      }
-    };
-
-    const handleNewAlert = () => {
-      if (pathname !== '/dashboard/alerts') {
-        setUnreadAlertsCount((prev) => prev + 1);
-      }
-    };
-
-    const handleAckAlert = () => {
-      setUnreadAlertsCount((prev) => Math.max(0, prev - 1));
-    };
-
-    on('sos:new', handleNewSos);
-    on('alert:new', handleNewAlert);
-    on('alert:acknowledged', handleAckAlert);
-
-    return () => {
-      off('sos:new', handleNewSos);
-      off('alert:new', handleNewAlert);
-      off('alert:acknowledged', handleAckAlert);
-    };
-  }, [on, off, pathname]);
 
   const handleEmergencyLockdown = () => {
     const confirm = window.confirm(

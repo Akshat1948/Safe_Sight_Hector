@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import DashboardLayout from '@/components/dashboard/dashboard-layout';
 import RoleGuard from '@/components/auth/role-guard';
-import { useAuth, useSocket } from '@/shared/hooks';
+import { useNotifications } from '@/shared/hooks';
 import { ISosRequest, SosStatus } from '@/shared/types';
-import { getSosRequests, updateSosStatus } from '@/shared/api';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-error/20 text-error border-error',
@@ -15,101 +14,10 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function SosPage() {
-  const { user } = useAuth();
-  const siteId = user?.siteId || 'demo-site-prayagraj-01';
-  const [requests, setRequests] = useState<ISosRequest[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { on, off } = useSocket(siteId);
-
-  useEffect(() => {
-    if (!siteId) return;
-
-    getSosRequests(siteId)
-      .then((res) => {
-        if (res.success && res.data) {
-          setRequests(res.data);
-        } else {
-          // Demo fallback
-          setRequests([
-            {
-              id: 'SOS-2026-001',
-              siteId: siteId,
-              location: { type: 'Point', coordinates: [81.8463, 25.4358] },
-              message: 'Elderly person collapsed near Sangam River Ghat Steps. High surge pressure detected.',
-              contactPhone: '+919876500001',
-              status: SosStatus.PENDING,
-              assignedTo: null,
-              createdAt: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
-              updatedAt: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
-            },
-            {
-              id: 'SOS-2026-002',
-              siteId: siteId,
-              location: { type: 'Point', coordinates: [81.8425, 25.4335] },
-              message: 'Child separated from family near Main Entry Gate 4. Requesting security assistance.',
-              contactPhone: '+919876500002',
-              status: SosStatus.ACKNOWLEDGED,
-              assignedTo: 'responder-team-bravo',
-              createdAt: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
-              updatedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-            },
-          ]);
-        }
-      })
-      .catch(() => {
-        setRequests([]);
-      })
-      .finally(() => setLoading(false));
-  }, [siteId]);
-
-  useEffect(() => {
-    const handleNewSos = (data: unknown) => {
-      const sos = data as any;
-      if (sos?.id) {
-        const normalizedSos: ISosRequest = {
-          id: sos.id,
-          siteId: sos.siteId || null,
-          location: sos.location || null,
-          message: sos.message || null,
-          contactPhone: sos.contactPhone || null,
-          status: (sos.status as SosStatus) || SosStatus.PENDING,
-          assignedTo: sos.assignedTo || null,
-          createdAt: sos.createdAt || new Date().toISOString(),
-          updatedAt: sos.updatedAt || new Date().toISOString(),
-        };
-        setRequests((prev) => [normalizedSos, ...prev.filter((s) => s.id !== sos.id)]);
-      }
-    };
-
-    const handleStatusUpdate = (data: unknown) => {
-      const payload = data as { id?: string; sosId?: string; status: SosStatus };
-      const targetId = payload?.id || payload?.sosId;
-      if (targetId && payload?.status) {
-        setRequests((prev) =>
-          prev.map((s) => (s.id === targetId ? { ...s, status: payload.status } : s))
-        );
-      }
-    };
-
-    on('sos:new', handleNewSos);
-    on('sos:status:update', handleStatusUpdate);
-    return () => {
-      off('sos:new', handleNewSos);
-      off('sos:status:update', handleStatusUpdate);
-    };
-  }, [on, off]);
+  const { sosRequests: requests, loading, updateSosStatus } = useNotifications();
 
   const handleStatusChange = async (id: string, newStatus: string) => {
-    const res = await updateSosStatus(id, newStatus);
-    if (res.success) {
-      setRequests((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, status: newStatus as SosStatus } : s))
-      );
-    } else {
-      setRequests((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, status: newStatus as SosStatus } : s))
-      );
-    }
+    await updateSosStatus(id, newStatus);
   };
 
   return (
