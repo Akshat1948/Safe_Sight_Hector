@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateSosDto {
-  @IsUUID(4)
+  @IsString()
   @IsOptional()
   siteId?: string;
 

@@ -22,8 +22,9 @@ export class SosService {
   ) {}
 
   async createSos(dto: CreateSosDto) {
+    const validSiteId = dto.siteId && UUID_REGEX.test(dto.siteId) ? dto.siteId : null;
     const sosRequest = this.sosRepository.create({
-      siteId: dto.siteId || null,
+      siteId: validSiteId,
       location: { latitude: dto.latitude, longitude: dto.longitude },
       message: dto.message || null,
       contactPhone: dto.contactPhone || null,
@@ -36,7 +37,7 @@ export class SosService {
     // Auto-create an incident from this SOS
     try {
       await this.incidentsService.createIncident({
-        siteId: dto.siteId,
+        siteId: validSiteId || undefined,
         incidentType: IncidentType.OTHER,
         severity: Severity.HIGH,
         title: 'SOS Emergency Request',
