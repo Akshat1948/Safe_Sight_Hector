@@ -44,28 +44,27 @@ const MARCHING_BORDER_COLORS: Record<string, string> = {
 
 export default function AlertBanner({ siteId }: AlertBannerProps) {
   const pathname = usePathname();
-  const { alerts, acknowledgeAlert } = useNotifications();
+  const { alerts, acknowledgeAlert, isAcknowledgingAlert } = useNotifications();
 
   const isAlertsPage = pathname === '/dashboard/alerts';
 
-  // Active unacknowledged alerts
-  const activeAlerts = alerts.filter(
-    (a) => a.status?.toLowerCase() === 'dispatched' || a.status?.toLowerCase() === 'escalated'
-  );
-
-  const handleAcknowledge = async (id: string) => {
-    await acknowledgeAlert(id);
-  };
-
   // Visibility Filter:
-  // - On /dashboard/alerts: Show both CRITICAL (Red) and MODERATE / ADVISORY (Yellow) alerts.
-  // - On all other pages: Show ONLY CRITICAL (Red) emergency alerts.
+  // - Only ACTIVE unacknowledged alerts (dispatched or escalated) can appear as banners.
+  // - On /dashboard/alerts: Show both CRITICAL (Red) and MODERATE / ADVISORY (Yellow) active banners.
+  // - On all other pages: Show ONLY CRITICAL (Red) emergency active banners.
   const visibleAlerts = alerts.filter((alert) => {
+    const st = (alert.status || '').toLowerCase();
+    if (st !== 'dispatched' && st !== 'escalated') return false;
+
     const sev = alert.severity?.toLowerCase();
     if (sev === 'critical') return true;
     if (isAlertsPage && (sev === 'advisory' || sev === 'moderate')) return true;
     return false;
   });
+
+  const handleAcknowledge = async (id: string) => {
+    await acknowledgeAlert(id);
+  };
 
   // Deduplicate active alerts by zone so repeated demo runs do not stack duplicate banners
   const displayedAlerts: IAlert[] = [];
@@ -168,11 +167,12 @@ export default function AlertBanner({ siteId }: AlertBannerProps) {
 
             <button
               onClick={() => handleAcknowledge(alert.id)}
-              className={`relative z-10 shrink-0 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition-all text-sm hover:shadow-md cursor-pointer ${
+              disabled={isAcknowledgingAlert(alert.id)}
+              className={`relative z-10 shrink-0 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition-all text-sm hover:shadow-md cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
                 SEVERITY_BTN_STYLES[sev] || SEVERITY_BTN_STYLES.critical
               }`}
             >
-              Acknowledge
+              {isAcknowledgingAlert(alert.id) ? 'Acknowledging...' : 'Acknowledge'}
             </button>
           </div>
         );

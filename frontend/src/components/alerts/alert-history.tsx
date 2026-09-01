@@ -23,7 +23,7 @@ const STATUS_BADGES: Record<string, string> = {
 };
 
 export default function AlertHistory({ siteId }: AlertHistoryProps) {
-  const { alerts, loading, acknowledgeAlert, refreshAlerts } = useNotifications();
+  const { alerts, loading, acknowledgeAlert, isAcknowledgingAlert, refreshAlerts } = useNotifications();
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -149,16 +149,17 @@ export default function AlertHistory({ siteId }: AlertHistoryProps) {
                     {new Date(alert.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                   </td>
                   <td className="py-3 text-right">
-                    {alert.status !== AlertStatus.ACKNOWLEDGED ? (
+                    {alert.status?.toLowerCase() !== 'acknowledged' ? (
                       <button
                         onClick={() => handleAcknowledge(alert.id)}
-                        className="px-2.5 py-1 bg-primary text-white rounded text-[10px] font-label-caps font-bold hover:bg-primary/90 transition-colors cursor-pointer"
+                        disabled={isAcknowledgingAlert(alert.id)}
+                        className="px-2.5 py-1 bg-primary text-white rounded text-[10px] font-label-caps font-bold hover:bg-primary/90 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Acknowledge
+                        {isAcknowledgingAlert(alert.id) ? 'Acking...' : 'Acknowledge'}
                       </button>
                     ) : (
-                      <span className="text-[10px] text-status-nominal font-telemetry-md font-bold">
-                        ✓ Acked
+                      <span className="text-[10px] text-status-nominal font-telemetry-md font-bold inline-flex items-center gap-1">
+                        <span>✓</span> <span>Acked</span>
                       </span>
                     )}
                   </td>

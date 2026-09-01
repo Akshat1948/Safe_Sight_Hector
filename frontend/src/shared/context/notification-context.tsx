@@ -11,17 +11,19 @@ import {
 import { useSocket, useAuth } from '@/shared/hooks';
 
 interface NotificationContextValue {
-  // Alerts
+  // Alerts State & Derived Properties
   alerts: IAlert[];
   unreadAlertsCount: number;
   acknowledgeAlert: (alertId: string) => Promise<boolean>;
+  isAcknowledgingAlert: (alertId: string) => boolean;
   refreshAlerts: () => Promise<void>;
 
-  // SOS Distress Requests
+  // SOS Distress State & Derived Properties
   sosRequests: ISosRequest[];
   unreadSosCount: number;
   updateSosStatus: (sosId: string, status: string) => Promise<boolean>;
   acknowledgeSos: (sosId: string) => Promise<boolean>;
+  isUpdatingSos: (sosId: string) => boolean;
   refreshSos: () => Promise<void>;
 
   loading: boolean;
@@ -34,33 +36,38 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const siteId = user?.siteId || '0275fd8b-81a2-4513-bdc5-9c4d27aae375';
   const { on, off } = useSocket(siteId);
 
+  // Single Source of Truth collections
   const [alerts, setAlerts] = useState<IAlert[]>([]);
   const [sosRequests, setSosRequests] = useState<ISosRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // In-flight operation trackers to prevent double-clicks & race conditions
+  const [pendingAlertAcks, setPendingAlertAcks] = useState<Set<string>>(new Set());
+  const [pendingSosAcks, setPendingSosAcks] = useState<Set<string>>(new Set());
+
   // Fetch initial alerts from database/API
   const refreshAlerts = useCallback(async () => {
     try {
-      const res = await getAlerts(siteId);
+      const res = await getAlerts();
       if (res?.success && Array.isArray(res.data)) {
         setAlerts(res.data);
       }
     } catch (err) {
       console.error('Failed to fetch alerts:', err);
     }
-  }, [siteId]);
+  }, []);
 
   // Fetch initial SOS requests from database/API
   const refreshSos = useCallback(async () => {
     try {
-      const res = await getSosRequests(siteId);
+      const res = await getSosRequests();
       if (res?.success && Array.isArray(res.data)) {
         setSosRequests(res.data);
       }
     } catch (err) {
       console.error('Failed to fetch SOS requests:', err);
     }
-  }, [siteId]);
+  }, []);
 
   // Initial load
   useEffect(() => {
@@ -76,67 +83,90 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     };
   }, [refreshAlerts, refreshSos]);
 
-  // Real-time WebSocket event handling for alerts and SOS
+  // Real-time WebSocket event handling: update collections directly
   useEffect(() => {
     const handleNewAlert = (alertData: unknown) => {
       const a = alertData as IAlert;
-      if (a && a.id) {
-        setAlerts((prev) => [a, ...prev.filter((item) => item.id !== a.id)]);
-      }
+      if (!a || !a.id) return;
+      setAlerts((prev) => {
+        const existingIndex = prev.findIndex((item) => item.id === a.id);
+        if (existingIndex >= 0) {
+          const updated = [...prev];
+          updated[existingIndex] = { ...updated[existingIndex], ...a };
+          return updated;
+        }
+        return [a, ...prev];
+      });
     };
 
     const handleAckAlert = (data: unknown) => {
-      const payload = data as { alertId: string };
-      if (payload?.alertId) {
-        setAlerts((prev) =>
-          prev.map((a) => (a.id === payload.alertId ? { ...a, status: AlertStatus.ACKNOWLEDGED } : a))
-        );
-      }
+      const payload = data as { alertId: string; acknowledgedBy?: string; acknowledgedAt?: string };
+      if (!payload?.alertId) return;
+      setAlerts((prev) =>
+        prev.map((a) =>
+          a.id === payload.alertId
+            ? {
+                ...a,
+                status: AlertStatus.ACKNOWLEDGED,
+                acknowledgedBy: payload.acknowledgedBy || a.acknowledgedBy || 'Operator',
+                acknowledgedAt: payload.acknowledgedAt || a.acknowledgedAt || new Date().toISOString(),
+              }
+            : a
+        )
+      );
     };
 
     const handleEscalateAlert = (data: unknown) => {
       const payload = data as { alertId: string; status: AlertStatus };
-      if (payload?.alertId) {
-        setAlerts((prev) =>
-          prev.map((a) => (a.id === payload.alertId ? { ...a, status: AlertStatus.ESCALATED } : a))
-        );
-      }
+      if (!payload?.alertId) return;
+      setAlerts((prev) =>
+        prev.map((a) =>
+          a.id === payload.alertId ? { ...a, status: AlertStatus.ESCALATED } : a
+        )
+      );
     };
 
     const handleNewSos = (sosData: unknown) => {
       const sos = sosData as any;
-      if (sos && sos.id) {
-        const normalizedSos: ISosRequest = {
-          id: sos.id,
-          siteId: sos.siteId || null,
-          location: sos.location || null,
-          message: sos.message || null,
-          contactPhone: sos.contactPhone || null,
-          status: (sos.status as SosStatus) || SosStatus.PENDING,
-          assignedTo: sos.assignedTo || null,
-          createdAt: sos.createdAt || new Date().toISOString(),
-          updatedAt: sos.updatedAt || new Date().toISOString(),
-        };
-        setSosRequests((prev) => [normalizedSos, ...prev.filter((item) => item.id !== sos.id)]);
-      }
+      if (!sos || !sos.id) return;
+      const normalizedSos: ISosRequest = {
+        id: sos.id,
+        siteId: sos.siteId || null,
+        location: sos.location || null,
+        message: sos.message || null,
+        contactPhone: sos.contactPhone || null,
+        status: (sos.status as SosStatus) || SosStatus.PENDING,
+        assignedTo: sos.assignedTo || null,
+        createdAt: sos.createdAt || new Date().toISOString(),
+        updatedAt: sos.updatedAt || new Date().toISOString(),
+      };
+      setSosRequests((prev) => {
+        const existingIndex = prev.findIndex((item) => item.id === sos.id);
+        if (existingIndex >= 0) {
+          const updated = [...prev];
+          updated[existingIndex] = { ...updated[existingIndex], ...normalizedSos };
+          return updated;
+        }
+        return [normalizedSos, ...prev];
+      });
     };
 
     const handleSosStatusUpdate = (data: unknown) => {
-      const payload = data as { id?: string; sosId?: string; status: string; assignedTo?: string };
+      const payload = data as { id?: string; sosId?: string; status: string; assignedTo?: string; updatedAt?: string };
       const targetId = payload?.id || payload?.sosId;
-      if (targetId && payload?.status) {
-        setSosRequests((prev) =>
-          prev.map((s) =>
-            s.id === targetId
-              ? {
-                  ...s,
-                  status: payload.status as SosStatus,
-                  assignedTo: payload.assignedTo !== undefined ? payload.assignedTo : s.assignedTo,
-                }
-              : s
-          )
-        );
-      }
+      if (!targetId || !payload?.status) return;
+      setSosRequests((prev) =>
+        prev.map((s) =>
+          s.id === targetId
+            ? {
+                ...s,
+                status: payload.status as SosStatus,
+                assignedTo: payload.assignedTo !== undefined ? payload.assignedTo : s.assignedTo,
+                updatedAt: payload.updatedAt || new Date().toISOString(),
+              }
+            : s
+        )
+      );
     };
 
     on('alert:new', handleNewAlert);
@@ -154,46 +184,111 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     };
   }, [on, off]);
 
-  // Acknowledge an alert: updates status to ACKNOWLEDGED in backend & local state
-  const acknowledgeAlert = useCallback(async (alertId: string): Promise<boolean> => {
-    try {
-      const res = await apiAcknowledgeAlert(alertId);
-      if (res?.success) {
-        setAlerts((prev) =>
-          prev.map((a) => (a.id === alertId ? { ...a, status: AlertStatus.ACKNOWLEDGED } : a))
-        );
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.error('Failed to acknowledge alert:', err);
-      // Optimistic update fallback
-      setAlerts((prev) =>
-        prev.map((a) => (a.id === alertId ? { ...a, status: AlertStatus.ACKNOWLEDGED } : a))
-      );
-      return true;
-    }
-  }, []);
+  // Acknowledge an alert with optimistic UI update and automatic rollback on failure
+  const acknowledgeAlert = useCallback(
+    async (alertId: string): Promise<boolean> => {
+      if (pendingAlertAcks.has(alertId)) return false;
 
-  // Update SOS status (e.g. acknowledge, responding, resolved)
-  const updateSosStatus = useCallback(async (sosId: string, status: string): Promise<boolean> => {
-    try {
-      const res = await apiUpdateSosStatus(sosId, status);
-      if (res?.success) {
-        setSosRequests((prev) =>
-          prev.map((s) => (s.id === sosId ? { ...s, status: status as SosStatus } : s))
-        );
+      const targetAlert = alerts.find((a) => a.id === alertId);
+      if (!targetAlert || targetAlert.status?.toLowerCase() === 'acknowledged') {
         return true;
       }
-      return false;
-    } catch (err) {
-      console.error('Failed to update SOS status:', err);
-      setSosRequests((prev) =>
-        prev.map((s) => (s.id === sosId ? { ...s, status: status as SosStatus } : s))
+
+      const previousAlerts = [...alerts];
+      setPendingAlertAcks((prev) => new Set(prev).add(alertId));
+
+      // 1. Optimistically update shared source of truth
+      setAlerts((prev) =>
+        prev.map((a) =>
+          a.id === alertId
+            ? { ...a, status: AlertStatus.ACKNOWLEDGED, acknowledgedAt: new Date().toISOString() }
+            : a
+        )
       );
-      return true;
-    }
-  }, []);
+
+      // 2. Persist via API
+      try {
+        const res = await apiAcknowledgeAlert(alertId);
+        if (res && (res.success || res.data)) {
+          if (res.data) {
+            setAlerts((prev) =>
+              prev.map((a) =>
+                a.id === alertId ? { ...a, ...res.data, status: AlertStatus.ACKNOWLEDGED } : a
+              )
+            );
+          }
+          return true;
+        } else {
+          throw new Error(res?.message || 'Server rejected acknowledgement');
+        }
+      } catch (err) {
+        console.error(`Acknowledgement failed for alert ${alertId}, rolling back:`, err);
+        // Rollback optimistic change
+        setAlerts(previousAlerts);
+        return false;
+      } finally {
+        setPendingAlertAcks((prev) => {
+          const next = new Set(prev);
+          next.delete(alertId);
+          return next;
+        });
+      }
+    },
+    [alerts, pendingAlertAcks]
+  );
+
+  // Update SOS status with optimistic UI update and automatic rollback on failure
+  const updateSosStatus = useCallback(
+    async (sosId: string, status: string): Promise<boolean> => {
+      if (pendingSosAcks.has(sosId)) return false;
+
+      const targetSos = sosRequests.find((s) => s.id === sosId);
+      if (!targetSos || targetSos.status?.toLowerCase() === status.toLowerCase()) {
+        return true;
+      }
+
+      const previousSos = [...sosRequests];
+      setPendingSosAcks((prev) => new Set(prev).add(sosId));
+
+      // 1. Optimistically update shared source of truth
+      setSosRequests((prev) =>
+        prev.map((s) =>
+          s.id === sosId
+            ? { ...s, status: status as SosStatus, updatedAt: new Date().toISOString() }
+            : s
+        )
+      );
+
+      // 2. Persist via API
+      try {
+        const res = await apiUpdateSosStatus(sosId, status);
+        if (res && (res.success || res.data)) {
+          if (res.data) {
+            setSosRequests((prev) =>
+              prev.map((s) =>
+                s.id === sosId ? { ...s, ...res.data, status: status as SosStatus } : s
+              )
+            );
+          }
+          return true;
+        } else {
+          throw new Error(res?.message || 'Server rejected SOS status update');
+        }
+      } catch (err) {
+        console.error(`Status update failed for SOS ${sosId}, rolling back:`, err);
+        // Rollback optimistic change
+        setSosRequests(previousSos);
+        return false;
+      } finally {
+        setPendingSosAcks((prev) => {
+          const next = new Set(prev);
+          next.delete(sosId);
+          return next;
+        });
+      }
+    },
+    [sosRequests, pendingSosAcks]
+  );
 
   // Convenience acknowledge SOS
   const acknowledgeSos = useCallback(
@@ -203,19 +298,29 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     [updateSosStatus]
   );
 
-  // Derived unread counts directly from underlying data model:
-  // - Unread Alerts: any alert whose status is NOT acknowledged, NOT resolved, and NOT expired.
+  const isAcknowledgingAlert = useCallback(
+    (alertId: string) => pendingAlertAcks.has(alertId),
+    [pendingAlertAcks]
+  );
+
+  const isUpdatingSos = useCallback(
+    (sosId: string) => pendingSosAcks.has(sosId),
+    [pendingSosAcks]
+  );
+
+  // DERIVED UNREAD COUNTS:
+  // - An alert is "unread" if and only if it is NOT acknowledged (status === 'dispatched' or 'escalated').
   const unreadAlertsCount = useMemo(() => {
     return alerts.filter((alert) => {
-      const st = alert.status?.toLowerCase();
+      const st = (alert.status || '').toLowerCase();
       return st === 'dispatched' || st === 'escalated';
     }).length;
   }, [alerts]);
 
-  // - Unread SOS: any SOS request whose status is 'pending' (not yet acknowledged, responding, or resolved).
+  // - An SOS is "unread" if and only if it is NOT acknowledged (status === 'pending').
   const unreadSosCount = useMemo(() => {
     return sosRequests.filter((sos) => {
-      const st = sos.status?.toLowerCase();
+      const st = (sos.status || '').toLowerCase();
       return st === 'pending';
     }).length;
   }, [sosRequests]);
@@ -225,11 +330,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       alerts,
       unreadAlertsCount,
       acknowledgeAlert,
+      isAcknowledgingAlert,
       refreshAlerts,
       sosRequests,
       unreadSosCount,
       updateSosStatus,
       acknowledgeSos,
+      isUpdatingSos,
       refreshSos,
       loading,
     }),
@@ -237,11 +344,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       alerts,
       unreadAlertsCount,
       acknowledgeAlert,
+      isAcknowledgingAlert,
       refreshAlerts,
       sosRequests,
       unreadSosCount,
       updateSosStatus,
       acknowledgeSos,
+      isUpdatingSos,
       refreshSos,
       loading,
     ]

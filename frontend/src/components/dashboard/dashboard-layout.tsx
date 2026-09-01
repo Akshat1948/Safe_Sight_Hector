@@ -243,20 +243,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Link
                 href="/dashboard/alerts"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded transition-colors duration-200 ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded transition-colors duration-150 ${
                   pathname === '/dashboard/alerts'
                     ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
                     : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
                 }`}
               >
-                <div className="flex items-center">
-                  <span className="material-symbols-outlined mr-3 text-[20px]">
+                <div className="flex items-center min-w-0">
+                  <span className="material-symbols-outlined mr-3 text-[20px] shrink-0">
                     notifications
                   </span>
-                  <span className="font-sans text-[13px] font-medium">Alert History</span>
+                  <span className="font-sans text-[13px] font-medium truncate">Alert History</span>
                 </div>
                 {unreadAlertsCount > 0 && (
-                  <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-black text-white bg-red-600 rounded-full shadow-sm shadow-red-600/50 animate-pulse">
+                  <span className="ml-2 shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-black text-white bg-red-600 rounded-full shadow-sm shadow-red-600/40 transition-all duration-200 ease-out animate-pulse">
                     {unreadAlertsCount > 99 ? '99+' : unreadAlertsCount}
                   </span>
                 )}
@@ -268,20 +268,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Link
                 href="/dashboard/sos"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded transition-colors duration-200 ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded transition-colors duration-150 ${
                   pathname === '/dashboard/sos'
                     ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
                     : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
                 }`}
               >
-                <div className="flex items-center">
-                  <span className="material-symbols-outlined mr-3 text-[20px] text-[#ef4444]">
+                <div className="flex items-center min-w-0">
+                  <span className="material-symbols-outlined mr-3 text-[20px] text-[#ef4444] shrink-0">
                     emergency
                   </span>
-                  <span className="font-sans text-[13px] font-medium">SOS Queue</span>
+                  <span className="font-sans text-[13px] font-medium truncate">SOS Queue</span>
                 </div>
                 {unreadSosCount > 0 && (
-                  <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-black text-white bg-red-600 rounded-full shadow-sm shadow-red-600/50 animate-pulse">
+                  <span className="ml-2 shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-black text-white bg-red-600 rounded-full shadow-sm shadow-red-600/40 transition-all duration-200 ease-out animate-pulse">
                     {unreadSosCount > 99 ? '99+' : unreadSosCount}
                   </span>
                 )}

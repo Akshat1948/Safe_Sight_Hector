@@ -14,7 +14,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function SosPage() {
-  const { sosRequests: requests, loading, updateSosStatus } = useNotifications();
+  const { sosRequests: requests, loading, updateSosStatus, isUpdatingSos } = useNotifications();
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     await updateSosStatus(id, newStatus);
@@ -165,28 +165,31 @@ export default function SosPage() {
                       </div>
 
                       <div className="flex gap-2 shrink-0 self-start md:self-center">
-                        {sos.status === 'pending' && (
+                        {sos.status?.toLowerCase() === 'pending' && (
                           <button
                             onClick={() => handleStatusChange(sos.id, 'acknowledged')}
-                            className="bg-error hover:bg-error/90 text-on-error text-xs font-body-bold py-2 px-4 rounded shadow-md shadow-error/20 transition-all cursor-pointer"
+                            disabled={isUpdatingSos(sos.id)}
+                            className="bg-error hover:bg-error/90 text-on-error text-xs font-body-bold py-2 px-4 rounded shadow-md shadow-error/20 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Acknowledge
+                            {isUpdatingSos(sos.id) ? 'Acknowledging...' : 'Acknowledge'}
                           </button>
                         )}
-                        {sos.status === 'acknowledged' && (
+                        {sos.status?.toLowerCase() === 'acknowledged' && (
                           <button
                             onClick={() => handleStatusChange(sos.id, 'responding')}
-                            className="bg-primary hover:bg-primary-container text-on-primary text-xs font-body-bold py-2 px-4 rounded shadow-sm transition-all cursor-pointer"
+                            disabled={isUpdatingSos(sos.id)}
+                            className="bg-primary hover:bg-primary-container text-on-primary text-xs font-body-bold py-2 px-4 rounded shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Dispatch Responder
+                            {isUpdatingSos(sos.id) ? 'Dispatching...' : 'Dispatch Responder'}
                           </button>
                         )}
-                        {sos.status === 'responding' && (
+                        {sos.status?.toLowerCase() === 'responding' && (
                           <button
                             onClick={() => handleStatusChange(sos.id, 'resolved')}
-                            className="bg-status-nominal hover:bg-emerald-700 text-white text-xs font-body-bold py-2 px-4 rounded shadow-sm transition-all cursor-pointer"
+                            disabled={isUpdatingSos(sos.id)}
+                            className="bg-status-nominal hover:bg-emerald-700 text-white text-xs font-body-bold py-2 px-4 rounded shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Mark Resolved
+                            {isUpdatingSos(sos.id) ? 'Resolving...' : 'Mark Resolved'}
                           </button>
                         )}
                       </div>
