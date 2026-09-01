@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { IWeatherData } from '@/shared/types';
@@ -95,44 +95,44 @@ export default function WeatherWidget({
   const icon = CONDITION_ICONS[conditionKey] || '🌤️';
 
   return (
-    <div className={`flex flex-col gap-3 rounded-2xl bg-white border border-slate-200/80 p-4 shadow-sm hover:shadow-md transition-all ${className}`}>
+    <div className={`flex flex-col gap-3 rounded-2xl bg-slate-900/90 border border-slate-800 p-4 sm:p-5 shadow-xl backdrop-blur-md transition-all ${className}`}>
       {/* Top Header: Title & Hazard Alert */}
-      <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+      <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
         <div className="flex items-center gap-2">
-          <span className="text-lg">🌤️</span>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          <span className="text-base sm:text-lg">🌤️</span>
+          <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-cyan-400">
             {t('weather_hazards')}
           </h3>
         </div>
         {current.condition && (
-          <span className="text-xs font-semibold capitalize px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+          <span className="text-[10px] sm:text-xs font-semibold capitalize px-2 sm:px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
             {current.condition.replace('_', ' ')}
           </span>
         )}
       </div>
 
-      {/* Main Temperature Display */}
-      <div className="flex items-center justify-between">
+      {/* Main Temperature & Telemetry Display */}
+      <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-baseline gap-2">
-          <span className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             {Math.round(current.temperature)}°C
           </span>
-          <span className="text-3xl shrink-0">{icon}</span>
+          <span className="text-2xl sm:text-3xl shrink-0">{icon}</span>
         </div>
 
         {/* Environmental Telemetry Grid */}
-        <div className="grid grid-cols-3 gap-3 text-right">
-          <div>
-            <span className="text-[10px] text-slate-400 block uppercase font-bold">{t('humidity')}</span>
-            <span className="text-xs md:text-sm font-bold text-slate-700">{current.humidity}%</span>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-left xs:text-right w-full xs:w-auto">
+          <div className="bg-slate-950/40 xs:bg-transparent p-2 xs:p-0 rounded-lg border border-slate-800 xs:border-0">
+            <span className="text-[9px] sm:text-[10px] text-slate-400 block uppercase font-bold">{t('humidity')}</span>
+            <span className="text-xs sm:text-sm font-bold text-slate-200">{current.humidity}%</span>
           </div>
-          <div>
-            <span className="text-[10px] text-slate-400 block uppercase font-bold">{t('wind')}</span>
-            <span className="text-xs md:text-sm font-bold text-slate-700">{Math.round(current.windSpeed)} km/h</span>
+          <div className="bg-slate-950/40 xs:bg-transparent p-2 xs:p-0 rounded-lg border border-slate-800 xs:border-0">
+            <span className="text-[9px] sm:text-[10px] text-slate-400 block uppercase font-bold">{t('wind')}</span>
+            <span className="text-xs sm:text-sm font-bold text-slate-200">{Math.round(current.windSpeed)} km/h</span>
           </div>
-          <div>
-            <span className="text-[10px] text-slate-400 block uppercase font-bold">{t('rainfall')}</span>
-            <span className="text-xs md:text-sm font-bold text-slate-700">{current.precipitation} mm</span>
+          <div className="bg-slate-950/40 xs:bg-transparent p-2 xs:p-0 rounded-lg border border-slate-800 xs:border-0">
+            <span className="text-[9px] sm:text-[10px] text-slate-400 block uppercase font-bold">{t('rainfall')}</span>
+            <span className="text-xs sm:text-sm font-bold text-slate-200">{current.precipitation} mm</span>
           </div>
         </div>
       </div>
@@ -142,23 +142,23 @@ export default function WeatherWidget({
 
       {/* 24-Hour Forecast Strip (if available and not compact) */}
       {!compact && forecast && forecast.length > 0 && (
-        <div className="mt-1 pt-2.5 border-t border-slate-100">
-          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+        <div className="mt-1 pt-2.5 border-t border-slate-800">
+          <div className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
             24-Hour Forecast
           </div>
-          <div className="flex gap-2.5 overflow-x-auto pb-1.5 scrollbar-thin">
+          <div className="flex gap-2 sm:gap-2.5 overflow-x-auto pb-1.5 scrollbar-thin">
             {forecast.slice(0, 8).map((pt, idx) => {
               const ptIcon = CONDITION_ICONS[(pt.condition || 'clear').toLowerCase()] || '🌤️';
               return (
                 <div
                   key={idx}
-                  className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 min-w-[58px] text-center border border-slate-100/80"
+                  className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-950/60 min-w-[54px] sm:min-w-[58px] text-center border border-slate-800/80 shrink-0"
                 >
-                  <span className="text-[10px] font-semibold text-slate-500">{pt.time}</span>
-                  <span className="text-base my-0.5">{ptIcon}</span>
-                  <span className="text-xs font-bold text-slate-800">{Math.round(pt.temperature)}°</span>
+                  <span className="text-[9px] sm:text-[10px] font-semibold text-slate-400">{pt.time}</span>
+                  <span className="text-sm sm:text-base my-0.5">{ptIcon}</span>
+                  <span className="text-xs font-bold text-slate-200">{Math.round(pt.temperature)}°</span>
                   {pt.precipitation > 0 && (
-                    <span className="text-[9px] font-bold text-blue-600 mt-0.5">
+                    <span className="text-[8px] sm:text-[9px] font-bold text-cyan-400 mt-0.5">
                       {pt.precipitation}mm
                     </span>
                   )}

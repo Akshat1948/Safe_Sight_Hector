@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { Filter, MapPin, ChevronDown, CheckCircle2, FileText } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/dashboard-layout';
 import RoleGuard from '@/components/auth/role-guard';
 import { useAuth, useSocket } from '@/shared/hooks';
@@ -204,13 +205,11 @@ export default function IncidentsPage() {
 
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm pointer-events-none">
-                    filter_list
-                  </span>
+                  <Filter className="w-3.5 h-3.5 text-on-surface-variant absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <select
                     value={severityFilter}
                     onChange={(e) => setSeverityFilter(e.target.value)}
-                    className="w-full bg-surface border border-outline-variant rounded pl-8 pr-2 py-1.5 text-xs font-telemetry-md focus:outline-none focus:border-primary text-on-surface cursor-pointer"
+                    className="w-full appearance-none bg-surface border border-outline-variant rounded pl-8 pr-7 py-1.5 text-xs font-telemetry-md focus:outline-none focus:border-primary text-on-surface cursor-pointer"
                   >
                     <option>All Severities</option>
                     <option>Critical</option>
@@ -218,22 +217,22 @@ export default function IncidentsPage() {
                     <option>Medium</option>
                     <option>Low</option>
                   </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-on-surface-variant absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" />
                 </div>
 
                 <div className="relative flex-1">
-                  <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm pointer-events-none">
-                    my_location
-                  </span>
+                  <MapPin className="w-3.5 h-3.5 text-on-surface-variant absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <select
                     value={sectorFilter}
                     onChange={(e) => setSectorFilter(e.target.value)}
-                    className="w-full bg-surface border border-outline-variant rounded pl-8 pr-2 py-1.5 text-xs font-telemetry-md focus:outline-none focus:border-primary text-on-surface cursor-pointer"
+                    className="w-full appearance-none bg-surface border border-outline-variant rounded pl-8 pr-7 py-1.5 text-xs font-telemetry-md focus:outline-none focus:border-primary text-on-surface cursor-pointer"
                   >
                     <option>All Sectors</option>
                     <option>Sector 1 (North)</option>
                     <option>Sector 7 (Core)</option>
                     <option>Sector 9 (South)</option>
                   </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-on-surface-variant absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" />
                 </div>
               </div>
             </div>
@@ -400,7 +399,7 @@ export default function IncidentsPage() {
                 {/* Resolution Notes */}
                 <div className="flex-1 flex flex-col">
                   <h3 className="font-label-caps text-[11px] text-on-surface-variant mb-2 flex items-center gap-1.5 uppercase font-bold tracking-wider">
-                    <span className="material-symbols-outlined text-sm">assignment</span>
+                    <FileText className="w-3.5 h-3.5" />
                     Incident Description & Action Log
                   </h3>
                   <div className="bg-surface-container hud-border rounded-lg p-3.5 font-telemetry-md text-xs text-on-surface leading-relaxed flex-1 whitespace-pre-line">
@@ -468,7 +467,7 @@ export default function IncidentsPage() {
             {/* Footer Status */}
             <div className="p-3 border-t border-outline-variant bg-surface-container-lowest flex justify-between items-center text-xs font-telemetry-md shrink-0">
               <div className="flex items-center gap-1.5 text-tertiary font-bold">
-                <span className="material-symbols-outlined text-sm">check_circle</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 Status Verified by Operational Commander
               </div>
               <div className="text-on-surface-variant">

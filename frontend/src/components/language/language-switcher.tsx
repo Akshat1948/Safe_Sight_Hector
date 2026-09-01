@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/i18n';
@@ -31,17 +31,17 @@ export default function LanguageSwitcher({ variant = 'compact', className = '' }
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-white/95 hover:bg-slate-50 text-slate-800 font-medium text-xs md:text-sm shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+        className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-slate-700/80 bg-slate-900/90 hover:bg-slate-800 text-slate-100 font-medium text-xs sm:text-sm shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
         aria-haspopup="true"
         aria-expanded={isOpen}
       >
-        <span className="text-base">🌐</span>
-        <span className="font-semibold text-slate-700">{currentLang.nativeName}</span>
+        <span className="text-sm sm:text-base">🌐</span>
+        <span className="font-semibold text-slate-200 text-xs sm:text-sm">{currentLang.nativeName}</span>
         {variant === 'full' && (
-          <span className="text-slate-400 text-xs hidden sm:inline">({currentLang.name})</span>
+          <span className="text-slate-400 text-[11px] sm:text-xs hidden md:inline">({currentLang.name})</span>
         )}
         <svg
-          className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-3 sm:w-3.5 h-3 sm:h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -51,8 +51,8 @@ export default function LanguageSwitcher({ variant = 'compact', className = '' }
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-48 rounded-xl bg-white shadow-xl border border-slate-100 py-1.5 ring-1 ring-black/5 focus:outline-none animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1">
+        <div className="absolute right-0 z-50 mt-2 w-44 sm:w-48 rounded-xl bg-slate-900 shadow-2xl border border-slate-700 py-1.5 ring-1 ring-black/50 focus:outline-none animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="px-3 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 mb-1">
             Select Language (भाषा)
           </div>
           <div className="max-h-60 overflow-y-auto">

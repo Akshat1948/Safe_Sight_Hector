@@ -98,19 +98,19 @@ export const SosEmergencyModal: React.FC<SosEmergencyModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/70 backdrop-blur-sm animate-in fade-in">
-      <div className="relative w-full max-w-lg rounded-2xl bg-white border border-red-200 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/80 backdrop-blur-sm animate-in fade-in">
+      <div className="relative w-full max-w-lg rounded-2xl bg-white border border-red-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 text-white flex items-center justify-between">
+        <div className="bg-gradient-to-r from-red-600 to-red-700 px-4 sm:px-6 py-3 sm:py-4 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <ShieldAlert className="w-5 h-5" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-base font-black tracking-wide uppercase">
+              <h2 className="text-sm sm:text-base font-black tracking-wide uppercase">
                 {t('emergency_sos')}
               </h2>
-              <p className="text-xs text-red-100 font-medium">
+              <p className="text-[10px] sm:text-xs text-red-100 font-medium">
                 {t('gps_broadcast_msg')}
               </p>
             </div>
@@ -119,12 +119,12 @@ export const SosEmergencyModal: React.FC<SosEmergencyModalProps> = ({
             onClick={onClose}
             className="p-1 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6 overflow-y-auto">
           {!sosSent ? (
             <div>
               {/* Emergency Warning */}

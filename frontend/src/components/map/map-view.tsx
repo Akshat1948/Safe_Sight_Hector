@@ -336,27 +336,27 @@ export default function MapView({
   }, [displayZones, incidents, selectedZoneId, showHeatmap, onSelectZone]);
 
   return (
-    <div className={`relative w-full h-full min-h-[380px] rounded-2xl overflow-hidden border border-slate-700/60 shadow-xl bg-slate-950 ${className}`}>
+    <div className={`relative w-full h-full min-h-[320px] sm:min-h-[380px] rounded-2xl overflow-hidden border border-slate-700/60 shadow-xl bg-slate-950 ${className}`}>
       {/* Map Container */}
-      <div ref={mapContainerRef} className="w-full h-full min-h-[380px] z-0" />
+      <div ref={mapContainerRef} className="w-full h-full min-h-[320px] sm:min-h-[380px] z-0" />
 
       {/* Floating HUD Legend */}
       {showLegend && (
-        <div className="absolute top-3 left-3 z-[400] bg-slate-900/90 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-slate-700/70 shadow-lg flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-200">
+        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-[400] bg-slate-900/90 backdrop-blur-md px-2.5 sm:px-3.5 py-1.5 sm:py-2.5 rounded-xl border border-slate-700/70 shadow-lg flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-semibold text-slate-200 max-w-[calc(100%-16px)]">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-emerald-500"></span>
             <span>Normal (&lt;50%)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-amber-400"></span>
             <span>Moderate</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-orange-500"></span>
             <span>High Risk</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-red-500 animate-ping"></span>
             <span className="text-red-400 font-bold">Surge Alert</span>
           </div>
         </div>
@@ -364,9 +364,9 @@ export default function MapView({
 
       {/* Active Selected Zone Drawer Card */}
       {showZoneDrawer && activeZoneDetails && (
-        <div className="absolute bottom-3 left-3 right-3 sm:right-auto sm:max-w-sm z-[400] bg-slate-900/95 backdrop-blur-lg p-4 rounded-xl border border-slate-700/80 shadow-2xl animate-in slide-in-from-bottom duration-200">
+        <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 right-2 sm:right-auto sm:max-w-sm z-[400] bg-slate-900/95 backdrop-blur-lg p-3 sm:p-4 rounded-xl border border-slate-700/80 shadow-2xl animate-in slide-in-from-bottom duration-200">
           <div className="flex justify-between items-start mb-1">
-            <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-cyan-400">
+            <span className="text-[9px] sm:text-[10px] font-mono uppercase font-bold tracking-wider text-cyan-400">
               Zone Telemetry Selected
             </span>
             <button
@@ -376,18 +376,18 @@ export default function MapView({
               ✕
             </button>
           </div>
-          <h4 className="text-sm font-bold text-white mb-2">{activeZoneDetails.name}</h4>
-          <div className="grid grid-cols-3 gap-2 text-xs font-mono bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+          <h4 className="text-xs sm:text-sm font-bold text-white mb-2">{activeZoneDetails.name}</h4>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-mono bg-slate-950/60 p-2 sm:p-2.5 rounded-lg border border-slate-800">
             <div>
-              <p className="text-[10px] text-slate-400">Density</p>
-              <p className="font-bold text-white">{activeZoneDetails.currentDensity?.toLocaleString() || 0}</p>
+              <p className="text-[9px] sm:text-[10px] text-slate-400">Density</p>
+              <p className="font-bold text-white truncate">{activeZoneDetails.currentDensity?.toLocaleString() || 0}</p>
             </div>
             <div>
-              <p className="text-[10px] text-slate-400">Max Cap</p>
-              <p className="font-bold text-slate-300">{activeZoneDetails.maxCapacity?.toLocaleString() || 0}</p>
+              <p className="text-[9px] sm:text-[10px] text-slate-400">Max Cap</p>
+              <p className="font-bold text-slate-300 truncate">{activeZoneDetails.maxCapacity?.toLocaleString() || 0}</p>
             </div>
             <div>
-              <p className="text-[10px] text-slate-400">Load</p>
+              <p className="text-[9px] sm:text-[10px] text-slate-400">Load</p>
               <p className={`font-bold ${activeZoneDetails.densityStatus === 'red' ? 'text-red-400' : 'text-emerald-400'
                 }`}>
                 {activeZoneDetails.maxCapacity

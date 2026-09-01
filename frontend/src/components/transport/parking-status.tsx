@@ -52,22 +52,22 @@ export default function ParkingStatus({ siteId, className = '' }: { siteId?: str
   }, [siteId]);
 
   return (
-    <div className={`p-5 rounded-2xl border border-slate-800 bg-slate-900/90 backdrop-blur-md shadow-xl ${className}`}>
-      <div className="flex items-center justify-between mb-4">
+    <div className={`p-4 sm:p-5 rounded-2xl border border-slate-800 bg-slate-900/90 backdrop-blur-md shadow-xl ${className}`}>
+      <div className="flex items-center justify-between gap-2 mb-4">
         <div>
-          <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-cyan-400">
+          <span className="text-[9px] sm:text-[10px] font-mono uppercase font-bold tracking-widest text-cyan-400">
             {t('smart_mobility')}
           </span>
-          <h3 className="text-base font-bold text-white flex items-center gap-2 mt-0.5">
+          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5 sm:gap-2 mt-0.5">
             {t('live_parking')}
           </h3>
         </div>
-        <span className="text-[11px] font-mono text-slate-400">
+        <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 shrink-0">
           {isLoading ? t('refreshing') : t('live_synced')}
         </span>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {parkingLots.map((lot) => {
           const total = lot.totalCapacity || 100;
           const occupied = lot.currentOccupancy || 0;
@@ -75,11 +75,11 @@ export default function ParkingStatus({ siteId, className = '' }: { siteId?: str
           const isFull = lot.status === TransportStatus.FULL || percentage >= 95;
 
           return (
-            <div key={lot.id} className="p-3.5 rounded-xl border border-slate-850 bg-slate-950/60 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-slate-200">{lot.name}</span>
+            <div key={lot.id} className="p-3 sm:p-3.5 rounded-xl border border-slate-850 bg-slate-950/60 space-y-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className="text-xs sm:text-sm font-semibold text-slate-200">{lot.name}</span>
                 <span
-                  className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full border ${
+                  className={`text-[9px] sm:text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full border shrink-0 ${
                     isFull
                       ? 'bg-red-500/20 text-red-400 border-red-500/30'
                       : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
@@ -91,7 +91,7 @@ export default function ParkingStatus({ siteId, className = '' }: { siteId?: str
 
               {/* Occupancy Progress Bar */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs font-mono text-slate-400">
+                <div className="flex justify-between text-[11px] sm:text-xs font-mono text-slate-400">
                   <span>{t('occupancy')}:</span>
                   <span className="font-bold text-slate-200">
                     {occupied} / {total} {t('spots')} ({percentage}%)
