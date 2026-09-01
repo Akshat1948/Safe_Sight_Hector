@@ -163,6 +163,25 @@ async function main() {
           source: 'simulation',
         }),
       });
+
+      // Acknowledge any active unacknowledged alerts to clear banners
+      try {
+        const activeAlertsRes = await fetch(`${API_BASE_URL}/alerts?siteId=${siteId}`, { headers: authHeaders });
+        if (activeAlertsRes.ok) {
+          const activeAlertsData = (await activeAlertsRes.json()) as ApiResponse<Array<{ id: string; status: string }>>;
+          const unacked = (activeAlertsData.data || []).filter((a) => a.status === 'dispatched' || a.status === 'escalated');
+          for (const alert of unacked) {
+            await fetch(`${API_BASE_URL}/alerts/${alert.id}/acknowledge`, {
+              method: 'PATCH',
+              headers: authHeaders,
+            });
+          }
+          if (unacked.length > 0) {
+            console.log(`${colors.green}  ✓ Cleared ${unacked.length} active alert banner(s)${colors.reset}`);
+          }
+        }
+      } catch (err) {}
+
       console.log(`${colors.green}${colors.bold}✅ Reset Complete! Zone C is Green (150/500). Ready for demo.${colors.reset}\n`);
       return;
     }

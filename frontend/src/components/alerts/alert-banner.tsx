@@ -7,6 +7,7 @@ import { useSocket } from '@/shared/hooks';
 
 interface AlertBannerProps {
   siteId?: string | null;
+  criticalOnly?: boolean;
 }
 
 const SEVERITY_STYLES: Record<string, string> = {
@@ -42,7 +43,7 @@ const MARCHING_BORDER_COLORS: Record<string, string> = {
   critical: '#DC2626',
 };
 
-export default function AlertBanner({ siteId }: AlertBannerProps) {
+export default function AlertBanner({ siteId, criticalOnly = false }: AlertBannerProps) {
   const [alerts, setAlerts] = useState<IAlert[]>([]);
   const { on, off } = useSocket(siteId || null);
 
@@ -93,7 +94,24 @@ export default function AlertBanner({ siteId }: AlertBannerProps) {
     }
   };
 
-  if (alerts.length === 0) return null;
+  // 1. Filter by severity if criticalOnly is enabled (non-alert dashboard pages)
+  const severityFiltered = criticalOnly
+    ? alerts.filter((a) => a.severity === 'critical')
+    : alerts;
+
+  // 2. Deduplicate: only show the single newest active alert per zone so repeated runs don't stack duplicates
+  const displayedAlerts: IAlert[] = [];
+  const seenKeys = new Set<string>();
+
+  for (const alert of severityFiltered) {
+    const dedupeKey = alert.targetZoneId ? `${alert.targetZoneId}-${alert.severity}` : alert.title;
+    if (!seenKeys.has(dedupeKey)) {
+      seenKeys.add(dedupeKey);
+      displayedAlerts.push(alert);
+    }
+  }
+
+  if (displayedAlerts.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-3">
