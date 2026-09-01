@@ -3,7 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/shared/hooks';
+import { useAuth, useSocket } from '@/shared/hooks';
+import { getSosRequests, getAlerts } from '@/shared/api';
 import AlertBanner from '@/components/alerts/alert-banner';
 
 interface DashboardLayoutProps {
@@ -20,6 +21,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [lockdownActive, setLockdownActive] = useState(false);
+
+  // Unread badge counters for real-time mobile-style notification pills
+  const [unreadSosCount, setUnreadSosCount] = useState(0);
+  const [unreadAlertsCount, setUnreadAlertsCount] = useState(0);
+  const { on, off } = useSocket(user?.siteId || null);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -97,6 +103,76 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [showProfileMenu]);
+
+  // Initial fetch of pending unread SOS and active Alert counts
+  useEffect(() => {
+    // Fetch pending SOS count
+    getSosRequests(user?.siteId || undefined)
+      .then((res) => {
+        if (res?.success && Array.isArray(res.data)) {
+          const pending = res.data.filter((s: any) => s.status === 'pending');
+          if (pathname !== '/dashboard/sos') {
+            setUnreadSosCount(pending.length);
+          }
+        }
+      })
+      .catch(console.error);
+
+    // Fetch dispatched / escalated active alerts count
+    getAlerts(user?.siteId || undefined)
+      .then((res) => {
+        if (res?.success && Array.isArray(res.data)) {
+          const active = res.data.filter((a: any) => a.status === 'dispatched' || a.status === 'escalated');
+          if (pathname !== '/dashboard/alerts') {
+            setUnreadAlertsCount(active.length);
+          }
+        }
+      })
+      .catch(console.error);
+  }, [user?.siteId]);
+
+  // When manager visits /dashboard/sos, clear the unread SOS counter
+  useEffect(() => {
+    if (pathname === '/dashboard/sos') {
+      setUnreadSosCount(0);
+    }
+  }, [pathname]);
+
+  // When manager visits /dashboard/alerts, clear the unread Alerts counter
+  useEffect(() => {
+    if (pathname === '/dashboard/alerts') {
+      setUnreadAlertsCount(0);
+    }
+  }, [pathname]);
+
+  // Real-time WebSocket listeners for incoming SOS distress and new Alerts
+  useEffect(() => {
+    const handleNewSos = () => {
+      if (pathname !== '/dashboard/sos') {
+        setUnreadSosCount((prev) => prev + 1);
+      }
+    };
+
+    const handleNewAlert = () => {
+      if (pathname !== '/dashboard/alerts') {
+        setUnreadAlertsCount((prev) => prev + 1);
+      }
+    };
+
+    const handleAckAlert = () => {
+      setUnreadAlertsCount((prev) => Math.max(0, prev - 1));
+    };
+
+    on('sos:new', handleNewSos);
+    on('alert:new', handleNewAlert);
+    on('alert:acknowledged', handleAckAlert);
+
+    return () => {
+      off('sos:new', handleNewSos);
+      off('alert:new', handleNewAlert);
+      off('alert:acknowledged', handleAckAlert);
+    };
+  }, [on, off, pathname]);
 
   const handleEmergencyLockdown = () => {
     const confirm = window.confirm(
@@ -242,16 +318,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Link
                 href="/dashboard/alerts"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center px-3.5 py-2.5 rounded transition-colors duration-200 ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded transition-colors duration-200 ${
                   pathname === '/dashboard/alerts'
                     ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
                     : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
                 }`}
               >
-                <span className="material-symbols-outlined mr-3 text-[20px]">
-                  notifications
-                </span>
-                <span className="font-sans text-[13px] font-medium">Alert History</span>
+                <div className="flex items-center">
+                  <span className="material-symbols-outlined mr-3 text-[20px]">
+                    notifications
+                  </span>
+                  <span className="font-sans text-[13px] font-medium">Alert History</span>
+                </div>
+                {unreadAlertsCount > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-black text-white bg-red-600 rounded-full shadow-sm shadow-red-600/50 animate-pulse">
+                    {unreadAlertsCount > 99 ? '99+' : unreadAlertsCount}
+                  </span>
+                )}
               </Link>
             </li>
 
@@ -260,16 +343,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Link
                 href="/dashboard/sos"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center px-3.5 py-2.5 rounded transition-colors duration-200 ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded transition-colors duration-200 ${
                   pathname === '/dashboard/sos'
                     ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
                     : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
                 }`}
               >
-                <span className="material-symbols-outlined mr-3 text-[20px] text-[#ef4444]">
-                  emergency
-                </span>
-                <span className="font-sans text-[13px] font-medium">SOS Queue</span>
+                <div className="flex items-center">
+                  <span className="material-symbols-outlined mr-3 text-[20px] text-[#ef4444]">
+                    emergency
+                  </span>
+                  <span className="font-sans text-[13px] font-medium">SOS Queue</span>
+                </div>
+                {unreadSosCount > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-black text-white bg-red-600 rounded-full shadow-sm shadow-red-600/50 animate-pulse">
+                    {unreadSosCount > 99 ? '99+' : unreadSosCount}
+                  </span>
+                )}
               </Link>
             </li>
           </ul>
@@ -435,6 +525,32 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </button>
               )}
             </div>
+
+            {/* Quick SOS Alert Icon (Topbar) */}
+            {unreadSosCount > 0 && (
+              <button
+                onClick={() => router.push('/dashboard/sos')}
+                className="flex items-center gap-1.5 h-8 px-2.5 rounded bg-red-600/20 border border-red-500 text-red-400 hover:bg-red-600 hover:text-white transition-all text-xs font-bold shadow-sm cursor-pointer whitespace-nowrap shrink-0 animate-pulse"
+                title={`${unreadSosCount} Unseen SOS Distress Requests`}
+              >
+                <span className="material-symbols-outlined text-[16px] text-red-500">emergency</span>
+                <span>{unreadSosCount} SOS</span>
+              </button>
+            )}
+
+            {/* Quick Alerts Bell Icon (Topbar) */}
+            {unreadAlertsCount > 0 && (
+              <button
+                onClick={() => router.push('/dashboard/alerts')}
+                className="relative flex items-center justify-center w-8 h-8 rounded border border-yellow-500/50 bg-yellow-500/15 text-yellow-400 hover:bg-yellow-500 hover:text-slate-950 transition-all cursor-pointer shrink-0"
+                title={`${unreadAlertsCount} Unseen Alerts`}
+              >
+                <span className="material-symbols-outlined text-[18px]">notifications</span>
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-600 text-white text-[9px] font-black flex items-center justify-center shadow-sm">
+                  {unreadAlertsCount > 9 ? '9+' : unreadAlertsCount}
+                </span>
+              </button>
+            )}
 
             {/* System Status Pill */}
             <button

@@ -64,15 +64,38 @@ export default function SosPage() {
 
   useEffect(() => {
     const handleNewSos = (data: unknown) => {
-      const sos = data as ISosRequest;
+      const sos = data as any;
       if (sos?.id) {
-        setRequests((prev) => [sos, ...prev.filter((s) => s.id !== sos.id)]);
+        const normalizedSos: ISosRequest = {
+          id: sos.id,
+          siteId: sos.siteId || null,
+          location: sos.location || null,
+          message: sos.message || null,
+          contactPhone: sos.contactPhone || null,
+          status: (sos.status as SosStatus) || SosStatus.PENDING,
+          assignedTo: sos.assignedTo || null,
+          createdAt: sos.createdAt || new Date().toISOString(),
+          updatedAt: sos.updatedAt || new Date().toISOString(),
+        };
+        setRequests((prev) => [normalizedSos, ...prev.filter((s) => s.id !== sos.id)]);
+      }
+    };
+
+    const handleStatusUpdate = (data: unknown) => {
+      const payload = data as { id?: string; sosId?: string; status: SosStatus };
+      const targetId = payload?.id || payload?.sosId;
+      if (targetId && payload?.status) {
+        setRequests((prev) =>
+          prev.map((s) => (s.id === targetId ? { ...s, status: payload.status } : s))
+        );
       }
     };
 
     on('sos:new', handleNewSos);
+    on('sos:status:update', handleStatusUpdate);
     return () => {
       off('sos:new', handleNewSos);
+      off('sos:status:update', handleStatusUpdate);
     };
   }, [on, off]);
 

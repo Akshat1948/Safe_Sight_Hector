@@ -2,13 +2,15 @@ import { apiClient } from './client';
 import { ISosRequest } from '@/shared/types';
 
 export async function getSosRequests(
-  siteId: string,
+  siteId?: string | null,
   params?: { status?: string },
 ) {
-  const query = new URLSearchParams({ siteId });
+  const query = new URLSearchParams();
+  if (siteId && !siteId.startsWith('demo-')) query.set('siteId', siteId);
   if (params?.status) query.set('status', params.status);
 
-  return apiClient<ISosRequest[]>(`/sos?${query}`);
+  const qs = query.toString() ? `?${query.toString()}` : '';
+  return apiClient<ISosRequest[]>(`/sos${qs}`);
 }
 
 export async function createSos(data: {

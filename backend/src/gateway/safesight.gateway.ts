@@ -74,7 +74,7 @@ export class SafeSightGateway implements OnGatewayConnection, OnGatewayDisconnec
     this.emitToSite(siteId, 'alert:acknowledged', data);
   }
 
-  emitSosNew(siteId: string, data: { id: string, location: any, message: string, createdAt: Date }) {
+  emitSosNew(siteId: string, data: any) {
     this.emitToSite(siteId, 'sos:new', data);
   }
 

@@ -16,16 +16,19 @@ import { IZone } from '@/shared/types';
 export default function VisitorPortalPage() {
   const [zones, setZones] = useState<IZone[]>([]);
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
-  const [activeSiteId] = useState<string>('cb9e2dc0-bff7-4dea-9507-8591e5f6e7c3');
+  const [activeSiteId, setActiveSiteId] = useState<string>('0275fd8b-81a2-4513-bdc5-9c4d27aae375');
   const { t } = useLanguage();
 
   useEffect(() => {
     let isSubscribed = true;
     const fetchZones = async () => {
       try {
-        const res = await getZones(activeSiteId);
-        if (res?.data && isSubscribed) {
+        const res = await getZones();
+        if (res?.data && isSubscribed && res.data.length > 0) {
           setZones(res.data);
+          if (res.data[0]?.siteId) {
+            setActiveSiteId(res.data[0].siteId);
+          }
         }
       } catch (err) {
         // Uses fallback mock data in MapView component
@@ -38,7 +41,7 @@ export default function VisitorPortalPage() {
       isSubscribed = false;
       clearInterval(interval);
     };
-  }, [activeSiteId]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-16 selection:bg-cyan-500 selection:text-black">

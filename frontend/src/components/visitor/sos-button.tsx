@@ -41,7 +41,7 @@ export default function SOSButton({ siteId, className = '', onSosDispatched }: S
 
     try {
       const res = await createSos({
-        siteId: siteId || 'cb9e2dc0-bff7-4dea-9507-8591e5f6e7c3',
+        siteId: siteId || '0275fd8b-81a2-4513-bdc5-9c4d27aae375',
         latitude: lat,
         longitude: lng,
         message: message || 'Emergency SOS assistance requested',

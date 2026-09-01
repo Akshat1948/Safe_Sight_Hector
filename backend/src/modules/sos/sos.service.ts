@@ -51,14 +51,17 @@ export class SosService {
     }
 
     // Emit via WebSocket
-    if (dto.siteId) {
-      this.gateway.emitSosNew(dto.siteId, {
-        id: saved.id,
-        location: saved.location,
-        message: saved.message,
-        createdAt: saved.createdAt,
-      });
-    }
+    this.gateway.emitSosNew(dto.siteId || 'all', {
+      id: saved.id,
+      siteId: saved.siteId,
+      location: saved.location,
+      message: saved.message,
+      contactPhone: saved.contactPhone,
+      status: saved.status,
+      assignedTo: saved.assignedTo || null,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
+    });
 
     return {
       id: saved.id,
