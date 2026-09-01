@@ -9,39 +9,6 @@ interface AlertBannerProps {
   siteId?: string | null;
 }
 
-const SEVERITY_STYLES: Record<string, string> = {
-  informational: 'bg-blue-50 border-blue-200 text-blue-900',
-  advisory: 'bg-yellow-50 border-yellow-200 text-yellow-900',
-  warning: 'bg-orange-50 border-orange-200 text-orange-900',
-  critical: 'bg-red-50 text-red-950', // Static (no pulse)
-};
-
-const SEVERITY_ICONS: Record<string, string> = {
-  informational: 'ℹ️',
-  advisory: '⚠️',
-  warning: '🔔',
-  critical: '🚨',
-};
-
-const SEVERITY_BADGE_STYLES: Record<string, string> = {
-  informational: 'bg-blue-100 text-blue-800 border border-blue-300',
-  advisory: 'bg-yellow-100 text-yellow-800 border border-yellow-400',
-  warning: 'bg-orange-100 text-orange-800 border border-orange-300',
-  critical: 'bg-red-100 text-red-800 border border-red-300',
-};
-
-const SEVERITY_BTN_STYLES: Record<string, string> = {
-  informational: 'bg-blue-600 hover:bg-blue-700 border border-blue-700',
-  advisory: 'bg-yellow-600 hover:bg-yellow-700 border border-yellow-700',
-  warning: 'bg-orange-600 hover:bg-orange-700 border border-orange-700',
-  critical: 'bg-red-600 hover:bg-red-700 border border-red-700',
-};
-
-const MARCHING_BORDER_COLORS: Record<string, string> = {
-  advisory: '#CA8A04',
-  critical: '#DC2626',
-};
-
 export default function AlertBanner({ siteId }: AlertBannerProps) {
   const [alerts, setAlerts] = useState<IAlert[]>([]);
   const { on, off } = useSocket(siteId || null);
@@ -93,7 +60,23 @@ export default function AlertBanner({ siteId }: AlertBannerProps) {
     }
   };
 
-  if (alerts.length === 0) return null;
+  // Global Alert Banner: Only CRITICAL emergency alerts appear globally across the application.
+  // Moderate / advisory / warning alerts are displayed exclusively in Alert History (/dashboard/alerts).
+  const criticalAlerts = alerts.filter((a) => a.severity?.toLowerCase() === 'critical');
+
+  // Deduplicate active critical alerts by zone so repeated runs do not stack duplicates
+  const displayedAlerts: IAlert[] = [];
+  const seenKeys = new Set<string>();
+
+  for (const alert of criticalAlerts) {
+    const dedupeKey = alert.targetZoneId ? `${alert.targetZoneId}-${alert.severity}` : alert.id;
+    if (!seenKeys.has(dedupeKey)) {
+      seenKeys.add(dedupeKey);
+      displayedAlerts.push(alert);
+    }
+  }
+
+  if (displayedAlerts.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-3">
@@ -113,75 +96,66 @@ export default function AlertBanner({ siteId }: AlertBannerProps) {
         }
       `}</style>
 
-      {alerts.map((alert) => {
-        const isCritical = alert.severity === 'critical';
-        const isHighlighted = isCritical || alert.severity === 'advisory';
+      {displayedAlerts.map((alert) => (
+        <div
+          key={alert.id}
+          className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl shadow-sm bg-red-50 text-red-950"
+        >
+          {/* Animated Marching Dashed Border for Critical Alerts */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-xl overflow-visible">
+            <rect
+              x="1"
+              y="1"
+              width="calc(100% - 2px)"
+              height="calc(100% - 2px)"
+              rx="10"
+              fill="none"
+              stroke="#DC2626"
+              strokeWidth="2.5"
+              className="marching-border"
+            />
+          </svg>
 
-        return (
-          <div
-            key={alert.id}
-            className={`relative flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl shadow-sm ${
-              SEVERITY_STYLES[alert.severity] || SEVERITY_STYLES.informational
-            } ${!isHighlighted ? 'border' : ''}`}
-          >
-            {/* Animated Marching Dashed Border for Critical & Advisory Alerts */}
-            {isHighlighted && (
-              <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-xl overflow-visible">
-                <rect
-                  x="1"
-                  y="1"
-                  width="calc(100% - 2px)"
-                  height="calc(100% - 2px)"
-                  rx="10"
-                  fill="none"
-                  stroke={MARCHING_BORDER_COLORS[alert.severity] || '#DC2626'}
-                  strokeWidth="2.5"
-                  className="marching-border"
-                />
-              </svg>
-            )}
-
-            <div className="relative z-10 flex items-start gap-3">
-              <span className="text-2xl mt-0.5">{SEVERITY_ICONS[alert.severity] || 'ℹ️'}</span>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-bold text-base">{alert.title}</h3>
-                  <span className={`text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${SEVERITY_BADGE_STYLES[alert.severity] || SEVERITY_BADGE_STYLES.informational}`}>
-                    {alert.severity}
+          <div className="relative z-10 flex items-start gap-3">
+            <span className="text-2xl mt-0.5">🚨</span>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-bold text-base">{alert.title}</h3>
+                <span className="text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-300">
+                  {alert.severity}
+                </span>
+                {alert.targetZoneName && (
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/70 border border-current/20">
+                    Zone: {alert.targetZoneName}
                   </span>
-                  {alert.targetZoneName && (
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/70 border border-current/20">
-                      Zone: {alert.targetZoneName}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm font-medium opacity-90">{alert.message}</p>
-                {alert.messageHi && (
-                  <p className="text-sm opacity-80 mt-1 italic font-sans">{alert.messageHi}</p>
                 )}
+              </div>
+              <p className="text-sm font-medium opacity-90">{alert.message}</p>
+              {alert.messageHi && (
+                <p className="text-sm opacity-80 mt-1 italic font-sans">{alert.messageHi}</p>
+              )}
 
-                <div className="flex items-center gap-2 mt-2">
-                  {alert.channels.map((channel) => (
-                    <span
-                      key={channel}
-                      className="text-[10px] uppercase bg-black/5 px-1.5 py-0.5 rounded text-current font-semibold"
-                    >
-                      {channel.replace('_', ' ')}
-                    </span>
-                  ))}
-                </div>
+              <div className="flex items-center gap-2 mt-2">
+                {alert.channels.map((channel) => (
+                  <span
+                    key={channel}
+                    className="text-[10px] uppercase bg-black/5 px-1.5 py-0.5 rounded text-current font-semibold"
+                  >
+                    {channel.replace('_', ' ')}
+                  </span>
+                ))}
               </div>
             </div>
-
-            <button
-              onClick={() => handleAcknowledge(alert.id)}
-              className={`relative z-10 shrink-0 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition-all text-sm hover:shadow-md ${SEVERITY_BTN_STYLES[alert.severity] || SEVERITY_BTN_STYLES.critical}`}
-            >
-              Acknowledge
-            </button>
           </div>
-        );
-      })}
+
+          <button
+            onClick={() => handleAcknowledge(alert.id)}
+            className="relative z-10 shrink-0 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm border border-red-700 transition-all text-sm hover:shadow-md cursor-pointer"
+          >
+            Acknowledge
+          </button>
+        </div>
+      ))}
     </div>
   );
 }

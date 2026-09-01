@@ -510,7 +510,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Content View with fluid padding */}
         <div className="flex-1 overflow-y-auto h-full p-3 sm:p-4 md:p-6">
-          {/* Global Alert Banner — visible across all tabs */}
+          {/* Global Alert Banner — renders CRITICAL emergency alerts across all dashboard views */}
           <div className="max-w-7xl mx-auto mb-4">
             <AlertBanner siteId={user?.siteId || 'demo-site-prayagraj-01'} />
           </div>
