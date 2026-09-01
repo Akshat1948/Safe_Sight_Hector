@@ -207,6 +207,25 @@ async function main() {
     console.log(`${colors.yellow}  🟡 Zone C Density: 320 / 500 (64% capacity) — STATUS: YELLOW${colors.reset}`);
     console.log(`${colors.dim}  Flow Velocity: 0.8 m/s | Heatmap updates to yellow on visitor PWA${colors.reset}`);
 
+    // Dispatch Advisory (Moderate) Alert for elevated crowding
+    console.log(`\n${colors.yellow}  📢 Dispatching ADVISORY (Moderate) Alert for Zone C...${colors.reset}`);
+    const advisoryAlertRes = await fetch(`${API_BASE_URL}/alerts`, {
+      method: 'POST',
+      headers: authHeaders,
+      body: JSON.stringify({
+        siteId,
+        targetZoneId: zoneC.id,
+        severity: 'advisory',
+        title: 'Moderate Crowding — Zone C Staircase',
+        message: 'Zone C is experiencing elevated foot traffic (64% capacity). Consider using Zone D corridor as an alternate route.',
+        channels: ['push', 'dashboard'],
+      }),
+    });
+    const advisoryAlertData = (await advisoryAlertRes.json()) as ApiResponse<{ id: string }>;
+    console.log(`${colors.yellow}  ⚠️  ADVISORY ALERT DISPATCHED (ID: ${advisoryAlertData.data?.id || 'ok'})${colors.reset}`);
+    console.log(`${colors.dim}  Channels: Push Notification (PWA) + Control Room Dashboard Banner${colors.reset}`);
+    console.log(`${colors.dim}  ↳ Yellow marching-border banner now visible on /dashboard/alerts in real-time${colors.reset}`);
+
     await pause('Advance to Phase 3 (Bottleneck Warning)');
 
     // ----------------------------------------------------

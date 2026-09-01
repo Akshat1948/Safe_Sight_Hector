@@ -23,6 +23,25 @@ const SEVERITY_ICONS: Record<string, string> = {
   critical: '🚨',
 };
 
+const SEVERITY_BADGE_STYLES: Record<string, string> = {
+  informational: 'bg-blue-100 text-blue-800 border border-blue-300',
+  advisory: 'bg-yellow-100 text-yellow-800 border border-yellow-400',
+  warning: 'bg-orange-100 text-orange-800 border border-orange-300',
+  critical: 'bg-red-100 text-red-800 border border-red-300',
+};
+
+const SEVERITY_BTN_STYLES: Record<string, string> = {
+  informational: 'bg-blue-600 hover:bg-blue-700 border border-blue-700',
+  advisory: 'bg-yellow-600 hover:bg-yellow-700 border border-yellow-700',
+  warning: 'bg-orange-600 hover:bg-orange-700 border border-orange-700',
+  critical: 'bg-red-600 hover:bg-red-700 border border-red-700',
+};
+
+const MARCHING_BORDER_COLORS: Record<string, string> = {
+  advisory: '#CA8A04',
+  critical: '#DC2626',
+};
+
 export default function AlertBanner({ siteId }: AlertBannerProps) {
   const [alerts, setAlerts] = useState<IAlert[]>([]);
   const { on, off } = useSocket(siteId || null);
@@ -96,16 +115,17 @@ export default function AlertBanner({ siteId }: AlertBannerProps) {
 
       {alerts.map((alert) => {
         const isCritical = alert.severity === 'critical';
+        const isHighlighted = isCritical || alert.severity === 'advisory';
 
         return (
           <div
             key={alert.id}
             className={`relative flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl shadow-sm ${
               SEVERITY_STYLES[alert.severity] || SEVERITY_STYLES.informational
-            } ${!isCritical ? 'border' : ''}`}
+            } ${!isHighlighted ? 'border' : ''}`}
           >
-            {/* Animated Marching Dashed Border for Critical Alerts */}
-            {isCritical && (
+            {/* Animated Marching Dashed Border for Critical & Advisory Alerts */}
+            {isHighlighted && (
               <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-xl overflow-visible">
                 <rect
                   x="1"
@@ -114,7 +134,7 @@ export default function AlertBanner({ siteId }: AlertBannerProps) {
                   height="calc(100% - 2px)"
                   rx="10"
                   fill="none"
-                  stroke="#DC2626"
+                  stroke={MARCHING_BORDER_COLORS[alert.severity] || '#DC2626'}
                   strokeWidth="2.5"
                   className="marching-border"
                 />
@@ -126,7 +146,7 @@ export default function AlertBanner({ siteId }: AlertBannerProps) {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-bold text-base">{alert.title}</h3>
-                  <span className="text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-300">
+                  <span className={`text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${SEVERITY_BADGE_STYLES[alert.severity] || SEVERITY_BADGE_STYLES.informational}`}>
                     {alert.severity}
                   </span>
                   {alert.targetZoneName && (
@@ -155,7 +175,7 @@ export default function AlertBanner({ siteId }: AlertBannerProps) {
 
             <button
               onClick={() => handleAcknowledge(alert.id)}
-              className="relative z-10 shrink-0 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm border border-red-700 transition-all text-sm hover:shadow-md"
+              className={`relative z-10 shrink-0 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition-all text-sm hover:shadow-md ${SEVERITY_BTN_STYLES[alert.severity] || SEVERITY_BTN_STYLES.critical}`}
             >
               Acknowledge
             </button>

@@ -51,6 +51,8 @@ elif command -v fuser >/dev/null 2>&1; then
     fuser -k 3001/tcp 2>/dev/null || true
     fuser -k 8000/tcp 2>/dev/null || true
     fuser -k 3000/tcp 2>/dev/null || true
+elif command -v powershell.exe >/dev/null 2>&1; then
+    powershell.exe -NoProfile -Command "Get-NetTCPConnection -LocalPort 3000, 3001, 8000 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id \$_.OwningProcess -Force -ErrorAction SilentlyContinue }" 2>/dev/null || true
 fi
 
 echo "================================================================="

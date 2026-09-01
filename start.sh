@@ -53,6 +53,8 @@ elif command -v fuser >/dev/null 2>&1; then
     fuser -k 3001/tcp 2>/dev/null || true
     fuser -k 8000/tcp 2>/dev/null || true
     fuser -k 3000/tcp 2>/dev/null || true
+elif command -v powershell.exe >/dev/null 2>&1; then
+    powershell.exe -NoProfile -Command "Get-NetTCPConnection -LocalPort 3000, 3001, 8000 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id \$_.OwningProcess -Force -ErrorAction SilentlyContinue }" 2>/dev/null || true
 fi
 
 # 4. Start NestJS Backend (Port 3001)
@@ -91,6 +93,13 @@ if [ -d "$SCRIPT_DIR/ai-ml" ]; then
         AIML_PID=$!
         echo $AIML_PID > "$SCRIPT_DIR/.aiml.pid"
         echo "   ✅ AI/ML Service started (PID: $AIML_PID, logs: aiml.log)"
+    elif command -v python >/dev/null 2>&1; then
+        echo "🧠 Starting AI/ML FastAPI Service on port 8000 (python)..."
+        cd "$SCRIPT_DIR/ai-ml"
+        nohup python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 > "$SCRIPT_DIR/aiml.log" 2>&1 &
+        AIML_PID=$!
+        echo $AIML_PID > "$SCRIPT_DIR/.aiml.pid"
+        echo "   ✅ AI/ML Service started (PID: $AIML_PID, logs: aiml.log)"
     fi
 fi
 
@@ -107,12 +116,27 @@ fi
 
 # 7. Wait for Backend & Frontend to initialize
 echo ""
-echo "⏳ Waiting for SafeSight services to initialize..."
-MAX_RETRIES=15
+echo "⏳ Waiting for SafeSight services to initialize (this may take up to 30 seconds)..."
+MAX_RETRIES=35
 COUNT=0
+FRONTEND_READY=0
+BACKEND_READY=0
+
 while [ $COUNT -lt $MAX_RETRIES ]; do
-    if curl -s http://localhost:3000 >/dev/null 2>&1 || curl -s http://localhost:3001/api/docs >/dev/null 2>&1; then
-        echo "   ✅ SafeSight Platform is healthy and ready!"
+    if [ $FRONTEND_READY -eq 0 ]; then
+        if curl -s -f http://localhost:3000 >/dev/null 2>&1; then
+            FRONTEND_READY=1
+            echo "   ✅ Frontend is ready (http://localhost:3000)"
+        fi
+    fi
+    if [ $BACKEND_READY -eq 0 ]; then
+        if curl -s -f http://localhost:3001/api/docs >/dev/null 2>&1; then
+            BACKEND_READY=1
+            echo "   ✅ Backend API is ready (http://localhost:3001)"
+        fi
+    fi
+    if [ $FRONTEND_READY -eq 1 ] && [ $BACKEND_READY -eq 1 ]; then
+        echo "   🎉 All SafeSight services are ready!"
         break
     fi
     sleep 1
@@ -138,5 +162,5 @@ if command -v open >/dev/null 2>&1; then
 elif command -v xdg-open >/dev/null 2>&1; then
     xdg-open "http://localhost:3000" 2>/dev/null || true
 elif command -v powershell.exe >/dev/null 2>&1; then
-    powershell.exe -Command "Start-Process 'http://localhost:3000'" 2>/dev/null || true
+    powershell.exe -NoProfile -Command "Start-Process 'http://localhost:3000'" 2>/dev/null || true
 fi
