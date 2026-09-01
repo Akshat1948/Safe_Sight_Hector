@@ -52,7 +52,7 @@ export default function VisitorPortalPage() {
             <div className="flex items-center gap-2">
               <h1 className="text-base font-extrabold tracking-tight text-white">{t('app_title')}</h1>
               <span className="text-[10px] font-mono font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                VISITOR PORTAL
+                {t('visitor_portal')}
               </span>
             </div>
             <p className="text-[10px] font-mono text-slate-400">Prayagraj Sangam Maha Kumbh Mela 2026</p>
@@ -65,13 +65,13 @@ export default function VisitorPortalPage() {
             href="/dashboard"
             className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors hidden sm:inline-block"
           >
-            Manager Console →
+            {t('manager_console')}
           </Link>
           <Link
             href="/login"
             className="text-xs font-bold px-3.5 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white shadow-md transition-colors"
           >
-            Official Login
+            {t('official_login')}
           </Link>
         </div>
       </header>
@@ -85,7 +85,7 @@ export default function VisitorPortalPage() {
         <span className="font-bold uppercase text-red-400">{t('safety_advisory')}:</span>
         <div className="overflow-hidden whitespace-nowrap text-xs text-red-200 font-semibold flex-1">
           <span className="inline-block animate-marquee">
-            High pilgrim density at Sangam Ghat Steps (Zone B). Please divert toward Safe Assembly Grounds (Zone D) via East Corridor C.
+            {t('safety_alert_text')}
           </span>
         </div>
       </div>
@@ -94,12 +94,12 @@ export default function VisitorPortalPage() {
         {/* Hero Section: 1-Tap SOS & Safe Status */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
           <div className="md:col-span-2 p-6 rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-920 shadow-xl space-y-2">
-            <span className="text-xs font-mono uppercase font-bold text-cyan-400">{t('crowd_density')} &amp; Safety</span>
+            <span className="text-xs font-mono uppercase font-bold text-cyan-400">{t('crowd_density_safety')}</span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
               {t('app_subtitle')}
             </h2>
             <p className="text-sm text-slate-300">
-              Real-time zone capacity meters, interactive pilgrimage maps, automated crowd diversion guidance, and 1-tap emergency medical dispatch.
+              {t('hero_description')}
             </p>
           </div>
 
@@ -114,11 +114,11 @@ export default function VisitorPortalPage() {
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-cyan-400">
-                Geospatial Density Heatmap
+                {t('geospatial_heatmap')}
               </span>
-              <h3 className="text-xl font-bold text-white">🗺️ {t('live_map')} &amp; Congestion Status</h3>
+              <h3 className="text-xl font-bold text-white">🗺️ {t('live_map')} &amp; {t('congestion_status')}</h3>
             </div>
-            <span className="text-xs font-mono text-slate-400">Auto-updating every 15s</span>
+            <span className="text-xs font-mono text-slate-400">{t('auto_updating')}</span>
           </div>
 
           <MapView

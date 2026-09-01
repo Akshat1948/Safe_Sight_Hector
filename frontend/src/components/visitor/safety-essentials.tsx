@@ -1,23 +1,26 @@
 'use client';
 
 import React from 'react';
+import { useLanguage } from '@/i18n';
 
 export default function SafetyEssentials({ className = '' }: { className?: string }) {
+  const { t } = useLanguage();
+
   const emergencyHelplines = [
-    { name: '108 Ambulance / Medical', number: '108', icon: '🚑', desc: 'On-site medical aid & trauma triage' },
-    { name: '112 Police Emergency', number: '112', icon: '🚓', desc: 'Police rapid response unit' },
-    { name: '1077 Disaster Helpline', number: '1077', icon: '🛡️', desc: 'State disaster management force' },
-    { name: 'Kumbh Mela Control Room', number: '+915322500000', icon: '🏛️', desc: 'Central pilgrimage control center' },
+    { name: t('ambulance_name'), number: '108', icon: '🚑', desc: t('ambulance_desc') },
+    { name: t('police_name'), number: '112', icon: '🚓', desc: t('police_desc') },
+    { name: t('disaster_name'), number: '1077', icon: '🛡️', desc: t('disaster_desc') },
+    { name: t('control_room_name'), number: '+915322500000', icon: '🏛️', desc: t('control_room_desc') },
   ];
 
   return (
     <div className={`p-5 rounded-2xl border border-slate-800 bg-slate-900/90 backdrop-blur-md shadow-xl ${className}`}>
       <div className="mb-4">
         <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-cyan-400">
-          Emergency Preparedness
+          {t('emergency_preparedness')}
         </span>
         <h3 className="text-base font-bold text-white flex items-center gap-2 mt-0.5">
-          📞 1-Tap Emergency Speed-Dials
+          {t('emergency_speed_dials')}
         </h3>
       </div>
 
@@ -39,7 +42,7 @@ export default function SafetyEssentials({ className = '' }: { className?: strin
               </div>
             </div>
             <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
-              Call →
+              {t('call')}
             </span>
           </a>
         ))}
@@ -49,12 +52,12 @@ export default function SafetyEssentials({ className = '' }: { className?: strin
       <div className="p-3.5 rounded-xl border border-cyan-500/30 bg-cyan-950/20 space-y-1.5">
         <div className="flex items-center gap-2 text-cyan-300 font-bold text-xs">
           <span>ℹ️</span>
-          <span>Pilgrim Safety Rules:</span>
+          <span>{t('pilgrim_safety_rules')}:</span>
         </div>
         <ul className="text-xs text-slate-300 space-y-1 list-disc list-inside font-mono">
-          <li>Move in the designated one-way flow corridors.</li>
-          <li>Avoid lingering or taking photos on ghat staircases (Zone B).</li>
-          <li>In case of localized crowd surge, move steadily toward Safe Assembly Zone D.</li>
+          <li>{t('safety_rule_1')}</li>
+          <li>{t('safety_rule_2')}</li>
+          <li>{t('safety_rule_3')}</li>
         </ul>
       </div>
     </div>

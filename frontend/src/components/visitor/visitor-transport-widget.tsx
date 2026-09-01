@@ -62,10 +62,10 @@ export const VisitorTransportWidget: React.FC = () => {
           </div>
           <div>
             <h3 className="text-sm font-bold text-stone-900">
-              {t('transport_status') || 'Transport & Parking Status'}
+              {t('transport_status')}
             </h3>
             <p className="text-[11px] text-stone-500 font-medium">
-              Live capacity telemetry & electric shuttle tracker
+              {t('transport_subtitle')}
             </p>
           </div>
         </div>
@@ -80,7 +80,7 @@ export const VisitorTransportWidget: React.FC = () => {
                 : 'text-stone-600 hover:text-stone-900'
             }`}
           >
-            Parking
+            {t('parking')}
           </button>
           <button
             onClick={() => setActiveTab('shuttle')}
@@ -90,7 +90,7 @@ export const VisitorTransportWidget: React.FC = () => {
                 : 'text-stone-600 hover:text-stone-900'
             }`}
           >
-            Shuttles
+            {t('shuttles')}
           </button>
         </div>
       </div>
@@ -126,7 +126,7 @@ export const VisitorTransportWidget: React.FC = () => {
 
                 <div className="flex items-center justify-between text-[11px] mb-1 text-stone-600">
                   <span>
-                    Occupancy: {lot.occupied} / {lot.total} spots
+                    {t('occupancy')}: {lot.occupied} / {lot.total} {t('spots')}
                   </span>
                   <span className="font-bold text-stone-900">{pct}%</span>
                 </div>
@@ -158,7 +158,7 @@ export const VisitorTransportWidget: React.FC = () => {
               <div className="flex items-center justify-between text-xs text-stone-600 pt-2 border-t border-stone-200/50 mt-2">
                 <span className="flex items-center gap-1 text-amber-700 font-bold">
                   <Clock className="w-3.5 h-3.5" />
-                  Next Departure: {s.nextBus}
+                  {t('next_departure')}: {s.nextBus}
                 </span>
                 <span className="text-[11px] text-stone-500 font-medium">
                   {s.frequency}

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { IParkingStatus, TransportStatus } from '@/shared/types';
 import { getParkingStatus } from '@/shared/api';
+import { useLanguage } from '@/i18n';
 
 const DEFAULT_PARKING_MOCKS: IParkingStatus[] = [
   {
@@ -22,6 +23,7 @@ const DEFAULT_PARKING_MOCKS: IParkingStatus[] = [
 ];
 
 export default function ParkingStatus({ siteId, className = '' }: { siteId?: string; className?: string }) {
+  const { t } = useLanguage();
   const [parkingLots, setParkingLots] = useState<IParkingStatus[]>(DEFAULT_PARKING_MOCKS);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -54,14 +56,14 @@ export default function ParkingStatus({ siteId, className = '' }: { siteId?: str
       <div className="flex items-center justify-between mb-4">
         <div>
           <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-cyan-400">
-            Smart Mobility Telemetry
+            {t('smart_mobility')}
           </span>
           <h3 className="text-base font-bold text-white flex items-center gap-2 mt-0.5">
-            🚗 Live Parking Availability
+            {t('live_parking')}
           </h3>
         </div>
         <span className="text-[11px] font-mono text-slate-400">
-          {isLoading ? 'Updating...' : 'Live Synced'}
+          {isLoading ? t('refreshing') : t('live_synced')}
         </span>
       </div>
 
@@ -83,16 +85,16 @@ export default function ParkingStatus({ siteId, className = '' }: { siteId?: str
                       : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                   }`}
                 >
-                  {isFull ? 'FULL' : 'AVAILABLE'}
+                  {isFull ? t('full') : t('available')}
                 </span>
               </div>
 
               {/* Occupancy Progress Bar */}
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-mono text-slate-400">
-                  <span>Occupancy:</span>
+                  <span>{t('occupancy')}:</span>
                   <span className="font-bold text-slate-200">
-                    {occupied} / {total} spots ({percentage}%)
+                    {occupied} / {total} {t('spots')} ({percentage}%)
                   </span>
                 </div>
                 <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">

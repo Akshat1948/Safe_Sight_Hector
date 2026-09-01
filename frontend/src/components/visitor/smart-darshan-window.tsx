@@ -31,16 +31,16 @@ export const SmartDarshanWindow: React.FC<SmartDarshanWindowProps> = ({
           </div>
           <div>
             <h3 className="text-sm font-bold text-stone-900">
-              AI Smart Darshan & Trek Optimizer
+              {t('smart_darshan')}
             </h3>
             <p className="text-xs text-stone-600">
-              Prophet predictive model crowd forecasting for {siteName}
+              {t('darshan_subtitle')} {siteName}
             </p>
           </div>
         </div>
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300/60">
           <TrendingDown className="w-3.5 h-3.5 text-amber-700" />
-          Best Window Active
+          {t('best_window')}
         </span>
       </div>
 
@@ -49,19 +49,19 @@ export const SmartDarshanWindow: React.FC<SmartDarshanWindowProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">
-              Recommended Low-Crowd Slot Today
+              {t('recommended_slot')}
             </span>
             <div className="text-lg font-black text-stone-900 flex items-center gap-2 mt-0.5">
               <Clock className="w-5 h-5 text-amber-600" />
               <span>02:00 PM — 03:30 PM</span>
             </div>
             <p className="text-xs text-stone-600 mt-1">
-              Estimated Sanctum wait time is only <strong className="text-emerald-700">10–12 minutes</strong> (save up to 45 mins).
+              {t('est_wait_time')} <strong className="text-emerald-700">10–12 minutes</strong> ({t('save_time')}).
             </p>
           </div>
           <div className="hidden sm:flex flex-col items-center justify-center p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800">
             <ShieldCheck className="w-6 h-6 text-emerald-600 mb-1" />
-            <span className="text-[10px] font-black uppercase">92% Comfort</span>
+            <span className="text-[10px] font-black uppercase">92% {t('comfort')}</span>
           </div>
         </div>
       </div>
@@ -80,7 +80,7 @@ export const SmartDarshanWindow: React.FC<SmartDarshanWindowProps> = ({
             }`}
           >
             <div className="text-xs font-bold text-stone-900">{slot.time}</div>
-            <div className="text-[11px] text-stone-600 mt-0.5">{slot.wait} wait</div>
+            <div className="text-[11px] text-stone-600 mt-0.5">{slot.wait} {t('wait')}</div>
             <span
               className={`mt-1.5 inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${
                 slot.optimal

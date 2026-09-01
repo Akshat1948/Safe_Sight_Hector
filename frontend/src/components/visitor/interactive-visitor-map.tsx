@@ -82,16 +82,16 @@ export const InteractiveVisitorMap: React.FC<InteractiveVisitorMapProps> = ({
       {/* Map Legend */}
       <div className="absolute top-3 right-3 z-10 hidden sm:flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-stone-200 text-[11px] font-semibold text-stone-700 shadow-xs">
         <span className="flex items-center gap-1">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Low
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> {t('low')}
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Medium
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> {t('medium')}
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2.5 h-2.5 rounded-full bg-orange-500" /> High
+          <span className="w-2.5 h-2.5 rounded-full bg-orange-500" /> {t('high')}
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-600" /> Surge
+          <span className="w-2.5 h-2.5 rounded-full bg-red-600" /> {t('surge')}
         </span>
       </div>
 

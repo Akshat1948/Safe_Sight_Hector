@@ -31,10 +31,11 @@ export const ZoneCrowdCard: React.FC<ZoneCrowdCardProps> = ({
           border: 'border-emerald-200',
           text: 'text-emerald-800',
           badgeBg: 'bg-emerald-100 text-emerald-800',
-          label: t('status_green') || 'Low Density — Safe',
+          label: t('status_green'),
+          shortLabel: t('status_green_short'),
           barColor: 'bg-emerald-500',
-          waitTime: '5–10 mins',
-          action: 'Normal Entry Permitted',
+          waitTime: t('wait_5_10'),
+          action: t('action_normal'),
           icon: CheckCircle2,
         };
       case DensityStatus.YELLOW:
@@ -43,10 +44,11 @@ export const ZoneCrowdCard: React.FC<ZoneCrowdCardProps> = ({
           border: 'border-amber-200',
           text: 'text-amber-800',
           badgeBg: 'bg-amber-100 text-amber-800',
-          label: t('status_yellow') || 'Moderate Density — Normal',
+          label: t('status_yellow'),
+          shortLabel: t('status_yellow_short'),
           barColor: 'bg-amber-500',
-          waitTime: '15–25 mins',
-          action: 'Expect Moderate Queues',
+          waitTime: t('wait_15_25'),
+          action: t('action_moderate'),
           icon: Clock,
         };
       case DensityStatus.ORANGE:
@@ -55,10 +57,11 @@ export const ZoneCrowdCard: React.FC<ZoneCrowdCardProps> = ({
           border: 'border-orange-200',
           text: 'text-orange-800',
           badgeBg: 'bg-orange-100 text-orange-800',
-          label: t('status_orange') || 'High Density — Caution',
+          label: t('status_orange'),
+          shortLabel: t('status_orange_short'),
           barColor: 'bg-orange-500',
-          waitTime: '35–45 mins',
-          action: 'Use Holding Area D',
+          waitTime: t('wait_35_45'),
+          action: t('action_holding'),
           icon: AlertTriangle,
         };
       case DensityStatus.RED:
@@ -67,10 +70,11 @@ export const ZoneCrowdCard: React.FC<ZoneCrowdCardProps> = ({
           border: 'border-red-300',
           text: 'text-red-800',
           badgeBg: 'bg-red-100 text-red-800 animate-pulse',
-          label: t('status_red') || 'Critical — Avoid Zone',
+          label: t('status_red'),
+          shortLabel: t('status_red_short'),
           barColor: 'bg-red-600',
-          waitTime: 'Paused / Diverted',
-          action: 'Diverted to Bypass Trail',
+          waitTime: t('wait_paused'),
+          action: t('action_diverted'),
           icon: ShieldAlert,
         };
       default:
@@ -79,7 +83,8 @@ export const ZoneCrowdCard: React.FC<ZoneCrowdCardProps> = ({
           border: 'border-stone-200',
           text: 'text-stone-800',
           badgeBg: 'bg-stone-100 text-stone-700',
-          label: 'Unknown',
+          label: 'Normal',
+          shortLabel: 'Normal',
           barColor: 'bg-stone-400',
           waitTime: '—',
           action: 'Proceed with Caution',
@@ -112,7 +117,7 @@ export const ZoneCrowdCard: React.FC<ZoneCrowdCardProps> = ({
           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap ${config.badgeBg}`}
         >
           <Icon className="w-3.5 h-3.5" />
-          <span>{config.label.split(' — ')[0]}</span>
+          <span>{config.shortLabel}</span>
         </span>
       </div>
 
@@ -121,7 +126,7 @@ export const ZoneCrowdCard: React.FC<ZoneCrowdCardProps> = ({
         <div className="flex items-center justify-between text-xs mb-1">
           <span className="font-semibold text-stone-700 flex items-center gap-1.5">
             <Users className="w-3.5 h-3.5 text-stone-500" />
-            Headcount: {zone.currentDensity.toLocaleString()} / {zone.maxCapacity.toLocaleString()}
+            {t('headcount')}: {zone.currentDensity.toLocaleString()} / {zone.maxCapacity.toLocaleString()}
           </span>
           <span className="font-bold text-stone-900">{densityPercent}%</span>
         </div>
@@ -137,7 +142,7 @@ export const ZoneCrowdCard: React.FC<ZoneCrowdCardProps> = ({
       <div className="mt-3.5 pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
         <div className="flex items-center gap-1.5 text-stone-600">
           <Clock className="w-3.5 h-3.5 text-amber-600" />
-          <span>Est. Wait: <strong className="text-stone-900">{config.waitTime}</strong></span>
+          <span>{t('est_wait')}: <strong className="text-stone-900">{config.waitTime}</strong></span>
         </div>
         <span className="text-[11px] font-medium text-stone-500">
           {config.action}

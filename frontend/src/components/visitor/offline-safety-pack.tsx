@@ -19,27 +19,27 @@ export const OfflineSafetyPack: React.FC = () => {
   const essentials = [
     {
       icon: HeartHandshake,
-      title: 'Lost & Found Booths',
-      location: 'Near Gate 1, Ghat 2, & Railway Helpdesk',
-      contact: 'Public Announcement Ch-4',
+      title: t('lost_found'),
+      location: t('lost_found_loc'),
+      contact: t('lost_found_contact'),
     },
     {
       icon: Droplets,
-      title: 'Free Drinking Water & ORS',
-      location: 'Every 150m along Pilgrim Corridor',
-      contact: '24/7 Red Cross Volunteers',
+      title: t('water_ors'),
+      location: t('water_loc'),
+      contact: t('water_contact'),
     },
     {
       icon: Compass,
-      title: 'Primary Medical Centers (ICU)',
-      location: 'Sector 4 Base Camp & Ghat 3 Post',
-      contact: 'Dr. On Duty / 108 Ambulance',
+      title: t('medical_center'),
+      location: t('medical_loc'),
+      contact: t('medical_contact'),
     },
     {
       icon: Footprints,
-      title: 'Safe Evacuation Assembly',
-      location: 'Holding Ground D (Capacity: 20,000)',
-      contact: 'Follow Green Glow Signs',
+      title: t('evac_assembly'),
+      location: t('evac_loc'),
+      contact: t('evac_contact'),
     },
   ];
 
@@ -53,16 +53,16 @@ export const OfflineSafetyPack: React.FC = () => {
           </div>
           <div>
             <h3 className="text-sm font-bold text-stone-900">
-              {t('safe_zones') || 'Offline Pilgrim Safety Essentials'}
+              {t('safe_zones')}
             </h3>
             <p className="text-[11px] text-stone-500 font-medium">
-              Permanent emergency amenities & evacuation guidance (Cached Offline)
+              {t('offline_subtitle')}
             </p>
           </div>
         </div>
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
           <WifiOff className="w-3 h-3 text-emerald-600" />
-          Works 100% Offline
+          {t('works_offline')}
         </span>
       </div>
 
@@ -97,15 +97,15 @@ export const OfflineSafetyPack: React.FC = () => {
             <Phone className="w-4 h-4 text-white" />
           </div>
           <div>
-            <div className="text-xs font-bold">{t('help_desk') || '24/7 Site Emergency Command Helpline'}</div>
-            <div className="text-[11px] text-stone-300">Toll-Free Control Room: 1800-180-5522 / 112</div>
+            <div className="text-xs font-bold">{t('help_desk')}</div>
+            <div className="text-[11px] text-stone-300">{t('toll_free')}</div>
           </div>
         </div>
         <a
           href="tel:112"
           className="px-3 py-1.5 rounded-lg bg-white hover:bg-stone-100 text-stone-900 text-xs font-bold transition whitespace-nowrap"
         >
-          Call Now
+          {t('call_now')}
         </a>
       </div>
     </div>

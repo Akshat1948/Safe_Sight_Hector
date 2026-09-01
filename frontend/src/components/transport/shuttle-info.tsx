@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { IShuttleStatus, TransportStatus } from '@/shared/types';
 import { getShuttleStatus } from '@/shared/api';
+import { useLanguage } from '@/i18n';
 
 const DEFAULT_SHUTTLE_MOCKS: IShuttleStatus[] = [
   {
@@ -26,6 +27,7 @@ const DEFAULT_SHUTTLE_MOCKS: IShuttleStatus[] = [
 ];
 
 export default function ShuttleInfo({ siteId, className = '' }: { siteId?: string; className?: string }) {
+  const { t } = useLanguage();
   const [shuttles, setShuttles] = useState<IShuttleStatus[]>(DEFAULT_SHUTTLE_MOCKS);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -58,14 +60,14 @@ export default function ShuttleInfo({ siteId, className = '' }: { siteId?: strin
       <div className="flex items-center justify-between mb-4">
         <div>
           <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-cyan-400">
-            Public Transit Telemetry
+            {t('public_transit')}
           </span>
           <h3 className="text-base font-bold text-white flex items-center gap-2 mt-0.5">
-            🚌 Shuttle Bus Schedules
+            {t('shuttle_schedules')}
           </h3>
         </div>
         <span className="text-[11px] font-mono text-slate-400">
-          {isLoading ? 'Updating...' : 'Live Schedules'}
+          {isLoading ? t('refreshing') : t('live_schedules')}
         </span>
       </div>
 
@@ -80,7 +82,7 @@ export default function ShuttleInfo({ siteId, className = '' }: { siteId?: strin
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold text-slate-200">{shuttle.name}</span>
                 <span className="text-[11px] font-mono font-bold text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 px-2 py-0.5 rounded-full">
-                  Departs in ~8 mins
+                  {t('departs_in')} ~8 mins
                 </span>
               </div>
 
@@ -94,9 +96,9 @@ export default function ShuttleInfo({ siteId, className = '' }: { siteId?: strin
 
               {/* Capacity Status */}
               <div className="flex justify-between items-center text-xs font-mono text-slate-400 pt-1">
-                <span>Passenger Load:</span>
+                <span>{t('passenger_load')}:</span>
                 <span className="font-bold text-slate-300">
-                  {occupied} / {total} seats ({percentage}%)
+                  {occupied} / {total} {t('seats')} ({percentage}%)
                 </span>
               </div>
             </div>

@@ -36,7 +36,7 @@ export const VisitorHeader: React.FC<VisitorHeaderProps> = ({
                 </span>
                 <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-                  Live Operational
+                  {t('live_operational')}
                 </span>
               </div>
               <p className="text-[11px] text-stone-500 hidden sm:block font-medium">
@@ -68,7 +68,7 @@ export const VisitorHeader: React.FC<VisitorHeaderProps> = ({
               title="1-Tap Emergency Distress Call"
             >
               <ShieldAlert className="w-4 h-4" />
-              <span>SOS</span>
+              <span>{t('sos')}</span>
             </button>
 
             {/* Staff / Manager Login */}
@@ -77,7 +77,7 @@ export const VisitorHeader: React.FC<VisitorHeaderProps> = ({
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium border border-stone-200 transition-colors"
             >
               <User className="w-3.5 h-3.5" />
-              <span>Staff Login</span>
+              <span>{t('staff_login')}</span>
             </Link>
           </div>
         </div>
