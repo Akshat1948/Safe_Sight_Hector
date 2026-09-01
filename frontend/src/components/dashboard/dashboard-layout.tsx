@@ -120,7 +120,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* SideNavBar (Responsive: Drawer on Mobile, Fixed Sidebar on Desktop) */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-full w-64 bg-surface border-r border-border-subtle flex flex-col py-4 z-50 transition-transform duration-300 ease-in-out md:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 h-full w-64 bg-[#1A3636] border-r border-[#40534C] flex flex-col py-4 z-50 transition-transform duration-300 ease-in-out md:translate-x-0 ${
           mobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'
         }`}
       >
@@ -132,16 +132,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             className="flex items-center space-x-2.5 group"
           >
             <span
-              className="material-symbols-outlined text-primary text-3xl group-hover:scale-105 transition-transform"
+              className="material-symbols-outlined text-[#D6BD98] text-3xl group-hover:scale-105 transition-transform"
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
               shield
             </span>
             <div>
-              <span className="font-headline-md text-headline-md font-extrabold text-on-surface tracking-tighter block leading-tight">
+              <span className="font-headline-md text-headline-md font-extrabold text-white tracking-tighter block leading-tight">
                 SafeSight
               </span>
-              <span className="text-on-surface-variant font-label-caps text-[9px] tracking-widest uppercase block">
+              <span className="text-[#D6BD98] font-sans text-[9px] font-bold tracking-widest uppercase block">
                 Operational Command
               </span>
             </div>
@@ -150,7 +150,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Close drawer button on mobile */}
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="md:hidden p-1.5 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container transition-colors"
+            className="md:hidden p-1.5 text-[#CBD6CF] hover:text-white rounded hover:bg-[#40534C] transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
@@ -166,8 +166,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center px-3.5 py-2.5 rounded transition-colors duration-200 ${
                   pathname === '/dashboard' || pathname === '/'
-                    ? 'bg-surface-container-low text-primary border-l-4 border-primary font-body-bold'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
+                    ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
+                    : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
                 }`}
               >
                 <span
@@ -179,7 +179,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 >
                   home
                 </span>
-                <span className="font-label-caps text-[13px]">Home / Overview</span>
+                <span className="font-sans text-[13px] font-medium">Home / Overview</span>
               </Link>
             </li>
 
@@ -190,14 +190,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center px-3.5 py-2.5 rounded transition-colors duration-200 ${
                   pathname === '/dashboard/map'
-                    ? 'bg-surface-container-low text-primary border-l-4 border-primary font-body-bold'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
+                    ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
+                    : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
                 }`}
               >
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   map
                 </span>
-                <span className="font-label-caps text-[13px]">Real-time Map</span>
+                <span className="font-sans text-[13px] font-medium">Real-time Map</span>
               </Link>
             </li>
 
@@ -208,14 +208,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center px-3.5 py-2.5 rounded transition-colors duration-200 ${
                   pathname === '/dashboard/assets'
-                    ? 'bg-surface-container-low text-primary border-l-4 border-primary font-body-bold'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
+                    ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
+                    : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
                 }`}
               >
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   local_shipping
                 </span>
-                <span className="font-label-caps text-[13px]">Asset Tracking</span>
+                <span className="font-sans text-[13px] font-medium">Asset Tracking</span>
               </Link>
             </li>
 
@@ -226,14 +226,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center px-3.5 py-2.5 rounded transition-colors duration-200 ${
                   pathname === '/dashboard/incidents'
-                    ? 'bg-surface-container-low text-primary border-l-4 border-primary font-body-bold'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
+                    ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
+                    : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
                 }`}
               >
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   crisis_alert
                 </span>
-                <span className="font-label-caps text-[13px]">Incidents Triage</span>
+                <span className="font-sans text-[13px] font-medium">Incidents Triage</span>
               </Link>
             </li>
 
@@ -244,14 +244,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center px-3.5 py-2.5 rounded transition-colors duration-200 ${
                   pathname === '/dashboard/alerts'
-                    ? 'bg-surface-container-low text-primary border-l-4 border-primary font-body-bold'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
+                    ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
+                    : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
                 }`}
               >
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   notifications
                 </span>
-                <span className="font-label-caps text-[13px]">Alert History</span>
+                <span className="font-sans text-[13px] font-medium">Alert History</span>
               </Link>
             </li>
 
@@ -262,20 +262,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center px-3.5 py-2.5 rounded transition-colors duration-200 ${
                   pathname === '/dashboard/sos'
-                    ? 'bg-surface-container-low text-primary border-l-4 border-primary font-body-bold'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
+                    ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
+                    : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
                 }`}
               >
-                <span className="material-symbols-outlined mr-3 text-[20px] text-error">
+                <span className="material-symbols-outlined mr-3 text-[20px] text-[#ef4444]">
                   emergency
                 </span>
-                <span className="font-label-caps text-[13px]">SOS Queue</span>
+                <span className="font-sans text-[13px] font-medium">SOS Queue</span>
               </Link>
             </li>
           </ul>
 
           {/* Divider */}
-          <div className="h-px bg-border-subtle w-full my-3"></div>
+          <div className="h-px bg-[#40534C] w-full my-3"></div>
 
           {/* Deploy Action Button */}
           <div className="mb-3">
@@ -284,15 +284,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 setMobileMenuOpen(false);
                 router.push('/dashboard/alerts?action=compose');
               }}
-              className="w-full flex items-center justify-center bg-primary text-on-primary py-2.5 px-3 rounded font-body-bold text-xs hover:bg-primary-container transition-colors shadow-sm cursor-pointer"
+              className="w-full flex items-center justify-center bg-[#D6BD98] text-[#1A3636] py-2.5 px-3 rounded font-bold text-xs hover:bg-[#c5ab85] transition-colors shadow-sm cursor-pointer"
             >
               <span
-                className="material-symbols-outlined text-[18px] mr-2"
+                className="material-symbols-outlined text-[18px] mr-2 text-[#1A3636]"
                 style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 rocket_launch
               </span>
-              <span>Deploy Response</span>
+              <span className="font-bold">Deploy Response</span>
             </button>
           </div>
 
@@ -302,12 +302,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Link
                 href="/responder"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center px-3.5 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors duration-200"
+                className="flex items-center px-3.5 py-2 rounded text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60 transition-colors duration-200"
               >
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   support_agent
                 </span>
-                <span className="font-label-caps text-[13px]">Responder View</span>
+                <span className="font-sans text-[13px]">Responder View</span>
               </Link>
             </li>
 
@@ -315,31 +315,31 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Link
                 href="/visitor"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center px-3.5 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors duration-200"
+                className="flex items-center px-3.5 py-2 rounded text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60 transition-colors duration-200"
               >
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   travel_explore
                 </span>
-                <span className="font-label-caps text-[13px]">Visitor Portal</span>
+                <span className="font-sans text-[13px]">Visitor Portal</span>
               </Link>
             </li>
           </ul>
         </div>
 
         {/* Footer User Info */}
-        <div className="px-4 pt-3 border-t border-border-subtle mt-auto">
+        <div className="px-4 pt-3 border-t border-[#40534C] mt-auto">
           <div className="flex items-center justify-between">
             <div className="flex flex-col truncate pr-2">
-              <span className="font-body-bold text-xs text-on-surface truncate">
+              <span className="font-bold text-xs text-white truncate">
                 {user?.name || 'Site Commander'}
               </span>
-              <span className="font-label-caps text-[10px] text-on-surface-variant uppercase">
+              <span className="font-sans text-[10px] text-[#D6BD98] uppercase">
                 {user?.role || 'manager'}
               </span>
             </div>
             <button
               onClick={logout}
-              className="p-1.5 text-on-surface-variant hover:text-error rounded hover:bg-surface-container transition-colors cursor-pointer"
+              className="p-1.5 text-[#CBD6CF] hover:text-[#D6BD98] rounded hover:bg-[#40534C] transition-colors cursor-pointer"
               title="Logout"
             >
               <span className="material-symbols-outlined text-[18px]">logout</span>
@@ -351,13 +351,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content Area & TopNavBar */}
       <div className="flex flex-col flex-1 h-full min-w-0 overflow-hidden relative md:ml-64">
         {/* TopNavBar */}
-        <nav className="relative h-topbar-height bg-surface border-b border-border-subtle flex justify-between items-center px-3 sm:px-4 md:px-6 z-40 shrink-0 shadow-sm gap-3">
+        <nav className="relative h-topbar-height bg-[#1A3636] border-b border-[#40534C] flex justify-between items-center px-3 sm:px-4 md:px-6 z-40 shrink-0 shadow-sm gap-3">
           {/* Left: Hamburger (Mobile only) */}
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 h-full shrink-0">
             {/* Hamburger Button (Mobile only) */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-1.5 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container transition-colors flex items-center justify-center shrink-0"
+              className="md:hidden p-1.5 text-[#CBD6CF] hover:text-white rounded hover:bg-[#40534C] transition-colors flex items-center justify-center shrink-0"
               title="Open Menu"
             >
               <span className="material-symbols-outlined text-[24px]">menu</span>
@@ -366,7 +366,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Center: Brand Title (Full Viewport Centered) */}
           <div className="fixed left-1/2 -translate-x-1/2 top-0 h-topbar-height flex items-center justify-center pointer-events-none z-40">
-            <span className="font-headline-md text-sm sm:text-base md:text-headline-md font-extrabold text-on-surface tracking-tighter whitespace-nowrap flex items-center leading-none">
+            <span className="font-headline-md text-sm sm:text-base md:text-headline-md font-extrabold text-[#D6BD98] tracking-wider whitespace-nowrap flex items-center leading-none">
               SafeSight HECTOR
             </span>
           </div>
@@ -382,8 +382,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               }}
               className={`relative h-8 flex items-center rounded-md border box-border overflow-hidden select-none shrink-0 ${
                 isSearchOpen
-                  ? 'bg-surface border-primary ring-2 ring-primary/20 shadow-md shadow-primary/10'
-                  : 'bg-surface-container-low border-outline-variant hover:border-primary hover:bg-surface cursor-pointer'
+                  ? 'bg-[#40534C] border-[#D6BD98] ring-2 ring-[#D6BD98]/30 shadow-md'
+                  : 'bg-[#40534C]/60 border-[#677D6A] hover:border-[#D6BD98] hover:bg-[#40534C] cursor-pointer'
               }`}
             >
               {isSearchOpen ? (
@@ -391,7 +391,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   onSubmit={handleSearchSubmit}
                   className="flex items-center w-full h-full min-w-0 overflow-hidden"
                 >
-                  <span className="material-symbols-outlined text-[17px] text-primary shrink-0 pl-2 pr-1 pointer-events-none">
+                  <span className="material-symbols-outlined text-[17px] text-[#D6BD98] shrink-0 pl-2 pr-1 pointer-events-none">
                     search
                   </span>
                   <input
@@ -401,7 +401,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search..."
                     tabIndex={0}
-                    className="flex-1 min-w-0 bg-transparent border-none text-xs font-telemetry-md text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 outline-none px-1 h-full select-text"
+                    className="flex-1 min-w-0 bg-transparent border-none text-xs font-sans text-white placeholder:text-[#CBD6CF]/60 focus:ring-0 outline-none px-1 h-full select-text"
                   />
                   <button
                     type="button"
@@ -414,7 +414,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         setIsSearchOpen(false);
                       }
                     }}
-                    className="w-7 h-full flex items-center justify-center text-on-surface-variant hover:text-error transition-colors shrink-0 cursor-pointer pr-1"
+                    className="w-7 h-full flex items-center justify-center text-[#CBD6CF] hover:text-[#D6BD98] transition-colors shrink-0 cursor-pointer pr-1"
                     title={searchQuery ? 'Clear' : 'Close search (Esc)'}
                     aria-label="Close search"
                   >
@@ -425,7 +425,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(true)}
-                  className="w-full h-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer border-none bg-transparent"
+                  className="w-full h-full flex items-center justify-center text-[#CBD6CF] hover:text-[#D6BD98] transition-colors cursor-pointer border-none bg-transparent"
                   title="Search (⌘K)"
                   aria-label="Open search"
                 >
@@ -439,17 +439,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* System Status Pill */}
             <button
               onClick={() => router.push('/dashboard')}
-              className="hidden sm:flex items-center h-8 border border-outline-variant text-on-surface-variant px-2.5 rounded hover:text-primary hover:border-primary transition-colors text-[11px] font-body-bold bg-surface cursor-pointer whitespace-nowrap shrink-0"
+              className="hidden sm:flex items-center h-8 border border-[#677D6A] text-[#CBD6CF] px-2.5 rounded hover:text-white hover:border-[#D6BD98] transition-colors text-[11px] font-bold bg-[#40534C] cursor-pointer whitespace-nowrap shrink-0"
               title="Operational System Status"
             >
-              <span className="w-2 h-2 rounded-full bg-status-nominal mr-1.5 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-[#677D6A] mr-1.5 animate-pulse"></span>
               <span>Status</span>
             </button>
 
             {/* Emergency Lockdown Button */}
             <button
               onClick={handleEmergencyLockdown}
-              className={`h-8 flex items-center gap-1 px-2.5 sm:px-3 rounded transition-all text-xs font-body-bold shadow-md cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`h-8 flex items-center gap-1 px-2.5 sm:px-3 rounded transition-all text-xs font-bold shadow-md cursor-pointer whitespace-nowrap shrink-0 ${
                 lockdownActive
                   ? 'bg-status-critical text-white animate-pulse shadow-status-critical/30'
                   : 'bg-error text-on-error hover:bg-error/90 shadow-error/20'
@@ -464,25 +464,25 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div ref={profileMenuRef} className="relative flex items-center h-8 shrink-0">
               <button
                 onClick={() => setShowProfileMenu((prev) => !prev)}
-                className="w-8 h-8 rounded-full border border-outline-variant overflow-hidden flex items-center justify-center bg-primary text-white font-bold text-xs hover:ring-2 hover:ring-primary/40 transition-all cursor-pointer"
+                className="w-8 h-8 rounded-full border border-[#D6BD98] overflow-hidden flex items-center justify-center bg-[#D6BD98] text-[#1A3636] font-extrabold text-xs hover:ring-2 hover:ring-[#D6BD98]/50 transition-all cursor-pointer"
               >
                 {user?.name ? user.name[0].toUpperCase() : 'M'}
               </button>
 
               {showProfileMenu && (
-                <div className="absolute right-0 mt-2 top-8 w-48 bg-surface rounded-lg shadow-xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="px-4 py-2 border-b border-border-subtle">
-                    <p className="font-body-bold text-xs text-on-surface">
+                <div className="absolute right-0 mt-2 top-8 w-48 bg-[#1A3636] rounded-lg shadow-xl border border-[#40534C] py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-4 py-2 border-b border-[#40534C]">
+                    <p className="font-bold text-xs text-white">
                       {user?.name || 'Site Commander'}
                     </p>
-                    <p className="font-telemetry-md text-[10px] text-on-surface-variant truncate">
+                    <p className="font-sans text-[10px] text-[#D6BD98] truncate">
                       {user?.email || 'manager@safesight.gov.in'}
                     </p>
                   </div>
                   <Link
                     href="/dashboard"
                     onClick={() => setShowProfileMenu(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs text-on-surface hover:bg-surface-container"
+                    className="flex items-center gap-2 px-4 py-2 text-xs text-[#CBD6CF] hover:text-white hover:bg-[#40534C]"
                   >
                     <span className="material-symbols-outlined text-sm">dashboard</span>
                     Command Center
@@ -490,14 +490,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Link
                     href="/responder"
                     onClick={() => setShowProfileMenu(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs text-on-surface hover:bg-surface-container"
+                    className="flex items-center gap-2 px-4 py-2 text-xs text-[#CBD6CF] hover:text-white hover:bg-[#40534C]"
                   >
                     <span className="material-symbols-outlined text-sm">support_agent</span>
                     Responder View
                   </Link>
                   <button
                     onClick={logout}
-                    className="w-full text-left flex items-center gap-2 px-4 py-2 text-xs text-error hover:bg-error-container/30 transition-colors"
+                    className="w-full text-left flex items-center gap-2 px-4 py-2 text-xs text-[#ef4444] hover:bg-[#ef4444]/20 transition-colors"
                   >
                     <span className="material-symbols-outlined text-sm">logout</span>
                     Sign Out

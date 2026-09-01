@@ -10,58 +10,82 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'on-tertiary-fixed': '#001e2d',
-        'outline': '#867461',
-        'status-warning': '#d97706',
-        'on-surface-variant': '#534434',
-        'border-subtle': '#e2e8f0',
-        'on-secondary-fixed': '#131b2e',
-        'on-secondary-container': '#5c647a',
-        'error': '#ba1a1a',
-        'error-container': '#ffdad6',
-        'primary-fixed': '#ffddb8',
-        'text-main': '#0f172a',
-        'tertiary': '#00658b',
-        'primary-fixed-dim': '#ffb95f',
-        'secondary': '#565e74',
-        'surface-container-high': '#e6e8ea',
-        'background': '#f7f9fb',
-        'surface-container-highest': '#e0e3e5',
-        'inverse-surface': '#2d3133',
-        'surface-container': '#f1f5f9',
-        'on-tertiary': '#ffffff',
-        'status-critical': '#dc2626',
-        'on-secondary': '#ffffff',
-        'on-primary-container': '#613b00',
-        'status-nominal': '#16a34a',
-        'surface-variant': '#e0e3e5',
-        'on-background': '#191c1e',
-        'on-secondary-fixed-variant': '#3f465c',
-        'surface-container-low': '#f2f4f6',
-        'on-primary-fixed-variant': '#653e00',
-        'tertiary-fixed-dim': '#7fd0ff',
-        'on-error': '#ffffff',
-        'tertiary-fixed': '#c5e7ff',
-        'surface-tint': '#855300',
-        'surface': '#ffffff',
-        'surface-container-lowest': '#ffffff',
-        'tertiary-container': '#1abdff',
-        'surface-bright': '#f7f9fb',
-        'on-tertiary-fixed-variant': '#004c6a',
-        'primary-container': '#f59e0b',
-        'on-error-container': '#93000a',
-        'inverse-on-surface': '#eff1f3',
-        'secondary-fixed': '#dae2fd',
-        'secondary-fixed-dim': '#bec6e0',
+        // Palette Base Colors:
+        // Almond: #D6BD98
+        // Matcha Brew: #677D6A
+        // Forest Roast: #40534C
+        // Eclipse: #1A3636
+
+        // Primary: Eclipse & Forest Roast
+        'primary': '#1A3636',
         'on-primary': '#ffffff',
-        'outline-variant': '#d8c3ad',
-        'on-primary-fixed': '#2a1700',
-        'on-surface': '#191c1e',
-        'primary': '#855300',
-        'on-tertiary-container': '#004966',
-        'secondary-container': '#dae2fd',
-        'surface-dim': '#d8dadc',
-        'inverse-primary': '#ffb95f',
+        'primary-container': '#40534C',
+        'on-primary-container': '#F2EFE9',
+        'primary-fixed': '#D6BD98',
+        'primary-fixed-dim': '#C5AB85',
+        'on-primary-fixed': '#1A3636',
+        'on-primary-fixed-variant': '#40534C',
+
+        // Secondary: Forest Roast & Matcha
+        'secondary': '#40534C',
+        'on-secondary': '#ffffff',
+        'secondary-container': '#677D6A',
+        'on-secondary-container': '#ffffff',
+        'secondary-fixed': '#E8EFEA',
+        'secondary-fixed-dim': '#D6BD98',
+        'on-secondary-fixed': '#1A3636',
+        'on-secondary-fixed-variant': '#40534C',
+
+        // Tertiary: Matcha Brew & Almond
+        'tertiary': '#677D6A',
+        'on-tertiary': '#ffffff',
+        'tertiary-container': '#D6BD98',
+        'on-tertiary-container': '#1A3636',
+        'tertiary-fixed': '#E8DFC8',
+        'tertiary-fixed-dim': '#D6BD98',
+        'on-tertiary-fixed': '#1A3636',
+        'on-tertiary-fixed-variant': '#40534C',
+
+        // Surfaces & Backgrounds
+        'background': '#F6F8F7',
+        'surface': '#FFFFFF',
+        'surface-bright': '#FFFFFF',
+        'surface-dim': '#DDE5E0',
+        'surface-variant': '#E5ECE8',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F0F4F2',
+        'surface-container': '#E6EDE9',
+        'surface-container-high': '#DBE5E0',
+        'surface-container-highest': '#D0DDD7',
+        'surface-tint': '#1A3636',
+
+        'inverse-surface': '#1A3636',
+        'inverse-on-surface': '#F0F4F2',
+        'inverse-primary': '#D6BD98',
+
+        // Text & Outlines
+        'text-main': '#1A3636',
+        'on-surface': '#1A3636',
+        'on-surface-variant': '#40534C',
+        'on-background': '#1A3636',
+        'outline': '#677D6A',
+        'outline-variant': '#CBD6CF',
+        'border-subtle': '#DCE4DF',
+
+        // Status Colors Harmonized
+        'status-nominal': '#677D6A',
+        'status-warning': '#D97706',
+        'status-critical': '#BA1A1A',
+        'error': '#BA1A1A',
+        'error-container': '#FFDAD6',
+        'on-error': '#ffffff',
+        'on-error-container': '#93000A',
+
+        // Named palette aliases
+        'almond': '#D6BD98',
+        'matcha': '#677D6A',
+        'forest': '#40534C',
+        'eclipse': '#1A3636',
 
         // Legacy compatibility aliases
         danger: {
@@ -72,13 +96,13 @@ const config: Config = {
         },
         warning: {
           50: '#fffbeb',
-          500: '#f59e0b',
-          600: '#d97706',
+          500: '#d97706',
+          600: '#b45309',
         },
         safe: {
           50: '#f0fdf4',
-          500: '#22c55e',
-          600: '#16a34a',
+          500: '#677d6a',
+          600: '#40534c',
         },
       },
       borderRadius: {

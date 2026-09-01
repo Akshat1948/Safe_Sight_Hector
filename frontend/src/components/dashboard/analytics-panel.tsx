@@ -293,8 +293,8 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container border border-border-subtle rounded text-xs font-sans text-on-surface-variant">
-            <span className="w-2 h-2 rounded-full bg-status-nominal animate-pulse"></span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#1A3636] border border-[#40534C] rounded text-xs font-sans text-[#D6BD98] shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-[#677D6A] animate-pulse"></span>
             LIVE TELEMETRY
           </span>
         </div>
@@ -303,7 +303,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
       {/* KPI Cards Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Alerts */}
-        <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-primary transition-colors">
+        <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-[#1A3636] transition-colors">
           <div className="flex justify-between items-start mb-3">
             <span className="font-sans text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
               Total Alerts Today
@@ -313,65 +313,65 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
             </span>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="font-stat-lg text-stat-lg text-primary">{stats.totalAlerts.toLocaleString()}</span>
+            <span className="font-stat-lg text-stat-lg text-[#1A3636]">{stats.totalAlerts.toLocaleString()}</span>
             <span className="font-body-base text-xs text-status-critical flex items-center font-bold">
               <span className="material-symbols-outlined text-[14px]">arrow_upward</span> 12%
             </span>
           </div>
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary/40 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-[#1A3636]/0 via-[#D6BD98] to-[#1A3636]/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
 
         {/* Card 2: Avg Response Time */}
-        <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-tertiary transition-colors">
+        <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-[#40534C] transition-colors">
           <div className="flex justify-between items-start mb-3">
             <span className="font-sans text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
               Avg Response Time
             </span>
-            <span className="material-symbols-outlined text-tertiary text-[20px]">
+            <span className="material-symbols-outlined text-[#677D6A] text-[20px]">
               timer
             </span>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="font-stat-lg text-stat-lg text-on-surface">{stats.avgResponseTime}</span>
-            <span className="font-body-base text-xs text-status-nominal flex items-center font-bold">
+            <span className="font-stat-lg text-stat-lg text-[#1A3636]">{stats.avgResponseTime}</span>
+            <span className="font-body-base text-xs text-[#677D6A] flex items-center font-bold">
               <span className="material-symbols-outlined text-[14px]">arrow_downward</span> 2s
             </span>
           </div>
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-tertiary/0 via-tertiary/40 to-tertiary/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-[#40534C]/0 via-[#677D6A] to-[#40534C]/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
 
         {/* Card 3: System Uptime */}
-        <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-tertiary transition-colors">
+        <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-[#40534C] transition-colors">
           <div className="flex justify-between items-start mb-3">
             <span className="font-sans text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
               System Uptime
             </span>
-            <span className="material-symbols-outlined text-tertiary text-[20px]">
+            <span className="material-symbols-outlined text-[#677D6A] text-[20px]">
               dns
             </span>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="font-stat-lg text-stat-lg text-on-surface">{stats.systemUptime}</span>
+            <span className="font-stat-lg text-stat-lg text-[#1A3636]">{stats.systemUptime}</span>
             <span className="font-body-base text-xs text-on-surface-variant font-medium">N-9 Nines</span>
           </div>
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-tertiary/0 via-tertiary/40 to-tertiary/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-[#40534C]/0 via-[#677D6A] to-[#40534C]/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
 
         {/* Card 4: Active Patrols */}
-        <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-primary transition-colors">
+        <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-[#1A3636] transition-colors">
           <div className="flex justify-between items-start mb-3">
             <span className="font-sans text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
               Active Patrols
             </span>
-            <span className="material-symbols-outlined text-secondary text-[20px]">
+            <span className="material-symbols-outlined text-[#40534C] text-[20px]">
               directions_car
             </span>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="font-stat-lg text-stat-lg text-primary">{stats.activePatrols}</span>
+            <span className="font-stat-lg text-stat-lg text-[#1A3636]">{stats.activePatrols}</span>
             <span className="font-body-base text-xs text-on-surface-variant font-medium">/ {stats.patrolCapacity} Capacity</span>
           </div>
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary/40 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-[#1A3636]/0 via-[#D6BD98] to-[#1A3636]/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
       </div>
 
@@ -391,7 +391,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
                   onClick={() => setTrendRange(range)}
                   className={`px-2.5 py-1 text-[10px] font-sans rounded transition-colors ${
                     trendRange === range
-                      ? 'bg-surface-container text-primary font-bold border border-border-subtle'
+                      ? 'bg-[#1A3636] text-[#D6BD98] font-bold border border-[#1A3636]'
                       : 'text-on-surface-variant hover:text-on-surface'
                   }`}
                 >
@@ -426,8 +426,8 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
                       point.isSpike
                         ? 'bg-status-critical/80 hover:bg-status-critical shadow-sm shadow-status-critical/30'
                         : point.isCurrent
-                        ? 'bg-primary/60 hover:bg-primary border-t-2 border-primary'
-                        : 'bg-primary/30 hover:bg-primary'
+                        ? 'bg-[#1A3636] hover:bg-[#40534C] border-t-2 border-[#D6BD98]'
+                        : 'bg-[#677D6A]/50 hover:bg-[#677D6A]'
                     }`}
                     style={{ height: `${point.heightPercent}%` }}
                   >
