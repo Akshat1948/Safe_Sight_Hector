@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/dashboard/dashboard-layout';
 import RoleGuard from '@/components/auth/role-guard';
 import { useNotifications } from '@/shared/hooks';
@@ -15,10 +15,15 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function SosPage() {
   const { sosRequests: requests, loading, updateSosStatus, isUpdatingSos } = useNotifications();
+  const [tab, setTab] = useState<'active' | 'resolved'>('active');
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     await updateSosStatus(id, newStatus);
   };
+
+  const activeRequests = requests.filter((r) => (r.status || '').toLowerCase() !== 'resolved');
+  const resolvedRequests = requests.filter((r) => (r.status || '').toLowerCase() === 'resolved');
+  const displayedRequests = tab === 'active' ? activeRequests : resolvedRequests;
 
   return (
     <RoleGuard allowedRoles={['manager', 'admin', 'responder']}>
@@ -50,10 +55,42 @@ export default function SosPage() {
                 Real-time monitor and response queue for visitor 1-tap emergency distress calls.
               </p>
             </div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container border border-border-subtle rounded text-xs font-telemetry-md text-primary font-bold self-start sm:self-auto">
-              <span className="w-2 h-2 rounded-full bg-error animate-pulse"></span>
-              {requests.filter((r) => (r.status || '').toLowerCase() === 'pending').length} ACTIVE DISTRESS CALLS
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container border border-border-subtle rounded text-xs font-telemetry-md text-primary font-bold">
+                <span className="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+                {activeRequests.filter((r) => (r.status || '').toLowerCase() === 'pending').length} PENDING CALLS
+              </span>
+            </div>
+          </div>
+
+          {/* Tab Filter (Active Queue vs Resolved Archive) */}
+          <div className="flex items-center gap-2 border-b border-border-subtle pb-3">
+            <button
+              onClick={() => setTab('active')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-label-caps font-bold transition-all flex items-center gap-2 ${
+                tab === 'active'
+                  ? 'bg-red-600 text-white shadow-md shadow-red-600/30'
+                  : 'bg-surface-container text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              <span>🚨 Active Queue</span>
+              <span className="px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
+                {activeRequests.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setTab('resolved')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-label-caps font-bold transition-all flex items-center gap-2 ${
+                tab === 'resolved'
+                  ? 'bg-status-nominal text-white shadow-md shadow-status-nominal/30'
+                  : 'bg-surface-container text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              <span>✓ Resolved Archive</span>
+              <span className="px-1.5 py-0.2 bg-black/20 rounded-full text-[10px]">
+                {resolvedRequests.length}
+              </span>
+            </button>
           </div>
 
           {loading && requests.length === 0 ? (
@@ -62,16 +99,27 @@ export default function SosPage() {
                 <div key={i} className="h-28 bg-surface-container animate-pulse rounded-lg border border-border-subtle" />
               ))}
             </div>
-          ) : requests.length === 0 ? (
+          ) : displayedRequests.length === 0 ? (
             <div className="hud-panel rounded-lg flex flex-col items-center justify-center py-20 text-on-surface-variant">
-              <span className="material-symbols-outlined text-5xl mb-3 text-secondary">emergency</span>
-              <h3 className="font-headline-sm text-base font-bold text-on-surface">No SOS Requests</h3>
-              <p className="text-xs font-telemetry-md mt-1">All site sectors nominal. No active distress signals.</p>
+              <span className="material-symbols-outlined text-5xl mb-3 text-secondary">
+                {tab === 'active' ? 'task_alt' : 'inventory_2'}
+              </span>
+              <h3 className="font-headline-sm text-base font-bold text-on-surface">
+                {tab === 'active' ? 'No Active SOS Requests' : 'No Resolved SOS Requests'}
+              </h3>
+              <p className="text-xs font-telemetry-md mt-1">
+                {tab === 'active'
+                  ? 'All site sectors nominal. No active distress signals requiring immediate action.'
+                  : 'No distress calls have been marked as resolved yet.'}
+              </p>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {requests.map((sos) => {
+              {displayedRequests.map((sos) => {
                 const isPending = (sos.status || '').toLowerCase() === 'pending';
+                const isAcknowledged = (sos.status || '').toLowerCase() === 'acknowledged';
+                const isResponding = (sos.status || '').toLowerCase() === 'responding';
+                const isResolved = (sos.status || '').toLowerCase() === 'resolved';
                 const statusClass = STATUS_COLORS[(sos.status || '').toLowerCase()] || STATUS_COLORS.pending;
                 const timeStr = new Date(sos.createdAt).toLocaleTimeString([], {
                   hour: '2-digit',
@@ -99,6 +147,8 @@ export default function SosPage() {
                     className={`relative rounded-lg p-5 transition-all shadow-sm ${
                       isPending
                         ? 'bg-error-container/15 border border-error/40'
+                        : isResolved
+                        ? 'bg-surface-container/40 border border-status-nominal/30 opacity-80'
                         : 'hud-panel border border-border-subtle border-l-4 border-l-secondary'
                     }`}
                   >
@@ -164,8 +214,9 @@ export default function SosPage() {
                         </div>
                       </div>
 
+                      {/* Action Progression Buttons */}
                       <div className="flex gap-2 shrink-0 self-start md:self-center">
-                        {sos.status?.toLowerCase() === 'pending' && (
+                        {isPending && (
                           <button
                             onClick={() => handleStatusChange(sos.id, 'acknowledged')}
                             disabled={isUpdatingSos(sos.id)}
@@ -174,7 +225,7 @@ export default function SosPage() {
                             {isUpdatingSos(sos.id) ? 'Acknowledging...' : 'Acknowledge'}
                           </button>
                         )}
-                        {sos.status?.toLowerCase() === 'acknowledged' && (
+                        {isAcknowledged && (
                           <button
                             onClick={() => handleStatusChange(sos.id, 'responding')}
                             disabled={isUpdatingSos(sos.id)}
@@ -183,7 +234,7 @@ export default function SosPage() {
                             {isUpdatingSos(sos.id) ? 'Dispatching...' : 'Dispatch Responder'}
                           </button>
                         )}
-                        {sos.status?.toLowerCase() === 'responding' && (
+                        {isResponding && (
                           <button
                             onClick={() => handleStatusChange(sos.id, 'resolved')}
                             disabled={isUpdatingSos(sos.id)}
@@ -191,6 +242,11 @@ export default function SosPage() {
                           >
                             {isUpdatingSos(sos.id) ? 'Resolving...' : 'Mark Resolved'}
                           </button>
+                        )}
+                        {isResolved && (
+                          <span className="text-xs text-status-nominal font-telemetry-md font-bold inline-flex items-center gap-1 py-1.5 px-3 bg-status-nominal/10 rounded border border-status-nominal/30">
+                            ✓ Resolved
+                          </span>
                         )}
                       </div>
                     </div>
@@ -204,4 +260,3 @@ export default function SosPage() {
     </RoleGuard>
   );
 }
-

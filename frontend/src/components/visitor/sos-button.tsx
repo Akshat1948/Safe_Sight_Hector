@@ -51,6 +51,8 @@ export default function SOSButton({ siteId, className = '', onSosDispatched }: S
 
       setSosStatus('success');
       setSosResponse(res?.data || { id: 'SOS-' + Date.now().toString().slice(-6), message: 'Help is on the way.' });
+      setMessage('');
+      setContactPhone('');
       if (onSosDispatched && res?.data?.id) {
         onSosDispatched(res.data.id);
       }
@@ -61,9 +63,18 @@ export default function SOSButton({ siteId, className = '', onSosDispatched }: S
         id: 'SOS-' + Date.now().toString().slice(-6),
         message: 'SOS received. Emergency responder dispatched.',
       });
+      setMessage('');
+      setContactPhone('');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setSosStatus('idle');
+    setMessage('');
+    setContactPhone('');
   };
 
   return (
@@ -121,10 +132,7 @@ export default function SOSButton({ siteId, className = '', onSosDispatched }: S
                     {t('call_108')}
                   </a>
                   <button
-                    onClick={() => {
-                      setIsOpen(false);
-                      setSosStatus('idle');
-                    }}
+                    onClick={handleClose}
                     className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm"
                   >
                     {t('close')}
@@ -139,7 +147,7 @@ export default function SOSButton({ siteId, className = '', onSosDispatched }: S
                     <span>{t('emergency_dispatch')}</span>
                   </div>
                   <button
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleClose}
                     className="text-slate-400 hover:text-white text-xs px-2 py-1 bg-slate-800 rounded"
                   >
                     ✕
@@ -183,7 +191,7 @@ export default function SOSButton({ siteId, className = '', onSosDispatched }: S
                     {isSubmitting ? t('transmitting_gps') : t('confirm_send_sos')}
                   </button>
                   <button
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleClose}
                     className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm"
                   >
                     {t('cancel')}
