@@ -147,8 +147,8 @@ export default function MapView({
           zoomControl: false,
         });
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; SafeSight',
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; SafeSight',
           maxZoom: 19,
         }).addTo(map);
 
@@ -388,9 +388,8 @@ export default function MapView({
             </div>
             <div>
               <p className="text-[10px] text-slate-400">Load</p>
-              <p className={`font-bold ${
-                activeZoneDetails.densityStatus === 'red' ? 'text-red-400' : 'text-emerald-400'
-              }`}>
+              <p className={`font-bold ${activeZoneDetails.densityStatus === 'red' ? 'text-red-400' : 'text-emerald-400'
+                }`}>
                 {activeZoneDetails.maxCapacity
                   ? `${Math.round((activeZoneDetails.currentDensity / activeZoneDetails.maxCapacity) * 100)}%`
                   : 'N/A'}
