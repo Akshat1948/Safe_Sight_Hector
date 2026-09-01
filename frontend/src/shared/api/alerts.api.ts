@@ -13,10 +13,10 @@ const DEFAULT_DEMO_ALERTS: IAlert[] = [
     message: 'High crowd density threshold (92%) breached near Gate 3 steps. Diverting pilgrim inflow to Corridor 4.',
     messageHi: 'संगम मुख्य घाट गेट 3 पर भीड़ का अत्यधिक दबाव। कृपया कॉरिडोर 4 की ओर प्रस्थान करें।',
     channels: [AlertChannel.DASHBOARD, AlertChannel.PUSH, AlertChannel.PA_SYSTEM],
-    status: AlertStatus.DISPATCHED,
+    status: AlertStatus.ACKNOWLEDGED,
     createdBy: 'commander-01',
-    acknowledgedBy: null,
-    acknowledgedAt: null,
+    acknowledgedBy: 'commander-01',
+    acknowledgedAt: new Date(Date.now() - 8 * 60 * 1000).toISOString(),
     createdAt: new Date(Date.now() - 8 * 60 * 1000).toISOString(),
   },
   {
@@ -30,10 +30,10 @@ const DEFAULT_DEMO_ALERTS: IAlert[] = [
     message: 'Parking Lot A has exceeded 95% capacity. Electronic signage redirecting upcoming vehicles to Lot B & C.',
     messageHi: 'पार्किंग स्थल A पूर्णतः भर चुका है। कृपया पार्किंग स्थल B और C का उपयोग करें।',
     channels: [AlertChannel.DASHBOARD, AlertChannel.SMS],
-    status: AlertStatus.DISPATCHED,
+    status: AlertStatus.ACKNOWLEDGED,
     createdBy: 'traffic-ai-system',
-    acknowledgedBy: null,
-    acknowledgedAt: null,
+    acknowledgedBy: 'traffic-ai-system',
+    acknowledgedAt: new Date(Date.now() - 22 * 60 * 1000).toISOString(),
     createdAt: new Date(Date.now() - 22 * 60 * 1000).toISOString(),
   },
   {
@@ -84,17 +84,32 @@ export async function getAlerts(
   if (params?.severity) query.set('severity', params.severity);
 
   const qs = query.toString() ? `?${query.toString()}` : '';
-  const res = await apiClient<IAlert[]>(`/alerts${qs}`);
-  if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-    return res;
+  try {
+    const res = await apiClient<IAlert[]>(`/alerts${qs}`);
+    if (res?.success && Array.isArray(res.data)) {
+      let list = res.data;
+      if (params?.status) {
+        list = list.filter((a) => (a.status || '').toLowerCase() === params.status?.toLowerCase());
+      }
+      if (params?.severity) {
+        list = list.filter((a) => (a.severity || '').toLowerCase() === params.severity?.toLowerCase());
+      }
+      return {
+        success: true,
+        data: list,
+        message: 'Alerts loaded',
+      };
+    }
+  } catch (err) {
+    // Offline fallback
   }
 
   let list = [...localDemoAlerts];
   if (params?.status) {
-    list = list.filter((a) => a.status.toLowerCase() === params.status?.toLowerCase());
+    list = list.filter((a) => (a.status || '').toLowerCase() === params.status?.toLowerCase());
   }
   if (params?.severity) {
-    list = list.filter((a) => a.severity.toLowerCase() === params.severity?.toLowerCase());
+    list = list.filter((a) => (a.severity || '').toLowerCase() === params.severity?.toLowerCase());
   }
 
   return {

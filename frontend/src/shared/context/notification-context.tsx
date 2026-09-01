@@ -148,14 +148,43 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         createdAt: sos.createdAt || new Date().toISOString(),
         updatedAt: sos.updatedAt || new Date().toISOString(),
       };
+
       setSosRequests((prev) => {
+        // 1. Check exact ID match
         const existingIndex = prev.findIndex((item) => item.id === sos.id);
         if (existingIndex >= 0) {
           const updated = [...prev];
           updated[existingIndex] = { ...updated[existingIndex], ...normalizedSos };
           return updated;
         }
-        return [normalizedSos, ...prev];
+
+        // 2. Check if there is an un-synced optimistic/fallback ticket matching this server ticket
+        const optimisticIndex = prev.findIndex(
+          (item) =>
+            item.id.startsWith('SOS-') &&
+            item.message === normalizedSos.message &&
+            Math.abs(new Date(item.createdAt).getTime() - new Date(normalizedSos.createdAt).getTime()) < 60000
+        );
+        if (optimisticIndex >= 0) {
+          const updated = [...prev];
+          updated[optimisticIndex] = normalizedSos;
+          return updated;
+        }
+
+        // 3. Filter out any identical message/phone duplicates created in the same 5-second window
+        const cleanPrev = prev.filter((item) => {
+          if (item.id === normalizedSos.id) return false;
+          if (
+            item.id.startsWith('SOS-') &&
+            item.message === normalizedSos.message &&
+            item.contactPhone === normalizedSos.contactPhone
+          ) {
+            return false;
+          }
+          return true;
+        });
+
+        return [normalizedSos, ...cleanPrev];
       });
     };
 
@@ -183,51 +212,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     on('sos:new', handleNewSos);
     on('sos:status:update', handleSosStatusUpdate);
 
-    // Cross-tab broadcast channel
-    let bc: BroadcastChannel | null = null;
-    try {
-      if (typeof window !== 'undefined') {
-        bc = new BroadcastChannel('safesight_sos_channel');
-        bc.onmessage = (event) => {
-          if (event.data?.type === 'sos:new' && event.data?.data) {
-            handleNewSos(event.data.data);
-          } else if (event.data?.type === 'sos:status:update' && event.data?.data) {
-            handleSosStatusUpdate(event.data.data);
-          }
-        };
-      }
-    } catch {}
-
-    const handleCustomSosNew = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        handleNewSos(customEvent.detail);
-      }
-    };
-
-    const handleCustomSosUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail) {
-        handleSosStatusUpdate(customEvent.detail);
-      }
-    };
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('safesight:sos:new', handleCustomSosNew);
-      window.addEventListener('safesight:sos:status:update', handleCustomSosUpdate);
-    }
-
     return () => {
       off('alert:new', handleNewAlert);
       off('alert:acknowledged', handleAckAlert);
       off('alert:escalated', handleEscalateAlert);
       off('sos:new', handleNewSos);
       off('sos:status:update', handleSosStatusUpdate);
-      if (bc) bc.close();
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('safesight:sos:new', handleCustomSosNew);
-        window.removeEventListener('safesight:sos:status:update', handleCustomSosUpdate);
-      }
     };
   }, [on, off]);
 
@@ -240,44 +230,44 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       message?: string | null;
       contactPhone?: string | null;
     }) => {
-      const tempId = `SOS-${Date.now().toString().slice(-6)}`;
-      const newSosItem: ISosRequest = {
-        id: tempId,
-        siteId: data.siteId || '0275fd8b-81a2-4513-bdc5-9c4d27aae375',
-        location: {
-          type: 'Point',
-          coordinates: [data.longitude || 81.8463, data.latitude || 25.4358],
-        },
-        message: data.message || 'Emergency SOS assistance requested',
-        contactPhone: data.contactPhone || null,
-        status: SosStatus.PENDING,
-        assignedTo: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      // Optimistically add to shared collection
-      setSosRequests((prev) => [newSosItem, ...prev.filter((s) => s.id !== tempId)]);
-
       try {
         const res = await apiCreateSos(data);
         if (res?.success && res?.data) {
-          const realId = res.data.id || tempId;
           const realItem: ISosRequest = {
-            ...newSosItem,
-            id: realId,
+            id: res.data.id,
+            siteId: res.data.siteId || data.siteId || '0275fd8b-81a2-4513-bdc5-9c4d27aae375',
+            location: res.data.location || {
+              type: 'Point',
+              coordinates: [data.longitude || 81.8463, data.latitude || 25.4358],
+            },
+            message: res.data.message || data.message || 'Emergency SOS assistance requested',
+            contactPhone: res.data.contactPhone || data.contactPhone || null,
             status: (res.data.status as SosStatus) || SosStatus.PENDING,
-            createdAt: res.data.createdAt || newSosItem.createdAt,
+            assignedTo: res.data.assignedTo || null,
+            createdAt: res.data.createdAt || new Date().toISOString(),
+            updatedAt: res.data.updatedAt || new Date().toISOString(),
           };
-          setSosRequests((prev) => [
-            realItem,
-            ...prev.filter((s) => s.id !== tempId && s.id !== realId),
-          ]);
+
+          setSosRequests((prev) => {
+            const exists = prev.some((s) => s.id === realItem.id);
+            if (exists) {
+              return prev.map((s) => (s.id === realItem.id ? { ...s, ...realItem } : s));
+            }
+            // Remove any temp or identical tickets
+            const cleanPrev = prev.filter(
+              (s) =>
+                s.id !== realItem.id &&
+                !(s.id.startsWith('SOS-') && s.message === realItem.message)
+            );
+            return [realItem, ...cleanPrev];
+          });
+
           return res;
         }
-        return { success: true, data: newSosItem };
+        return res;
       } catch (err) {
-        return { success: true, data: newSosItem };
+        console.error('Failed to create SOS request:', err);
+        throw err;
       }
     },
     []

@@ -21,8 +21,17 @@ export default function SosPage() {
     await updateSosStatus(id, newStatus);
   };
 
-  const activeRequests = requests.filter((r) => (r.status || '').toLowerCase() !== 'resolved');
-  const resolvedRequests = requests.filter((r) => (r.status || '').toLowerCase() === 'resolved');
+  const uniqueRequests = React.useMemo(() => {
+    const seen = new Set<string>();
+    return requests.filter((r) => {
+      if (!r || !r.id || seen.has(r.id)) return false;
+      seen.add(r.id);
+      return true;
+    });
+  }, [requests]);
+
+  const activeRequests = uniqueRequests.filter((r) => (r.status || '').toLowerCase() !== 'resolved');
+  const resolvedRequests = uniqueRequests.filter((r) => (r.status || '').toLowerCase() === 'resolved');
   const displayedRequests = tab === 'active' ? activeRequests : resolvedRequests;
 
   return (

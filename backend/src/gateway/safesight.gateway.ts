@@ -44,10 +44,11 @@ export class SafeSightGateway implements OnGatewayConnection, OnGatewayDisconnec
   }
 
   emitToSite(siteId: string, event: string, payload: any) {
-    if (siteId) {
+    if (siteId && siteId !== 'all') {
       this.server.to(`site_${siteId}`).emit(event, payload);
+    } else {
+      this.server.emit(event, payload);
     }
-    this.server.emit(event, payload);
   }
 
   emitZoneDensityUpdate(siteId: string, data: { zoneId: string, currentDensity: number, densityStatus: string, flowRate: number, flowVelocity: number, updatedAt: Date }) {
