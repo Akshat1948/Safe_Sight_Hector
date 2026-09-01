@@ -253,7 +253,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <span className="material-symbols-outlined mr-3 text-[20px] shrink-0">
                     notifications
                   </span>
-                  <span className="font-sans text-[13px] font-medium truncate">Alert History</span>
+                  <span className="font-sans text-[13px] font-medium truncate">Alert</span>
                 </div>
                 {unreadAlertsCount > 0 && (
                   <span className="ml-2 shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-black text-white bg-red-600 rounded-full shadow-sm shadow-red-600/40 transition-all duration-200 ease-out animate-pulse">
