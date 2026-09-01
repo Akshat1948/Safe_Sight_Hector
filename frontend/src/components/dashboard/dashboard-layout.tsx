@@ -10,14 +10,6 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-const TOP_NAV_TABS = [
-  { label: 'Overview', href: '/dashboard' },
-  { label: 'Map', href: '/dashboard/map' },
-  { label: 'Assets', href: '/dashboard/assets' },
-  { label: 'Alerts', href: '/dashboard/alerts' },
-  { label: 'Incidents', href: '/dashboard/incidents' },
-  { label: 'SOS Queue', href: '/dashboard/sos' },
-];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
@@ -187,7 +179,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 >
                   home
                 </span>
-                <span className="font-label-caps text-label-caps">Home / Overview</span>
+                <span className="font-label-caps text-[13px]">Home / Overview</span>
               </Link>
             </li>
 
@@ -205,7 +197,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   map
                 </span>
-                <span className="font-label-caps text-label-caps">Real-time Map</span>
+                <span className="font-label-caps text-[13px]">Real-time Map</span>
               </Link>
             </li>
 
@@ -223,7 +215,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   local_shipping
                 </span>
-                <span className="font-label-caps text-label-caps">Asset Tracking</span>
+                <span className="font-label-caps text-[13px]">Asset Tracking</span>
               </Link>
             </li>
 
@@ -241,7 +233,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   crisis_alert
                 </span>
-                <span className="font-label-caps text-label-caps">Incidents Triage</span>
+                <span className="font-label-caps text-[13px]">Incidents Triage</span>
               </Link>
             </li>
 
@@ -259,7 +251,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   notifications
                 </span>
-                <span className="font-label-caps text-label-caps">Alert History</span>
+                <span className="font-label-caps text-[13px]">Alert History</span>
               </Link>
             </li>
 
@@ -277,7 +269,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <span className="material-symbols-outlined mr-3 text-[20px] text-error">
                   emergency
                 </span>
-                <span className="font-label-caps text-label-caps">SOS Queue</span>
+                <span className="font-label-caps text-[13px]">SOS Queue</span>
               </Link>
             </li>
           </ul>
@@ -315,7 +307,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   support_agent
                 </span>
-                <span className="font-label-caps text-label-caps">Responder View</span>
+                <span className="font-label-caps text-[13px]">Responder View</span>
               </Link>
             </li>
 
@@ -328,7 +320,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <span className="material-symbols-outlined mr-3 text-[20px]">
                   travel_explore
                 </span>
-                <span className="font-label-caps text-label-caps">Visitor Portal</span>
+                <span className="font-label-caps text-[13px]">Visitor Portal</span>
               </Link>
             </li>
           </ul>
@@ -359,9 +351,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content Area & TopNavBar */}
       <div className="flex flex-col flex-1 h-full min-w-0 overflow-hidden relative md:ml-64">
         {/* TopNavBar */}
-        <nav className="h-topbar-height bg-surface border-b border-border-subtle flex justify-between items-center px-3 sm:px-4 md:px-6 z-40 shrink-0 shadow-sm gap-3">
-          {/* Left: Hamburger + Brand + Tabs */}
-          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 h-full shrink-0 min-w-max">
+        <nav className="relative h-topbar-height bg-surface border-b border-border-subtle flex justify-between items-center px-3 sm:px-4 md:px-6 z-40 shrink-0 shadow-sm gap-3">
+          {/* Left: Hamburger (Mobile only) */}
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 h-full shrink-0">
             {/* Hamburger Button (Mobile only) */}
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -370,35 +362,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               <span className="material-symbols-outlined text-[24px]">menu</span>
             </button>
+          </div>
 
-            {/* Brand Title */}
-            <span className="font-headline-md text-sm sm:text-base md:text-headline-md font-extrabold text-on-surface tracking-tighter whitespace-nowrap flex items-center leading-none shrink-0 mr-1">
+          {/* Center: Brand Title (Full Viewport Centered) */}
+          <div className="fixed left-1/2 -translate-x-1/2 top-0 h-topbar-height flex items-center justify-center pointer-events-none z-40">
+            <span className="font-headline-md text-sm sm:text-base md:text-headline-md font-extrabold text-on-surface tracking-tighter whitespace-nowrap flex items-center leading-none">
               SafeSight HECTOR
             </span>
-
-            {/* Top Navigation Tabs */}
-            <div className="hidden lg:flex items-center space-x-1 h-full shrink-0">
-              {TOP_NAV_TABS.map((tab) => {
-                const isActive =
-                  tab.href === '/dashboard'
-                    ? pathname === '/dashboard' || pathname === '/'
-                    : pathname.startsWith(tab.href);
-
-                return (
-                  <Link
-                    key={tab.href}
-                    href={tab.href}
-                    className={`relative flex items-center h-full px-2 xl:px-2.5 font-label-caps text-[10.5px] xl:text-label-caps uppercase whitespace-nowrap transition-colors duration-150 cursor-pointer ${
-                      isActive
-                        ? 'text-primary font-bold after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary'
-                        : 'text-on-surface-variant hover:text-on-surface hover:text-primary/90'
-                    }`}
-                  >
-                    {tab.label}
-                  </Link>
-                );
-              })}
-            </div>
           </div>
 
           {/* Right: Fluid Animated Search Bar, Status & Profile */}
@@ -407,7 +377,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div
               ref={searchContainerRef}
               style={{
-                width: isSearchOpen ? 185 : 36,
+                width: isSearchOpen ? 280 : 36,
                 transition: 'width 220ms cubic-bezier(0.22, 1, 0.36, 1)',
               }}
               className={`relative h-8 flex items-center rounded-md border box-border overflow-hidden select-none shrink-0 ${

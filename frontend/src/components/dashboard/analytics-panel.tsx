@@ -293,7 +293,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container border border-border-subtle rounded text-xs font-telemetry-md text-on-surface-variant">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container border border-border-subtle rounded text-xs font-sans text-on-surface-variant">
             <span className="w-2 h-2 rounded-full bg-status-nominal animate-pulse"></span>
             LIVE TELEMETRY
           </span>
@@ -305,7 +305,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
         {/* Card 1: Total Alerts */}
         <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-primary transition-colors">
           <div className="flex justify-between items-start mb-3">
-            <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+            <span className="font-sans text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
               Total Alerts Today
             </span>
             <span className="material-symbols-outlined text-status-critical text-[20px]">
@@ -324,7 +324,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
         {/* Card 2: Avg Response Time */}
         <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-tertiary transition-colors">
           <div className="flex justify-between items-start mb-3">
-            <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+            <span className="font-sans text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
               Avg Response Time
             </span>
             <span className="material-symbols-outlined text-tertiary text-[20px]">
@@ -343,7 +343,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
         {/* Card 3: System Uptime */}
         <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-tertiary transition-colors">
           <div className="flex justify-between items-start mb-3">
-            <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+            <span className="font-sans text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
               System Uptime
             </span>
             <span className="material-symbols-outlined text-tertiary text-[20px]">
@@ -354,12 +354,13 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
             <span className="font-stat-lg text-stat-lg text-on-surface">{stats.systemUptime}</span>
             <span className="font-body-base text-xs text-on-surface-variant font-medium">N-9 Nines</span>
           </div>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-tertiary/0 via-tertiary/40 to-tertiary/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
 
         {/* Card 4: Active Patrols */}
         <div className="hud-panel rounded-lg p-4 flex flex-col relative overflow-hidden group hover:border-primary transition-colors">
           <div className="flex justify-between items-start mb-3">
-            <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+            <span className="font-sans text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
               Active Patrols
             </span>
             <span className="material-symbols-outlined text-secondary text-[20px]">
@@ -370,6 +371,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
             <span className="font-stat-lg text-stat-lg text-primary">{stats.activePatrols}</span>
             <span className="font-body-base text-xs text-on-surface-variant font-medium">/ {stats.patrolCapacity} Capacity</span>
           </div>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary/40 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
       </div>
 
@@ -379,15 +381,15 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
         <div className="col-span-12 lg:col-span-8 hud-panel rounded-lg p-4 flex flex-col min-h-[380px]">
           <div className="flex justify-between items-center border-b border-border-subtle pb-3 mb-4">
             <div>
-              <h2 className="font-body-bold text-body-bold text-on-surface">{currentTrendData.title}</h2>
-              <p className="text-xs text-on-surface-variant font-telemetry-md">{currentTrendData.subtitle}</p>
+              <h2 className="font-sans text-[16px] font-bold text-on-surface">{currentTrendData.title}</h2>
+              <p className="text-xs text-on-surface-variant font-sans">{currentTrendData.subtitle}</p>
             </div>
             <div className="flex space-x-1">
               {(['1D', '1W', '1M'] as const).map((range) => (
                 <button
                   key={range}
                   onClick={() => setTrendRange(range)}
-                  className={`px-2.5 py-1 text-[10px] font-label-caps rounded transition-colors ${
+                  className={`px-2.5 py-1 text-[10px] font-sans rounded transition-colors ${
                     trendRange === range
                       ? 'bg-surface-container text-primary font-bold border border-border-subtle'
                       : 'text-on-surface-variant hover:text-on-surface'
@@ -402,7 +404,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
           {/* Chart Area with Y-axis & Bars */}
           <div className="flex-1 w-full bg-surface-container-lowest rounded border border-border-subtle flex flex-col justify-between p-4 relative overflow-hidden group min-h-[240px]">
             {/* Y Axis labels */}
-            <div className="absolute left-4 top-4 bottom-8 flex flex-col justify-between text-[10px] font-telemetry-md text-on-surface-variant select-none">
+            <div className="absolute left-4 top-4 bottom-8 flex flex-col justify-between text-[10px] font-sans text-on-surface-variant select-none">
               {currentTrendData.yAxis.map((val, idx) => (
                 <span key={idx}>{val}</span>
               ))}
@@ -430,13 +432,13 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
                     style={{ height: `${point.heightPercent}%` }}
                   >
                     {point.isSpike && (
-                      <span className="absolute -top-5 left-1/2 -translate-x-1/2 px-1 py-0.5 bg-status-critical text-white text-[8px] font-label-caps rounded whitespace-nowrap z-20">
+                      <span className="absolute -top-5 left-1/2 -translate-x-1/2 px-1 py-0.5 bg-status-critical text-white text-[8px] font-sans rounded whitespace-nowrap z-20">
                         SPIKE
                       </span>
                     )}
                   </div>
                   <span
-                    className={`text-[9px] font-telemetry-md transition-opacity duration-200 ${
+                    className={`text-[9px] font-sans transition-opacity duration-200 ${
                       point.isSpike
                         ? 'text-status-critical font-bold'
                         : point.isCurrent
@@ -455,7 +457,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
               {currentTrendData.points.map((point) => (
                 <div key={point.label} className="flex-1 text-center">
                   <span
-                    className={`text-[10px] font-telemetry-md truncate block ${
+                    className={`text-[10px] font-sans truncate block ${
                       point.isCurrent
                         ? 'text-primary font-bold'
                         : point.isSpike
@@ -476,15 +478,15 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
           {/* Sub-System Health Panel */}
           <div className="hud-panel rounded-lg p-4 flex flex-col">
             <div className="flex justify-between items-center border-b border-border-subtle pb-3 mb-4">
-              <h2 className="font-body-bold text-body-bold text-on-surface">Sub-System Health</h2>
+              <h2 className="font-sans text-[16px] font-bold text-on-surface">Sub-System Health</h2>
               <span className="material-symbols-outlined text-on-surface-variant text-[18px]">memory</span>
             </div>
             <div className="space-y-4">
               {/* Subsystem 1 */}
               <div className="flex flex-col">
                 <div className="flex justify-between mb-1">
-                  <span className="font-label-caps text-label-caps text-on-surface">Core Telemetry</span>
-                  <span className="font-telemetry-md text-[12px] text-status-nominal font-bold">NOMINAL (98%)</span>
+                  <span className="font-sans text-xs text-on-surface">Core Telemetry</span>
+                  <span className="font-sans text-[12px] text-status-nominal font-bold">NOMINAL (98%)</span>
                 </div>
                 <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden border border-border-subtle">
                   <div className="w-[98%] h-full bg-status-nominal"></div>
@@ -494,20 +496,20 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
               {/* Subsystem 2 */}
               <div className="flex flex-col">
                 <div className="flex justify-between mb-1">
-                  <span className="font-label-caps text-label-caps text-on-surface">Video Analytics AI</span>
-                  <span className="font-telemetry-md text-[12px] text-status-warning font-bold">DEGRADED (75%)</span>
+                  <span className="font-sans text-xs text-on-surface">Video Analytics AI</span>
+                  <span className="font-sans text-[12px] text-status-warning font-bold">DEGRADED (75%)</span>
                 </div>
                 <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden border border-border-subtle">
                   <div className="w-[75%] h-full bg-status-warning"></div>
                 </div>
-                <span className="text-[10px] text-on-surface-variant mt-1 font-telemetry-md">&gt; Latency spike in Sector 7 processing</span>
+                <span className="text-[10px] text-on-surface-variant mt-1 font-sans">&gt; Latency spike in Sector 7 processing</span>
               </div>
 
               {/* Subsystem 3 */}
               <div className="flex flex-col">
                 <div className="flex justify-between mb-1">
-                  <span className="font-label-caps text-label-caps text-on-surface">Geospatial DB</span>
-                  <span className="font-telemetry-md text-[12px] text-status-nominal font-bold">NOMINAL (100%)</span>
+                  <span className="font-sans text-xs text-on-surface">Geospatial DB</span>
+                  <span className="font-sans text-[12px] text-status-nominal font-bold">NOMINAL (100%)</span>
                 </div>
                 <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden border border-border-subtle">
                   <div className="w-[100%] h-full bg-status-nominal"></div>
@@ -519,7 +521,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
           {/* Recent High-Priority Events Mini-Feed */}
           <div className="hud-panel rounded-lg p-0 flex flex-col overflow-hidden">
             <div className="bg-surface-container-low p-3 border-b border-border-subtle flex justify-between items-center">
-              <h3 className="font-label-caps text-label-caps text-on-surface uppercase tracking-wider">
+              <h3 className="font-sans text-xs text-on-surface uppercase tracking-wider">
                 Recent High-Priority Events
               </h3>
               <span className="material-symbols-outlined text-on-surface-variant text-[16px]">priority_high</span>
@@ -535,7 +537,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
                     >
                       {evt.type}
                     </span>
-                    <span className="font-telemetry-md text-[10px] text-on-surface-variant">{evt.time}</span>
+                    <span className="font-sans text-[10px] text-on-surface-variant">{evt.time}</span>
                   </div>
                   <p className="text-[12px] text-on-surface font-body-base leading-tight">
                     {evt.description}
@@ -551,10 +553,10 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
       <div className="hud-panel rounded-lg p-4">
         <div className="flex justify-between items-center border-b border-border-subtle pb-3 mb-4">
           <div>
-            <h3 className="font-body-bold text-body-bold text-on-surface">Sector Crowd Density Telemetry</h3>
-            <p className="text-xs text-on-surface-variant font-telemetry-md">Active density capacity and crowd flow across designated zones</p>
+            <h3 className="font-sans text-[16px] font-bold text-on-surface">Sector Crowd Density Telemetry</h3>
+            <p className="text-xs text-on-surface-variant font-sans">Active density capacity and crowd flow across designated zones</p>
           </div>
-          <span className="font-label-caps text-label-caps text-primary uppercase">
+          <span className="font-sans text-xs text-primary uppercase">
             {zones.length || 4} Sectors Monitored
           </span>
         </div>
@@ -583,7 +585,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
               <div key={zone.id} className="border border-border-subtle p-3.5 rounded-lg bg-surface-container-low hover:border-primary/50 transition-all">
                 <div className="flex justify-between items-center gap-2 mb-2">
                   <span className="font-body-bold text-sm text-text-main truncate">{zone.name}</span>
-                  <span className={`font-label-caps text-[10px] font-bold uppercase tracking-wider ${statusText} flex items-center gap-1`}>
+                  <span className={`font-sans text-[10px] font-bold uppercase tracking-wider ${statusText} flex items-center gap-1`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${barColor} ${isCritical ? 'animate-pulse' : ''}`}></span>
                     {zone.densityStatus}
                   </span>
@@ -596,7 +598,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
                   />
                 </div>
 
-                <div className="flex justify-between items-center text-xs font-telemetry-md text-on-surface-variant">
+                <div className="flex justify-between items-center text-xs font-sans text-on-surface-variant">
                   <span>{zone.currentDensity} / {zone.maxCapacity}</span>
                   <span className="font-bold text-text-main">{Math.round(densityPercent)}%</span>
                 </div>
@@ -610,7 +612,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
               <div className="border border-border-subtle p-3.5 rounded-lg bg-surface-container-low">
                 <div className="flex justify-between items-center gap-2 mb-2">
                   <span className="font-body-bold text-sm text-text-main truncate">Sector A — Main Ghat</span>
-                  <span className="font-label-caps text-[10px] font-bold text-status-nominal flex items-center gap-1">
+                  <span className="font-sans text-[10px] font-bold text-status-nominal flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-status-nominal"></span>
                     GREEN
                   </span>
@@ -618,7 +620,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
                 <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden mb-2 border border-border-subtle">
                   <div className="h-full bg-status-nominal w-[32%]"></div>
                 </div>
-                <div className="flex justify-between items-center text-xs font-telemetry-md text-on-surface-variant">
+                <div className="flex justify-between items-center text-xs font-sans text-on-surface-variant">
                   <span>160 / 500</span>
                   <span className="font-bold text-text-main">32%</span>
                 </div>
@@ -627,7 +629,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
               <div className="border border-border-subtle p-3.5 rounded-lg bg-surface-container-low">
                 <div className="flex justify-between items-center gap-2 mb-2">
                   <span className="font-body-bold text-sm text-text-main truncate">Sector B — East Concourse</span>
-                  <span className="font-label-caps text-[10px] font-bold text-status-warning flex items-center gap-1">
+                  <span className="font-sans text-[10px] font-bold text-status-warning flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-status-warning"></span>
                     YELLOW
                   </span>
@@ -635,7 +637,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
                 <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden mb-2 border border-border-subtle">
                   <div className="h-full bg-status-warning w-[64%]"></div>
                 </div>
-                <div className="flex justify-between items-center text-xs font-telemetry-md text-on-surface-variant">
+                <div className="flex justify-between items-center text-xs font-sans text-on-surface-variant">
                   <span>256 / 400</span>
                   <span className="font-bold text-text-main">64%</span>
                 </div>
@@ -644,7 +646,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
               <div className="border border-border-subtle p-3.5 rounded-lg bg-surface-container-low border-status-critical/30">
                 <div className="flex justify-between items-center gap-2 mb-2">
                   <span className="font-body-bold text-sm text-text-main truncate">Sector C — Ghat Staircase</span>
-                  <span className="font-label-caps text-[10px] font-bold text-status-critical flex items-center gap-1">
+                  <span className="font-sans text-[10px] font-bold text-status-critical flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-status-critical animate-pulse"></span>
                     CRITICAL
                   </span>
@@ -652,7 +654,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
                 <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden mb-2 border border-border-subtle">
                   <div className="h-full bg-status-critical w-[88%]"></div>
                 </div>
-                <div className="flex justify-between items-center text-xs font-telemetry-md text-on-surface-variant">
+                <div className="flex justify-between items-center text-xs font-sans text-on-surface-variant">
                   <span>440 / 500</span>
                   <span className="font-bold text-status-critical">88%</span>
                 </div>
@@ -661,7 +663,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
               <div className="border border-border-subtle p-3.5 rounded-lg bg-surface-container-low">
                 <div className="flex justify-between items-center gap-2 mb-2">
                   <span className="font-body-bold text-sm text-text-main truncate">Sector D — Corridor</span>
-                  <span className="font-label-caps text-[10px] font-bold text-status-nominal flex items-center gap-1">
+                  <span className="font-sans text-[10px] font-bold text-status-nominal flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-status-nominal"></span>
                     NOMINAL
                   </span>
@@ -669,7 +671,7 @@ export default function AnalyticsPanel({ siteId }: AnalyticsPanelProps) {
                 <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden mb-2 border border-border-subtle">
                   <div className="h-full bg-status-nominal w-[41%]"></div>
                 </div>
-                <div className="flex justify-between items-center text-xs font-telemetry-md text-on-surface-variant">
+                <div className="flex justify-between items-center text-xs font-sans text-on-surface-variant">
                   <span>246 / 600</span>
                   <span className="font-bold text-text-main">41%</span>
                 </div>
