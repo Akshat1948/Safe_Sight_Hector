@@ -592,6 +592,15 @@ async def chat_endpoint(req: ChatRequest):
         else:
             reply, actions = generate_general_response(req.message, lang)
 
+        # Append extra assistance helpline message to the end of every chat reply
+        if lang == "hi":
+            assistance_footer = "\n\n💡 *अतिरिक्त सहायता के लिए संपर्क करें:* 24×7 कुंभ हेल्पलाइन **1920** | कंट्रोल रूम **0532-2500000**"
+        else:
+            assistance_footer = "\n\n💡 *Need extra assistance? Contact:* 24×7 Kumbh Helpline **1920** | Control Room **+91-532-2500000**"
+
+        if "1920" not in reply:
+            reply = reply.strip() + assistance_footer
+
         # Ensure 24x7 Helpline button is available on EVERY response
         has_helpline = any(a.value in ("1920", "+915322500000", "05322500000") for a in actions)
         if not has_helpline:
