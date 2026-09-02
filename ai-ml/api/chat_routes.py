@@ -526,32 +526,34 @@ def generate_navigation_response(message: str, language: str) -> tuple[str, list
 
 
 def generate_general_response(message: str, language: str) -> tuple[str, list[QuickAction]]:
-    """Generate general info response."""
+    """Generate general info response with helpline assistance."""
     actions: list[QuickAction] = []
 
     if language == "hi":
         reply = (
-            "🙏 मैं **SafeSight साथी** हूं। मैं इन विषयों में मदद कर सकता हूं:\n\n"
-            "• 📊 **\"भीड़ कैसी है?\"** — लाइव भीड़ की स्थिति\n"
-            "• 🌤️ **\"मौसम कैसा है?\"** — मौसम का हाल\n"
-            "• 🚌 **\"बस कब आएगी?\"** — बस, नाव, पार्किंग\n"
-            "• 🚨 **\"मदद चाहिए\"** — आपातकालीन सहायता\n"
-            "• 📍 **\"शौचालय कहां है?\"** — स्थान खोजें\n\n"
-            "कृपया ऊपर दिए गए विषयों में से कोई प्रश्न पूछें!"
+            "🙏 मैं **SafeSight साथी** हूं। मैं इन प्रमुख सेवाओं में आपकी सहायता कर सकता हूं:\n\n"
+            "• 📊 **\"भीड़ कैसी है?\"** — लाइव भीड़ की स्थिति व सुरक्षित घाट\n"
+            "• 🌤️ **\"मौसम कैसा है?\"** — लाइव तापमान और मौसम अलर्ट\n"
+            "• 🚌 **\"बस और पार्किंग\"** — बस, नाव, शटल और खाली पार्किंग\n"
+            "• 🚨 **\"आपातकाल\"** — 1-क्लिक SOS और पुलिस/एम्बुलेंस सहायता\n"
+            "• 📍 **\"शौचालय/खाना\"** — शौचालय, अन्नक्षेत्र (लंगर) व चिकित्सा कैंप\n\n"
+            "ℹ️ **अधिक सहायता चाहिए?**\n"
+            "यदि आपको किसी अन्य विषय पर तत्काल जानकारी या सहायता चाहिए, तो कृपया **24×7 कुंभ हेल्पलाइन 1920** या मेला कंट्रोल रूम **0532-2500000** पर संपर्क करें।"
         )
     else:
         reply = (
-            "🙏 I'm **SafeSight Saathi**. I can help with:\n\n"
-            "• 📊 **\"How's the crowd?\"** — Live crowd density\n"
-            "• 🌤️ **\"What's the weather?\"** — Current weather\n"
-            "• 🚌 **\"When's the next bus?\"** — Bus, boat, parking\n"
-            "• 🚨 **\"I need help\"** — Emergency assistance\n"
-            "• 📍 **\"Where's the toilet?\"** — Find locations\n\n"
-            "Try asking one of the topics above!"
+            "🙏 I'm **SafeSight Saathi**. I can assist you with:\n\n"
+            "• 📊 **\"How's the crowd?\"** — Live crowd density & safe ghats\n"
+            "• 🌤️ **\"What's the weather?\"** — Live weather & temperature\n"
+            "• 🚌 **\"Where is parking?\"** — EV shuttles, boats & free parking\n"
+            "• 🚨 **\"I need help\"** — 1-tap SOS beacon & police/ambulance\n"
+            "• 📍 **\"Where's food/toilet?\"** — Washrooms, Annakshetra (Langar) & camps\n\n"
+            "ℹ️ **Need Further Assistance?**\n"
+            "If you need direct human assistance or have questions not listed above, please contact our **24×7 Kumbh Helpline at 1920** or Control Room at **+91-532-2500000**."
         )
 
-    actions.append(QuickAction(label="📊 Crowd Status", action="link", value="/visitor"))
-    actions.append(QuickAction(label="🚌 Transport Hub", action="link", value="/visitor/transport"))
+    actions.append(QuickAction(label="📊 Crowd Status" if language == "en" else "📊 भीड़ की स्थिति", action="link", value="/visitor"))
+    actions.append(QuickAction(label="🚌 Transport Hub" if language == "en" else "🚌 परिवहन केंद्र", action="link", value="/visitor/transport"))
 
     return reply, actions
 
@@ -563,6 +565,7 @@ async def chat_endpoint(req: ChatRequest):
     """
     SafeSight Saathi — AI Chatbot for pilgrim visitors.
     Classifies intent, fetches live data, returns contextual response.
+    Appends 24x7 Helpline action to every single chat response.
     """
     try:
         intent = classify_intent(req.message)
@@ -572,7 +575,10 @@ async def chat_endpoint(req: ChatRequest):
 
         if intent == ChatIntent.GREETING:
             reply = GREETING_RESPONSES.get(lang, GREETING_RESPONSES["en"])
-            actions: list[QuickAction] = []
+            actions = [
+                QuickAction(label="🗺️ View Live Map" if lang == "en" else "🗺️ लाइव मैप", action="link", value="/visitor"),
+                QuickAction(label="🚌 Transport Hub" if lang == "en" else "🚌 परिवहन केंद्र", action="link", value="/visitor/transport"),
+            ]
         elif intent == ChatIntent.CROWD:
             reply, actions = await generate_crowd_response(req.message, lang)
         elif intent == ChatIntent.WEATHER:
@@ -585,6 +591,12 @@ async def chat_endpoint(req: ChatRequest):
             reply, actions = generate_navigation_response(req.message, lang)
         else:
             reply, actions = generate_general_response(req.message, lang)
+
+        # Ensure 24x7 Helpline button is available on EVERY response
+        has_helpline = any(a.value in ("1920", "+915322500000", "05322500000") for a in actions)
+        if not has_helpline:
+            helpline_label = "📞 Helpline 1920" if lang == "en" else "📞 हेल्पलाइन 1920"
+            actions.append(QuickAction(label=helpline_label, action="call", value="1920"))
 
         return {
             "success": True,
@@ -600,9 +612,9 @@ async def chat_endpoint(req: ChatRequest):
 
     except Exception as e:
         logger.error(f"Chat error: {e}", exc_info=True)
-        fallback = "I'm sorry, I encountered an error. For immediate help, please dial 108 (Ambulance) or 112 (Police)."
+        fallback = "If you need immediate assistance, please contact the 24×7 Kumbh Helpline at 1920, Ambulance 108, or Police 112."
         if req.language == "hi":
-            fallback = "क्षमा करें, कोई त्रुटि हुई। तत्काल सहायता के लिए 108 (एम्बुलेंस) या 112 (पुलिस) डायल करें।"
+            fallback = "यदि आपको तत्काल सहायता चाहिए, तो कृपया 24×7 कुंभ हेल्पलाइन 1920, एम्बुलेंस 108, या पुलिस 112 पर संपर्क करें।"
 
         return {
             "success": True,
@@ -610,7 +622,9 @@ async def chat_endpoint(req: ChatRequest):
                 reply=fallback,
                 intent="error",
                 quick_actions=[
-                    QuickAction(label="📞 Call 108", action="call", value="108"),
+                    QuickAction(label="🚨 Trigger SOS Dispatch" if req.language != "hi" else "🚨 आपातकालीन SOS भेजें", action="sos", value="trigger_sos"),
+                    QuickAction(label="📞 Helpline 1920" if req.language != "hi" else "📞 हेल्पलाइन 1920", action="call", value="1920"),
+                    QuickAction(label="📞 Call 108" if req.language != "hi" else "📞 कॉल 108", action="call", value="108"),
                 ],
                 timestamp=datetime.utcnow().isoformat() + "Z",
                 session_id=req.session_id,
