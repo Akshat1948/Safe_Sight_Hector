@@ -84,18 +84,42 @@ export default function CameraPage() {
   const lastFpsCalcTime = useRef<number>(Date.now());
   const frameCountRef = useRef<number>(0);
 
-  // Stop media stream
+  // Complete Media Teardown & Reset
   const stopMedia = useCallback(() => {
     isLoopRunningRef.current = false;
     setIsLiveDetectionActive(false);
+
     if (videoRef.current) {
+      try {
+        videoRef.current.pause();
+      } catch {}
+
+      // 1. Stop and detach Webcam Stream
       if (videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach((track) => track.stop());
+        stream.getTracks().forEach((track) => {
+          try {
+            track.stop();
+          } catch {}
+        });
         videoRef.current.srcObject = null;
       }
-      videoRef.current.pause();
+
+      // 2. Revoke and remove Video URL source
+      if (videoRef.current.src) {
+        try {
+          if (videoRef.current.src.startsWith('blob:')) {
+            URL.revokeObjectURL(videoRef.current.src);
+          }
+        } catch {}
+        videoRef.current.removeAttribute('src');
+        videoRef.current.src = '';
+        try {
+          videoRef.current.load();
+        } catch {}
+      }
     }
+
     setIsWebcamActive(false);
     setIsVideoPlaying(false);
   }, []);
@@ -121,6 +145,10 @@ export default function CameraPage() {
       const ctx = overlayCanvasRef.current.getContext('2d');
       if (ctx) ctx.clearRect(0, 0, overlayCanvasRef.current.width, overlayCanvasRef.current.height);
     }
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
   }, [stopMedia]);
 
   useEffect(() => {
@@ -128,119 +156,6 @@ export default function CameraPage() {
       stopMedia();
     };
   }, [stopMedia]);
-
-  // Start Webcam
-  const startWebcam = async () => {
-    clearCurrentMedia();
-    setSourceMode('webcam');
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        setIsWebcamActive(true);
-        setIsLiveDetectionActive(true);
-        isLoopRunningRef.current = true;
-      }
-    } catch (err) {
-      console.error('Error starting webcam:', err);
-      setError('Could not access webcam. Please ensure camera permissions are allowed.');
-    }
-  };
-
-  // Handle Video File Upload
-  const loadVideoFile = (file: File) => {
-    clearCurrentMedia();
-    setSourceMode('video');
-    setVideoFileName(file.name);
-
-    const url = URL.createObjectURL(file);
-    setVideoSrc(url);
-    
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-      videoRef.current.src = url;
-      videoRef.current.load();
-      videoRef.current.onloadeddata = () => {
-        videoRef.current?.play();
-        setIsVideoPlaying(true);
-        setIsLiveDetectionActive(true);
-        isLoopRunningRef.current = true;
-      };
-    }
-  };
-
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      loadVideoFile(file);
-    }
-    e.target.value = '';
-  };
-
-  // Handle Image Upload
-  const loadImageFile = async (file: File) => {
-    clearCurrentMedia();
-    setSourceMode('image');
-    setImageFileName(file.name);
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const dataUrl = event.target?.result as string;
-      setSelectedImage(dataUrl);
-
-      // Run single frame detection
-      const base64Data = dataUrl.split(',')[1];
-      const res = await detectFromBase64(base64Data, confidence, autoSyncToBackend);
-      if (res.success && res.data) {
-        setTotalHeadcount(res.data.total_persons);
-        setLiveDetections(res.data.detections);
-        setProcessingTime(res.data.processing_time_ms);
-        
-        if (res.data.zone_breakdown) {
-          const counts: Record<string, number> = {};
-          res.data.zone_breakdown.forEach((z) => {
-            counts[z.zone_id] = z.headcount;
-          });
-          setZoneCounts(counts);
-        }
-
-        const imgObj = new Image();
-        imgObj.onload = () => {
-          drawOverlay(res.data!.detections, imgObj.width, imgObj.height);
-        };
-        imgObj.src = dataUrl;
-      } else {
-        setError(res.message || 'Detection failed');
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      loadImageFile(file);
-    }
-    e.target.value = '';
-  };
-
-  // Drag & Drop on Video Container
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-
-    if (file.type.startsWith('video/')) {
-      loadVideoFile(file);
-    } else if (file.type.startsWith('image/')) {
-      loadImageFile(file);
-    }
-  };
 
   // Draw overlay on canvas with normalized coordinates
   const drawOverlay = useCallback((
@@ -334,56 +249,16 @@ export default function CameraPage() {
     });
   }, [showZoneGrid, zoneCounts]);
 
-  // Single Precision Frame Analysis on Paused Video Frame
-  const analyzeCurrentPausedFrame = useCallback(async () => {
-    if (!videoRef.current || !canvasRef.current) return;
-    const video = videoRef.current;
-    if (video.videoWidth === 0) return;
-
-    const vw = video.videoWidth || 640;
-    const vh = video.videoHeight || 480;
-    const targetWidth = Math.min(640, vw);
-    const targetHeight = Math.round((vh / vw) * targetWidth);
-
-    const canvas = canvasRef.current;
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
-    const base64Data = dataUrl.split(',')[1];
-
-    try {
-      const res = await detectFromBase64(base64Data, confidence, autoSyncToBackend);
-      if (res.success && res.data) {
-        setTotalHeadcount(res.data.total_persons);
-        setLiveDetections(res.data.detections);
-        setProcessingTime(res.data.processing_time_ms);
-
-        if (res.data.zone_breakdown) {
-          const counts: Record<string, number> = {};
-          res.data.zone_breakdown.forEach((z) => {
-            counts[z.zone_id] = z.headcount;
-          });
-          setZoneCounts(counts);
-        }
-
-        drawOverlay(res.data.detections, vw, vh);
-      }
-    } catch (err) {
-      console.error('Paused frame detection error:', err);
-    }
-  }, [confidence, autoSyncToBackend, drawOverlay]);
-
   // Main Continuous Live Frame Processing Loop
   const processLiveFrame = useCallback(async () => {
     if (!isLoopRunningRef.current || !videoRef.current || !canvasRef.current) return;
 
     const video = videoRef.current;
-    if (video.paused || video.ended || video.videoWidth === 0) {
-      return; // Do not loop while paused
+    if (video.paused || video.ended || video.videoWidth === 0 || video.readyState < 2) {
+      if (isLoopRunningRef.current) {
+        requestAnimationFrame(processLiveFrame);
+      }
+      return;
     }
 
     const vw = video.videoWidth || 640;
@@ -431,22 +306,186 @@ export default function CameraPage() {
     } catch (err) {
       console.error('Frame detection error:', err);
     } finally {
-      // Keep continuous loop running only if video is actively playing
+      // Keep continuous loop running if active and playing
       if (isLoopRunningRef.current && videoRef.current && !videoRef.current.paused) {
         setTimeout(processLiveFrame, 120); // ~8-10 FPS live YOLO stream
       }
     }
   }, [confidence, autoSyncToBackend, drawOverlay]);
 
-  // Start or stop live loop
-  useEffect(() => {
-    if (isLiveDetectionActive && (isWebcamActive || isVideoPlaying)) {
-      isLoopRunningRef.current = true;
-      processLiveFrame();
-    } else {
-      isLoopRunningRef.current = false;
+  // Single Precision Frame Analysis on Paused Video Frame
+  const analyzeCurrentPausedFrame = useCallback(async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    if (video.videoWidth === 0) return;
+
+    const vw = video.videoWidth || 640;
+    const vh = video.videoHeight || 480;
+    const targetWidth = Math.min(640, vw);
+    const targetHeight = Math.round((vh / vw) * targetWidth);
+
+    const canvas = canvasRef.current;
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
+    const base64Data = dataUrl.split(',')[1];
+
+    try {
+      const res = await detectFromBase64(base64Data, confidence, autoSyncToBackend);
+      if (res.success && res.data) {
+        setTotalHeadcount(res.data.total_persons);
+        setLiveDetections(res.data.detections);
+        setProcessingTime(res.data.processing_time_ms);
+
+        if (res.data.zone_breakdown) {
+          const counts: Record<string, number> = {};
+          res.data.zone_breakdown.forEach((z) => {
+            counts[z.zone_id] = z.headcount;
+          });
+          setZoneCounts(counts);
+        }
+
+        drawOverlay(res.data.detections, vw, vh);
+      }
+    } catch (err) {
+      console.error('Paused frame detection error:', err);
     }
-  }, [isLiveDetectionActive, isWebcamActive, isVideoPlaying, processLiveFrame]);
+  }, [confidence, autoSyncToBackend, drawOverlay]);
+
+  // Start Webcam cleanly
+  const startWebcam = async () => {
+    clearCurrentMedia();
+    setSourceMode('webcam');
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'user',
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+      });
+
+      if (videoRef.current) {
+        videoRef.current.removeAttribute('src');
+        videoRef.current.src = '';
+        videoRef.current.srcObject = stream;
+        
+        videoRef.current.onloadedmetadata = async () => {
+          try {
+            await videoRef.current?.play();
+            setIsWebcamActive(true);
+            setIsLiveDetectionActive(true);
+            isLoopRunningRef.current = true;
+            processLiveFrame();
+          } catch (e) {
+            console.error('Error starting webcam playback:', e);
+          }
+        };
+      }
+    } catch (err: any) {
+      console.error('Error starting webcam:', err);
+      setError(
+        err.name === 'NotAllowedError'
+          ? 'Webcam permission was denied. Please allow camera access in your browser.'
+          : 'Could not access webcam. Please ensure a camera is available.'
+      );
+    }
+  };
+
+  // Handle Video File Upload cleanly
+  const loadVideoFile = (file: File) => {
+    clearCurrentMedia();
+    setSourceMode('video');
+    setVideoFileName(file.name);
+
+    const url = URL.createObjectURL(file);
+    setVideoSrc(url);
+    
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+      videoRef.current.src = url;
+      videoRef.current.load();
+      videoRef.current.onloadedmetadata = async () => {
+        try {
+          await videoRef.current?.play();
+          setIsVideoPlaying(true);
+          setIsLiveDetectionActive(true);
+          isLoopRunningRef.current = true;
+          processLiveFrame();
+        } catch (e) {
+          console.error('Error playing video file:', e);
+        }
+      };
+    }
+  };
+
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      loadVideoFile(file);
+    }
+    e.target.value = '';
+  };
+
+  // Handle Image Upload
+  const loadImageFile = async (file: File) => {
+    clearCurrentMedia();
+    setSourceMode('image');
+    setImageFileName(file.name);
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const dataUrl = event.target?.result as string;
+      setSelectedImage(dataUrl);
+
+      // Run single frame detection
+      const base64Data = dataUrl.split(',')[1];
+      const res = await detectFromBase64(base64Data, confidence, autoSyncToBackend);
+      if (res.success && res.data) {
+        setTotalHeadcount(res.data.total_persons);
+        setLiveDetections(res.data.detections);
+        setProcessingTime(res.data.processing_time_ms);
+        
+        if (res.data.zone_breakdown) {
+          const counts: Record<string, number> = {};
+          res.data.zone_breakdown.forEach((z) => {
+            counts[z.zone_id] = z.headcount;
+          });
+          setZoneCounts(counts);
+        }
+      } else {
+        setError(res.message || 'Detection failed');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      loadImageFile(file);
+    }
+    e.target.value = '';
+  };
+
+  // Drag & Drop on Video Container
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    if (file.type.startsWith('video/')) {
+      loadVideoFile(file);
+    } else if (file.type.startsWith('image/')) {
+      loadImageFile(file);
+    }
+  };
 
   // Play / Pause Toggle Button Handler
   const togglePlayPause = () => {
@@ -571,7 +610,13 @@ export default function CameraPage() {
                 <div className="flex items-center gap-2">
                   <span className={`w-2.5 h-2.5 rounded-full ${isLiveDetectionActive ? 'bg-red-500 animate-ping' : 'bg-gray-400'}`}></span>
                   <span className="font-label-caps text-xs font-bold text-on-surface uppercase tracking-wider">
-                    {sourceMode === 'webcam' ? 'Live Camera Feed' : sourceMode === 'video' ? `CCTV: ${videoFileName || 'Video Stream'}` : `Photo: ${imageFileName || 'Snapshot'}`}
+                    {sourceMode === 'webcam' && isWebcamActive
+                      ? 'Live Camera Feed'
+                      : sourceMode === 'video' && videoSrc
+                      ? `CCTV: ${videoFileName || 'Video Stream'}`
+                      : selectedImage
+                      ? `Photo: ${imageFileName || 'Snapshot'}`
+                      : 'Standby / No Source'}
                   </span>
                   {isLiveDetectionActive ? (
                     <span className="px-2 py-0.5 bg-red-600/20 border border-red-500 text-red-400 rounded text-[10px] font-mono font-bold animate-pulse">
@@ -631,12 +676,12 @@ export default function CameraPage() {
                 {/* Hidden Capture Canvas */}
                 <canvas ref={canvasRef} className="hidden" />
 
-                {/* HTML5 Video Element */}
+                {/* HTML5 Video Element (Only rendered when webcam or video source is active) */}
                 <video
                   ref={videoRef}
                   playsInline
                   muted
-                  controls={sourceMode === 'video'}
+                  controls={sourceMode === 'video' && Boolean(videoSrc)}
                   loop={sourceMode === 'video'}
                   onPlay={() => {
                     setIsVideoPlaying(true);
@@ -652,7 +697,9 @@ export default function CameraPage() {
                   onSeeked={() => {
                     analyzeCurrentPausedFrame();
                   }}
-                  className={`w-full h-full object-contain ${sourceMode === 'image' ? 'hidden' : 'block'}`}
+                  className={`w-full h-full object-contain ${
+                    (isWebcamActive || (sourceMode === 'video' && videoSrc)) ? 'block' : 'hidden'
+                  }`}
                 />
 
                 {/* Static Image Preview */}
@@ -667,7 +714,9 @@ export default function CameraPage() {
                 {/* Live Detection Overlay Canvas (Bounding boxes + Sector Lines) */}
                 <canvas
                   ref={overlayCanvasRef}
-                  className="absolute inset-0 w-full h-full object-contain pointer-events-none z-10"
+                  className={`absolute inset-0 w-full h-full object-contain pointer-events-none z-10 ${
+                    (isWebcamActive || videoSrc || selectedImage) ? 'block' : 'hidden'
+                  }`}
                 />
 
                 {/* Drag Overlay State */}
@@ -678,9 +727,9 @@ export default function CameraPage() {
                   </div>
                 )}
 
-                {/* Empty State Prompt */}
+                {/* Empty State Prompt (Shown when no media is active) */}
                 {!isWebcamActive && !videoSrc && !selectedImage && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-on-surface-variant">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-on-surface-variant z-10">
                     <span className="material-symbols-outlined text-6xl text-primary/60 mb-3 animate-pulse">
                       videocam
                     </span>
@@ -730,7 +779,7 @@ export default function CameraPage() {
                       <span className="material-symbols-outlined text-sm">
                         {isLiveDetectionActive ? 'pause' : 'play_arrow'}
                       </span>
-                      {isLiveDetectionActive ? 'Pause Video & Lock Frame' : 'Play Video & Resume Live Detect'}
+                      {isLiveDetectionActive ? 'Pause & Lock Frame' : 'Resume Live Detect'}
                     </button>
                   )}
 
