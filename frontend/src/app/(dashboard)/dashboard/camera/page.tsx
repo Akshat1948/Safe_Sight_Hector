@@ -143,6 +143,7 @@ export default function CameraPage() {
         await videoRef.current.play();
         setIsWebcamActive(true);
         setIsLiveDetectionActive(true);
+        isLoopRunningRef.current = true;
       }
     } catch (err) {
       console.error('Error starting webcam:', err);
@@ -167,6 +168,7 @@ export default function CameraPage() {
         videoRef.current?.play();
         setIsVideoPlaying(true);
         setIsLiveDetectionActive(true);
+        isLoopRunningRef.current = true;
       };
     }
   };
@@ -176,7 +178,6 @@ export default function CameraPage() {
     if (file) {
       loadVideoFile(file);
     }
-    // Reset input value so same file can be re-selected if desired
     e.target.value = '';
   };
 
@@ -273,7 +274,8 @@ export default function CameraPage() {
 
         // Zone Tag / Header Banner
         ctx.fillStyle = `${zone.color}dd`;
-        const tagText = `${zone.name} (${zoneCounts[zone.id] || 0})`;
+        const count = zoneCounts[zone.id] || 0;
+        const tagText = `${zone.name} (${count} people)`;
         ctx.font = 'bold 11px system-ui, sans-serif';
         const textWidth = ctx.measureText(tagText).width;
         ctx.fillRect(x + 8, y + 8, textWidth + 16, 22);
@@ -322,16 +324,51 @@ export default function CameraPage() {
     });
   }, [showZoneGrid, zoneCounts]);
 
+  // Single Precision Frame Analysis on Paused Video Frame
+  const analyzeCurrentPausedFrame = useCallback(async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    if (video.videoWidth === 0) return;
+
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    const base64Data = dataUrl.split(',')[1];
+
+    try {
+      const res = await detectFromBase64(base64Data, confidence, autoSyncToBackend);
+      if (res.success && res.data) {
+        setTotalHeadcount(res.data.total_persons);
+        setLiveDetections(res.data.detections);
+        setProcessingTime(res.data.processing_time_ms);
+
+        if (res.data.zone_breakdown) {
+          const counts: Record<string, number> = {};
+          res.data.zone_breakdown.forEach((z) => {
+            counts[z.zone_id] = z.headcount;
+          });
+          setZoneCounts(counts);
+        }
+
+        drawOverlay(res.data.detections, video.videoWidth, video.videoHeight);
+      }
+    } catch (err) {
+      console.error('Paused frame detection error:', err);
+    }
+  }, [confidence, autoSyncToBackend, drawOverlay]);
+
   // Main Continuous Live Frame Processing Loop
   const processLiveFrame = useCallback(async () => {
     if (!isLoopRunningRef.current || !videoRef.current || !canvasRef.current) return;
 
     const video = videoRef.current;
     if (video.paused || video.ended || video.videoWidth === 0) {
-      if (isLoopRunningRef.current) {
-        requestAnimationFrame(processLiveFrame);
-      }
-      return;
+      return; // Do not loop while paused
     }
 
     const canvas = canvasRef.current;
@@ -374,8 +411,8 @@ export default function CameraPage() {
     } catch (err) {
       console.error('Frame detection error:', err);
     } finally {
-      // Keep continuous loop running reliably
-      if (isLoopRunningRef.current) {
+      // Keep continuous loop running only if video is actively playing
+      if (isLoopRunningRef.current && videoRef.current && !videoRef.current.paused) {
         setTimeout(processLiveFrame, 120); // ~8-10 FPS live YOLO stream
       }
     }
@@ -390,6 +427,28 @@ export default function CameraPage() {
       isLoopRunningRef.current = false;
     }
   }, [isLiveDetectionActive, isWebcamActive, isVideoPlaying, processLiveFrame]);
+
+  // Play / Pause Toggle Button Handler
+  const togglePlayPause = () => {
+    if (!videoRef.current) return;
+
+    if (isLiveDetectionActive && !videoRef.current.paused) {
+      // Instantly Pause
+      videoRef.current.pause();
+      isLoopRunningRef.current = false;
+      setIsLiveDetectionActive(false);
+      setIsVideoPlaying(false);
+      // Analyze current exact paused frame to lock in headcount count
+      analyzeCurrentPausedFrame();
+    } else {
+      // Resume Live Detection
+      videoRef.current.play();
+      isLoopRunningRef.current = true;
+      setIsLiveDetectionActive(true);
+      setIsVideoPlaying(true);
+      processLiveFrame();
+    }
+  };
 
   // Redraw overlay for static image
   useEffect(() => {
@@ -494,11 +553,15 @@ export default function CameraPage() {
                   <span className="font-label-caps text-xs font-bold text-on-surface uppercase tracking-wider">
                     {sourceMode === 'webcam' ? 'Live Camera Feed' : sourceMode === 'video' ? `CCTV: ${videoFileName || 'Video Stream'}` : `Photo: ${imageFileName || 'Snapshot'}`}
                   </span>
-                  {isLiveDetectionActive && (
+                  {isLiveDetectionActive ? (
                     <span className="px-2 py-0.5 bg-red-600/20 border border-red-500 text-red-400 rounded text-[10px] font-mono font-bold animate-pulse">
                       LIVE DETECT ON
                     </span>
-                  )}
+                  ) : (videoSrc || isWebcamActive) ? (
+                    <span className="px-2 py-0.5 bg-yellow-500/20 border border-yellow-500 text-yellow-400 rounded text-[10px] font-mono font-bold">
+                      PAUSED (FRAME LOCKED)
+                    </span>
+                  ) : null}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -555,6 +618,20 @@ export default function CameraPage() {
                   muted
                   controls={sourceMode === 'video'}
                   loop={sourceMode === 'video'}
+                  onPlay={() => {
+                    setIsVideoPlaying(true);
+                    setIsLiveDetectionActive(true);
+                    isLoopRunningRef.current = true;
+                  }}
+                  onPause={() => {
+                    setIsVideoPlaying(false);
+                    setIsLiveDetectionActive(false);
+                    isLoopRunningRef.current = false;
+                    analyzeCurrentPausedFrame();
+                  }}
+                  onSeeked={() => {
+                    analyzeCurrentPausedFrame();
+                  }}
                   className={`w-full h-full object-contain ${sourceMode === 'image' ? 'hidden' : 'block'}`}
                 />
 
@@ -621,19 +698,19 @@ export default function CameraPage() {
               {/* Bottom Stream Controls Toolbar */}
               <div className="p-3 bg-surface border-t border-border-subtle flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  {(isWebcamActive || isVideoPlaying) && (
+                  {(isWebcamActive || videoSrc) && (
                     <button
-                      onClick={() => setIsLiveDetectionActive((prev) => !prev)}
+                      onClick={togglePlayPause}
                       className={`px-3 py-1.5 rounded text-xs font-body-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                         isLiveDetectionActive
-                          ? 'bg-red-600 hover:bg-red-700 text-white shadow-sm'
+                          ? 'bg-yellow-500 hover:bg-yellow-600 text-black shadow-sm'
                           : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
                       }`}
                     >
                       <span className="material-symbols-outlined text-sm">
                         {isLiveDetectionActive ? 'pause' : 'play_arrow'}
                       </span>
-                      {isLiveDetectionActive ? 'Pause Detection' : 'Resume Detection'}
+                      {isLiveDetectionActive ? 'Pause Video & Lock Frame' : 'Play Video & Resume Live Detect'}
                     </button>
                   )}
 
@@ -684,7 +761,7 @@ export default function CameraPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="hud-panel p-4 rounded-xl flex flex-col justify-between">
                 <span className="font-label-caps text-[10px] text-on-surface-variant uppercase font-bold">
-                  Total Detected
+                  {isLiveDetectionActive ? 'Live Headcount' : 'Frame Headcount'}
                 </span>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className="text-3xl font-extrabold text-primary font-telemetry-md">
@@ -702,7 +779,7 @@ export default function CameraPage() {
                   <span className="text-2xl font-bold text-status-nominal font-mono">
                     {processingTime.toFixed(0)}
                   </span>
-                  <span className="text-xs text-on-surface-variant">ms ({fps} FPS)</span>
+                  <span className="text-xs text-on-surface-variant">ms ({isLiveDetectionActive ? `${fps} FPS` : 'Locked'})</span>
                 </div>
               </div>
             </div>
@@ -774,7 +851,7 @@ export default function CameraPage() {
             {/* Live Person Detections Roster */}
             <div className="hud-panel p-4 rounded-xl flex flex-col gap-2.5 max-h-60 overflow-y-auto">
               <h3 className="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider font-bold">
-                Active Bounding Boxes ({liveDetections.length})
+                Detected Bounding Boxes ({liveDetections.length})
               </h3>
               {liveDetections.length === 0 ? (
                 <div className="text-center py-4 text-xs font-telemetry-md text-on-surface-variant">

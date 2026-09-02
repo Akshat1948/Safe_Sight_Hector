@@ -95,7 +95,7 @@ export default function WeatherUpdatesPage() {
     {
       id: 'WTH-002',
       title: 'Morning Fog & Low Visibility Notice',
-      severity: AlertSeverity.MODERATE,
+      severity: AlertSeverity.ADVISORY,
       scope: 'Riverboat Transit Corridor',
       channels: 'Responders, Electronic Signage',
       time: '06:15 AM',
@@ -138,7 +138,7 @@ export default function WeatherUpdatesPage() {
         title: alertTitle.trim(),
         message: alertMessage.trim(),
         severity: alertSeverity,
-        targetZoneName: targetZone,
+        targetZoneId: null,
         channels: [AlertChannel.DASHBOARD, AlertChannel.PUSH, AlertChannel.PA_SYSTEM],
       });
 
@@ -429,7 +429,7 @@ export default function WeatherUpdatesPage() {
                   <option value={AlertSeverity.CRITICAL}>🔴 CRITICAL (Emergency Action)</option>
                   <option value={AlertSeverity.WARNING}>🟡 WARNING (Caution Required)</option>
                   <option value={AlertSeverity.ADVISORY}>🔵 ADVISORY (Public Guidance)</option>
-                  <option value={AlertSeverity.MODERATE}>⚪ MODERATE (Informational)</option>
+                  <option value={AlertSeverity.INFORMATIONAL}>⚪ INFORMATIONAL (General Notice)</option>
                 </select>
               </div>
 
