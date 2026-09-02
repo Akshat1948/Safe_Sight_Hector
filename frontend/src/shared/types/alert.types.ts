@@ -42,6 +42,7 @@ export interface CreateAlertRequest {
   incidentId?: string | null;
   siteId: string;
   targetZoneId?: string | null;
+  targetZoneName?: string | null;
   severity: AlertSeverity;
   title: string;
   message: string;
