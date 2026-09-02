@@ -78,6 +78,13 @@ export default function VisitorPortalPage() {
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <Link
+            href="/visitor/transport"
+            className="text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors flex items-center gap-1"
+          >
+            <span className="material-symbols-outlined text-sm">directions_bus</span>
+            <span>Transit & Parking</span>
+          </Link>
           <LanguageSwitcher variant="compact" />
           <Link
             href="/dashboard"
@@ -191,9 +198,32 @@ export default function VisitorPortalPage() {
         </section>
 
         {/* Smart Mobility & Public Transport Section */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <ParkingStatus siteId={activeSiteId} />
-          <ShuttleInfo siteId={activeSiteId} />
+        <section className="space-y-4">
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-900 to-teal-950 text-white shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-emerald-700/50">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🚗</span>
+              <div>
+                <h4 className="font-bold text-sm sm:text-base text-emerald-200">
+                  Dedicated Pilgrim Transit &amp; Parking Hub
+                </h4>
+                <p className="text-xs text-emerald-100/80">
+                  Live parking space counters, free EV shuttle countdowns, riverboat ferry status, and Save My Car GPS locator.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/visitor/transport"
+              className="px-4 py-2 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold text-xs shrink-0 transition-colors shadow-sm flex items-center gap-1.5"
+            >
+              <span>Open Transit Hub</span>
+              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <ParkingStatus siteId={activeSiteId} />
+            <ShuttleInfo siteId={activeSiteId} />
+          </div>
         </section>
 
         {/* Safety Essentials & Speed Dial Section */}
