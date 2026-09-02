@@ -56,17 +56,17 @@ export default function ShuttleInfo({ siteId, className = '' }: { siteId?: strin
   }, [siteId]);
 
   return (
-    <div className={`p-4 sm:p-5 rounded-2xl border border-slate-800 bg-slate-900/90 backdrop-blur-md shadow-xl ${className}`}>
+    <div className={`p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-xs ${className}`}>
       <div className="flex items-center justify-between gap-2 mb-4">
         <div>
-          <span className="text-[9px] sm:text-[10px] font-mono uppercase font-bold tracking-widest text-cyan-400">
+          <span className="text-[9px] sm:text-[10px] font-sans uppercase font-bold tracking-widest text-cyan-600">
             {t('public_transit')}
           </span>
-          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-1.5 sm:gap-2 mt-0.5">
+          <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-1.5 sm:gap-2 mt-0.5">
             {t('shuttle_schedules')}
           </h3>
         </div>
-        <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 shrink-0">
+        <span className="text-[10px] sm:text-[11px] font-sans text-slate-500 shrink-0">
           {isLoading ? t('refreshing') : t('live_schedules')}
         </span>
       </div>
@@ -78,26 +78,26 @@ export default function ShuttleInfo({ siteId, className = '' }: { siteId?: strin
           const percentage = Math.min(Math.round((occupied / total) * 100), 100);
 
           return (
-            <div key={shuttle.id} className="p-3 sm:p-3.5 rounded-xl border border-slate-850 bg-slate-950/60 space-y-2 sm:space-y-2.5">
+            <div key={shuttle.id} className="p-3 sm:p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-2 sm:space-y-2.5">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="text-xs sm:text-sm font-bold text-slate-200">{shuttle.name}</span>
-                <span className="text-[10px] sm:text-[11px] font-mono font-bold text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 px-2 py-0.5 rounded-full shrink-0">
+                <span className="text-xs sm:text-sm font-bold text-slate-900">{shuttle.name}</span>
+                <span className="text-[10px] sm:text-[11px] font-sans font-bold text-cyan-700 bg-cyan-50 border border-cyan-300 px-2.5 py-0.5 rounded-full shrink-0">
                   {t('departs_in')} ~8 mins
                 </span>
               </div>
 
               {/* Route Timeline */}
               {shuttle.routeInfo && (
-                <div className="text-[11px] sm:text-xs font-mono text-slate-400 bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-800 flex items-center gap-1.5">
+                <div className="text-[11px] sm:text-xs font-sans text-slate-600 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 flex items-center gap-1.5 shadow-xs">
                   <span className="shrink-0">📍</span>
                   <span className="truncate">{shuttle.routeInfo}</span>
                 </div>
               )}
 
               {/* Capacity Status */}
-              <div className="flex justify-between items-center text-[11px] sm:text-xs font-mono text-slate-400 pt-1">
+              <div className="flex justify-between items-center text-[11px] sm:text-xs font-sans text-slate-500 pt-1">
                 <span>{t('passenger_load')}:</span>
-                <span className="font-bold text-slate-300">
+                <span className="font-bold text-slate-800">
                   {occupied} / {total} {t('seats')} ({percentage}%)
                 </span>
               </div>

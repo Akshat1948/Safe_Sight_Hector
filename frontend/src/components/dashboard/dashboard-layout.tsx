@@ -238,6 +238,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </Link>
             </li>
 
+            {/* Weather Updates */}
+            <li>
+              <Link
+                href="/dashboard/weather"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center px-3.5 py-2.5 rounded transition-colors duration-200 ${
+                  pathname === '/dashboard/weather'
+                    ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
+                    : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
+                }`}
+              >
+                <span className="material-symbols-outlined mr-3 text-[20px] text-cyan-300">
+                  cloud_sync
+                </span>
+                <span className="font-sans text-[13px] font-medium">Weather Updates</span>
+              </Link>
+            </li>
+
             {/* Notifications / Alerts */}
             <li>
               <Link
