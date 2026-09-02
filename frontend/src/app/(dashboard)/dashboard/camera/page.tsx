@@ -207,6 +207,12 @@ export default function CameraPage() {
           });
           setZoneCounts(counts);
         }
+
+        const imgObj = new Image();
+        imgObj.onload = () => {
+          drawOverlay(res.data!.detections, imgObj.width, imgObj.height);
+        };
+        imgObj.src = dataUrl;
       } else {
         setError(res.message || 'Detection failed');
       }

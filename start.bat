@@ -51,6 +51,8 @@ echo.
 echo Waiting for SafeSight services to initialize...
 powershell -NoProfile -Command "$backendReady = $false; for ($i=0; $i -lt 25; $i++) { try { $res = Invoke-WebRequest -Uri 'http://localhost:3001/api/zones' -UseBasicParsing -TimeoutSec 1; if ($res.StatusCode -eq 200 -or $res.StatusCode -eq 401) { $backendReady = $true; break } } catch { Start-Sleep -Seconds 1 } }; if ($backendReady) { Write-Host '   ✅ Backend API is LIVE on port 3001' -ForegroundColor Green } else { Write-Host '   ⚠️ Backend is still initializing or encountered an issue. Check backend.log.' -ForegroundColor Yellow }"
 
+powershell -NoProfile -Command "$aimlReady = $false; for ($i=0; $i -lt 25; $i++) { try { $res = Invoke-WebRequest -Uri 'http://localhost:8000/ml/health' -UseBasicParsing -TimeoutSec 1; if ($res.StatusCode -eq 200) { $aimlReady = $true; break } } catch { Start-Sleep -Seconds 1 } }; if ($aimlReady) { Write-Host '   ✅ AI/ML Vision & Intelligence Service is LIVE on port 8000' -ForegroundColor Green } else { Write-Host '   ⚠️ AI/ML Service is still initializing. Check aiml.log.' -ForegroundColor Yellow }"
+
 powershell -NoProfile -Command "$feReady = $false; for ($i=0; $i -lt 30; $i++) { try { $res = Invoke-WebRequest -Uri 'http://localhost:3000' -UseBasicParsing -TimeoutSec 2; if ($res.StatusCode -eq 200) { $feReady = $true; break } } catch { Start-Sleep -Seconds 1 } }; if ($feReady) { Write-Host '   ✅ Frontend UI is LIVE on port 3000' -ForegroundColor Green; Start-Process 'http://localhost:3000' } else { Write-Host '   Frontend is still compiling. Opening browser...' -ForegroundColor Yellow; Start-Process 'http://localhost:3000' }"
 
 echo =================================================================
