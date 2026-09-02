@@ -287,6 +287,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 )}
               </Link>
             </li>
+
+            {/* AI Vision / Camera */}
+            <li>
+              <Link
+                href="/dashboard/camera"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded transition-colors duration-150 ${
+                  pathname === '/dashboard/camera'
+                    ? 'bg-[#40534C] text-[#D6BD98] border-l-4 border-[#D6BD98] font-bold shadow-sm'
+                    : 'text-[#CBD6CF] hover:text-white hover:bg-[#40534C]/60'
+                }`}
+              >
+                <div className="flex items-center min-w-0">
+                  <span className="material-symbols-outlined mr-3 text-[20px] shrink-0">
+                    videocam
+                  </span>
+                  <span className="font-sans text-[13px] font-medium truncate">AI Vision</span>
+                </div>
+              </Link>
+            </li>
           </ul>
 
           {/* Divider */}

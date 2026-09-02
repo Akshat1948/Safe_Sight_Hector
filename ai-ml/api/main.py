@@ -49,6 +49,10 @@ from api.translation_routes import router as translation_router
 app.include_router(anomaly_router, prefix="/ml")
 app.include_router(translation_router, prefix="/ml")
 
+from api.vision_routes import router as vision_router
+app.include_router(vision_router, prefix="/ml")
+
+
 
 @app.get("/ml/health")
 async def health_check():

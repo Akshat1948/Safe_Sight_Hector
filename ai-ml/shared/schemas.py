@@ -162,3 +162,35 @@ class ApiEnvelope(BaseModel):
     success: bool = True
     data: Optional[dict] = None
     message: str = ""
+
+# --- Computer Vision (YOLO Detection) ---
+
+class BoundingBox(BaseModel):
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    confidence: float
+    label: str = "person"
+
+class DetectionResult(BaseModel):
+    total_persons: int
+    detections: list[BoundingBox]
+    annotated_image_base64: Optional[str] = None
+    processing_time_ms: float
+    model_version: str = "yolov8n"
+
+class ZoneDetectionResult(BaseModel):
+    zone_id: str
+    zone_name: str
+    headcount: int
+    max_capacity: int
+    density_percentage: float
+    density_status: DensityStatusEnum
+
+class VisionAnalysisResponse(BaseModel):
+    total_persons: int
+    zone_breakdown: list[ZoneDetectionResult]
+    annotated_image_base64: Optional[str] = None
+    processing_time_ms: float
+    timestamp: str

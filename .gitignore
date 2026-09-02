@@ -13,6 +13,11 @@ build/
 .next/
 *.tsbuildinfo
 
+# Python venv & model weights
+venv/
+.venv/
+*.pt
+
 # Test artifacts (Diya)
 ai-ml/server.log
 ai-ml/server_err.log
