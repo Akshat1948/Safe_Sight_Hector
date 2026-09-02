@@ -3,6 +3,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { IZone, DensityStatus, IIncident } from '@/shared/types';
 
+export interface CustomMarkerItem {
+  id: string;
+  coordinates: [number, number]; // [latitude, longitude]
+  label?: string;
+  icon?: string;
+  color?: string;
+  pulse?: boolean;
+}
+
 interface MapViewProps {
   zones?: IZone[];
   incidents?: IIncident[];
@@ -14,6 +23,9 @@ interface MapViewProps {
   showLegend?: boolean;
   showZoneDrawer?: boolean;
   className?: string;
+  onMapClick?: (coords: { lat: number; lng: number }) => void;
+  targetWaypoint?: { lat: number; lng: number; label?: string } | null;
+  customMarkers?: CustomMarkerItem[];
 }
 
 // Fallback demo zones for Prayagraj Sangam Kumbh Mela if API is loading
@@ -107,6 +119,9 @@ export default function MapView({
   showLegend = false,
   showZoneDrawer = false,
   className = '',
+  onMapClick,
+  targetWaypoint,
+  customMarkers = [],
 }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -333,7 +348,128 @@ export default function MapView({
         layerGroupRef.current.addLayer(incMarker);
       });
     }
-  }, [displayZones, incidents, selectedZoneId, showHeatmap, onSelectZone]);
+
+    // Render Custom Asset Markers (Vehicles, Ambulances, Fire Tenders, Drones)
+    if (customMarkers && customMarkers.length > 0) {
+      customMarkers.forEach((m) => {
+        const markerColor = m.color || '#3b82f6';
+        const assetIcon = L.divIcon({
+          className: 'custom-asset-marker',
+          html: `
+            <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+              ${
+                m.pulse
+                  ? `<div style="position: absolute; top: -3px; left: -3px; width: 34px; height: 34px; border-radius: 50%; background: ${markerColor}; opacity: 0.4; animation: ping 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>`
+                  : ''
+              }
+              <div style="
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                background: ${markerColor};
+                border: 2px solid #ffffff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #ffffff;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+                position: relative;
+                z-index: 10;
+              ">
+                <span class="material-symbols-outlined" style="font-size: 16px;">${m.icon || 'near_me'}</span>
+              </div>
+              ${
+                m.label
+                  ? `<div style="background: rgba(15,23,42,0.9); color: #ffffff; border: 1px solid ${markerColor}; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; white-space: nowrap; margin-top: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-family: system-ui, sans-serif;">
+                      ${m.label}
+                    </div>`
+                  : ''
+              }
+            </div>
+          `,
+          iconSize: [28, 44],
+          iconAnchor: [14, 14],
+        });
+
+        const marker = L.marker(m.coordinates, { icon: assetIcon, zIndexOffset: 500 });
+        if (m.label) {
+          marker.bindPopup(`
+            <div style="font-family: system-ui, sans-serif; padding: 4px;">
+              <strong style="color: ${markerColor};">${m.label}</strong>
+              <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0; font-family: monospace;">GPS: ${m.coordinates[0].toFixed(4)}° N, ${m.coordinates[1].toFixed(4)}° E</p>
+            </div>
+          `);
+        }
+        layerGroupRef.current.addLayer(marker);
+      });
+    }
+
+    // Render Exact Point-on-Map Target Destination Waypoint Pin
+    if (targetWaypoint && targetWaypoint.lat && targetWaypoint.lng) {
+      const targetIcon = L.divIcon({
+        className: 'custom-target-waypoint',
+        html: `
+          <div style="position: relative; display: flex; flex-direction: column; align-items: center; z-index: 999;">
+            <div style="position: absolute; top: -8px; left: -8px; width: 48px; height: 48px; border-radius: 50%; border: 2.5px dashed #ef4444; animation: spin 4s linear infinite; opacity: 0.85;"></div>
+            <div style="position: absolute; top: 0; left: 0; width: 32px; height: 32px; border-radius: 50%; background: rgba(239,68,68,0.35); animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+            <div style="
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              background: #ef4444;
+              border: 2.5px solid #ffffff;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #ffffff;
+              box-shadow: 0 0 16px rgba(239, 68, 68, 0.95);
+              position: relative;
+              z-index: 10;
+            ">
+              <span class="material-symbols-outlined" style="font-size: 20px;">my_location</span>
+            </div>
+            <div style="background: #ef4444; color: #ffffff; border: 1.5px solid #ffffff; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; white-space: nowrap; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); letter-spacing: 0.05em; font-family: monospace;">
+              ${targetWaypoint.label || '🎯 Target GPS Waypoint'}
+            </div>
+          </div>
+        `,
+        iconSize: [48, 60],
+        iconAnchor: [24, 16],
+      });
+
+      const waypointMarker = L.marker([targetWaypoint.lat, targetWaypoint.lng], {
+        icon: targetIcon,
+        zIndexOffset: 1000,
+      });
+
+      waypointMarker.bindPopup(`
+        <div style="font-family: system-ui, sans-serif; padding: 4px;">
+          <strong style="color: #ef4444; font-size: 12px;">TARGET DISPATCH DESTINATION</strong>
+          <p style="font-size: 12px; margin: 4px 0 0 0; color: #0f172a; font-family: monospace; font-weight: bold;">
+            ${targetWaypoint.lat.toFixed(5)}° N, ${targetWaypoint.lng.toFixed(5)}° E
+          </p>
+        </div>
+      `);
+      layerGroupRef.current.addLayer(waypointMarker);
+    }
+  }, [displayZones, incidents, selectedZoneId, showHeatmap, onSelectZone, customMarkers, targetWaypoint]);
+
+  // Handle map click event for point-on-map coordinate picking
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+
+    const handleMapClick = (e: any) => {
+      if (onMapClick && e.latlng) {
+        onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng });
+      }
+    };
+
+    map.on('click', handleMapClick);
+    return () => {
+      map.off('click', handleMapClick);
+    };
+  }, [onMapClick]);
 
   return (
     <div className={`relative w-full h-full min-h-[320px] sm:min-h-[380px] rounded-2xl overflow-hidden border border-slate-700/60 shadow-xl bg-slate-950 ${className}`}>

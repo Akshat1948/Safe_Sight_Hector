@@ -232,6 +232,8 @@ export default function AssetTrackingPage() {
   const [isDispatchModalOpen, setIsDispatchModalOpen] = useState(false);
   const [selectedZoneName, setSelectedZoneName] = useState('');
   const [dispatchInstruction, setDispatchInstruction] = useState('');
+  const [isPickingLocationOnMap, setIsPickingLocationOnMap] = useState(false);
+  const [targetCoordinates, setTargetCoordinates] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     getZones(siteId).then((res) => {
@@ -265,11 +267,23 @@ export default function AssetTrackingPage() {
     setIsDispatchModalOpen(true);
   };
 
+  const handleMapClick = (coords: { lat: number; lng: number }) => {
+    if (isPickingLocationOnMap || isDispatchModalOpen) {
+      setTargetCoordinates(coords);
+      setIsPickingLocationOnMap(false);
+      setActionNotice(`📍 Target Waypoint set: ${coords.lat.toFixed(4)}° N, ${coords.lng.toFixed(4)}° E`);
+      setTimeout(() => setActionNotice(null), 3500);
+    }
+  };
+
   const handleConfirmDispatch = () => {
     const targetZone = selectedZoneName || availableZones[0]?.name || 'Zone A — Main Entry Plaza';
+    const gpsSuffix = targetCoordinates
+      ? ` [GPS: ${targetCoordinates.lat.toFixed(4)}°N, ${targetCoordinates.lng.toFixed(4)}°E]`
+      : '';
     const directive = dispatchInstruction.trim()
       ? dispatchInstruction.trim()
-      : `High-priority tactical deployment to ${targetZone}`;
+      : `High-priority tactical deployment to ${targetZone}${gpsSuffix}`;
 
     setAssets((prev) =>
       prev.map((a) => {
@@ -277,9 +291,12 @@ export default function AssetTrackingPage() {
           const updated: AssetItem = {
             ...a,
             status: 'DEPLOYED',
-            assignment: `${targetZone} (${directive.length > 24 ? directive.slice(0, 22) + '...' : directive})`,
+            coordinates: targetCoordinates
+              ? [targetCoordinates.lat, targetCoordinates.lng]
+              : a.coordinates,
+            assignment: `${targetZone}${gpsSuffix} (${directive.length > 20 ? directive.slice(0, 18) + '...' : directive})`,
             metricLabel: 'DISPATCH STATUS',
-            metricValue: 'EN ROUTE (LIVE)',
+            metricValue: targetCoordinates ? 'PINPOINT NAVIGATION' : 'EN ROUTE (LIVE)',
           };
           setSelectedAsset(updated);
           return updated;
@@ -294,12 +311,18 @@ export default function AssetTrackingPage() {
         : selectedAsset.category === 'fire'
         ? '🚒 Fire Brigade Tender Dispatched'
         : selectedAsset.category === 'drone'
-        ? '🛸 Drone Rerouted to Sector'
+        ? '🛸 Drone Flight Vector Set'
         : '🚨 Tactical Unit Dispatched';
 
-    setActionNotice(`${verb} ➔ ${targetZone}: "${directive}"`);
+    const locationText = targetCoordinates
+      ? `📍 [${targetCoordinates.lat.toFixed(4)}° N, ${targetCoordinates.lng.toFixed(4)}° E] (${targetZone})`
+      : `➔ ${targetZone}`;
+
+    setActionNotice(`${verb} ${locationText}: "${directive}"`);
     setIsDispatchModalOpen(false);
+    setIsPickingLocationOnMap(false);
     setDispatchInstruction('');
+    setTargetCoordinates(null);
     setTimeout(() => setActionNotice(null), 4500);
   };
 
@@ -614,10 +637,52 @@ export default function AssetTrackingPage() {
           )}
 
           <div className="flex-1 w-full h-full min-h-[380px] relative bg-surface-container">
+            {/* Active Pinpoint Map Picking Alert Banner */}
+            {isPickingLocationOnMap && (
+              <div className="absolute top-3 left-3 right-3 sm:top-4 sm:left-6 sm:right-6 z-[550] bg-red-600 text-white px-3 sm:px-4 py-2.5 rounded-lg shadow-2xl border-2 border-white/60 flex items-center justify-between animate-pulse">
+                <div className="flex items-center gap-2 text-xs font-bold">
+                  <span className="material-symbols-outlined text-lg">my_location</span>
+                  <span>📍 CLICK ON MAP TO SET DESTINATION WAYPOINT FOR {selectedAsset.name.toUpperCase()}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPickingLocationOnMap(false)}
+                  className="px-2 py-0.5 bg-black/30 hover:bg-black/50 text-white rounded text-[11px] font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
             <MapView
               zones={zones}
               center={selectedAsset.coordinates}
               zoom={16}
+              onMapClick={handleMapClick}
+              targetWaypoint={
+                targetCoordinates
+                  ? {
+                      lat: targetCoordinates.lat,
+                      lng: targetCoordinates.lng,
+                      label: `🎯 ${selectedAsset.name} Destination`,
+                    }
+                  : null
+              }
+              customMarkers={assets.map((a) => ({
+                id: a.id,
+                coordinates: a.coordinates,
+                label: a.name,
+                icon: a.icon,
+                color:
+                  a.category === 'medical'
+                    ? '#ef4444'
+                    : a.category === 'fire'
+                    ? '#f97316'
+                    : a.category === 'drone'
+                    ? '#06b6d4'
+                    : '#10b981',
+                pulse: a.id === selectedAsset.id,
+              }))}
             />
 
             {/* Tactical Detail Overlay / Second Dispatch Directive Modal Popup */}
@@ -753,7 +818,10 @@ export default function AssetTrackingPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setIsDispatchModalOpen(false)}
+                    onClick={() => {
+                      setIsDispatchModalOpen(false);
+                      setIsPickingLocationOnMap(false);
+                    }}
                     className="p-1 text-on-surface-variant hover:text-text-main rounded-md hover:bg-surface-container transition-colors cursor-pointer"
                     title="Close"
                   >
@@ -761,7 +829,7 @@ export default function AssetTrackingPage() {
                   </button>
                 </div>
 
-                <div className="space-y-3 text-xs">
+                <div className="space-y-2.5 text-xs">
                   {/* Field 1: Target Zone Dropdown Menu */}
                   <div>
                     <label className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mb-1 flex items-center gap-1 uppercase font-bold">
@@ -772,7 +840,7 @@ export default function AssetTrackingPage() {
                       <select
                         value={selectedZoneName}
                         onChange={(e) => setSelectedZoneName(e.target.value)}
-                        className="w-full bg-surface-container border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary rounded p-2 pr-8 text-xs font-telemetry-md text-text-main appearance-none cursor-pointer outline-none shadow-xs"
+                        className="w-full bg-surface-container border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary rounded p-1.5 pr-8 text-xs font-telemetry-md text-text-main appearance-none cursor-pointer outline-none shadow-xs"
                       >
                         {availableZones.map((z) => (
                           <option key={z.id} value={z.name} className="bg-surface text-text-main">
@@ -786,18 +854,75 @@ export default function AssetTrackingPage() {
                     </div>
                   </div>
 
-                  {/* Field 2: Tactical Instructions / Description Box */}
+                  {/* Field 2: Exact Point-on-Map GPS Waypoint Coordinates */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant flex items-center gap-1 uppercase font-bold">
+                        <span className="material-symbols-outlined text-[13px] text-error">my_location</span>
+                        Exact GPS Waypoint (Point on Map)
+                      </label>
+                      {targetCoordinates && (
+                        <button
+                          type="button"
+                          onClick={() => setTargetCoordinates(null)}
+                          className="text-[10px] text-error hover:underline cursor-pointer font-bold"
+                        >
+                          Clear Pin
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsPickingLocationOnMap((prev) => !prev);
+                          if (window.innerWidth < 768) {
+                            setMobileTab('map');
+                          }
+                        }}
+                        className={`flex-1 py-1.5 px-2.5 rounded border text-xs font-telemetry-md font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs ${
+                          isPickingLocationOnMap
+                            ? 'bg-red-600 text-white border-red-500 animate-pulse'
+                            : targetCoordinates
+                            ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-500'
+                            : 'bg-surface-container border-border-subtle hover:border-primary text-primary'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-sm">
+                          {isPickingLocationOnMap ? 'radio_button_checked' : 'touch_app'}
+                        </span>
+                        {isPickingLocationOnMap
+                          ? 'Click Map Now...'
+                          : targetCoordinates
+                          ? '📍 Waypoint Set'
+                          : '📍 Point on Map'}
+                      </button>
+
+                      <div className="flex-1 bg-surface-container border border-border-subtle p-1.5 rounded font-mono text-[10px] text-text-main flex items-center justify-center text-center">
+                        {targetCoordinates ? (
+                          <span className="text-emerald-500 font-bold">
+                            {targetCoordinates.lat.toFixed(4)}°N, {targetCoordinates.lng.toFixed(4)}°E
+                          </span>
+                        ) : (
+                          <span className="text-on-surface-variant/70 italic">Default zone center</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Field 3: Tactical Instructions / Description Box */}
                   <div>
                     <label className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mb-1 flex items-center gap-1 uppercase font-bold">
                       <span className="material-symbols-outlined text-[13px] text-primary">edit_note</span>
                       Tactical Instructions & Directives
                     </label>
                     <textarea
-                      rows={3}
+                      rows={2}
                       value={dispatchInstruction}
                       onChange={(e) => setDispatchInstruction(e.target.value)}
                       placeholder={`Enter deployment orders, priority level, route details, or emergency protocol for ${selectedAsset.name}...`}
-                      className="w-full bg-surface-container border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary rounded p-2 text-xs font-telemetry-md text-text-main placeholder:text-on-surface-variant/60 resize-none outline-none shadow-xs"
+                      className="w-full bg-surface-container border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary rounded p-1.5 text-xs font-telemetry-md text-text-main placeholder:text-on-surface-variant/60 resize-none outline-none shadow-xs"
                     />
                   </div>
 
@@ -805,7 +930,10 @@ export default function AssetTrackingPage() {
                   <div className="pt-1.5 border-t border-border-subtle flex gap-2">
                     <button
                       type="button"
-                      onClick={() => setIsDispatchModalOpen(false)}
+                      onClick={() => {
+                        setIsDispatchModalOpen(false);
+                        setIsPickingLocationOnMap(false);
+                      }}
                       className="flex-1 bg-surface border border-border-subtle text-secondary font-body-bold text-xs py-2 rounded hover:bg-surface-container transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1"
                     >
                       <span className="material-symbols-outlined text-sm">arrow_back</span>
