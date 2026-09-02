@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/dashboard/dashboard-layout';
 import MapView from '@/components/map/map-view';
 import { useAuth } from '@/shared/hooks';
 import { getParkingStatus, getShuttleStatus, getZones } from '@/shared/api';
-import { IZone } from '@/shared/types';
+import { IZone, ZoneType, DensityStatus } from '@/shared/types';
 
 interface AssetItem {
   id: string;
@@ -216,6 +216,101 @@ const INITIAL_ASSETS: AssetItem[] = [
   },
 ];
 
+const DEMO_DEFAULT_ZONES: IZone[] = [
+  {
+    id: 'zone-a-entry',
+    siteId: '0275fd8b-81a2-4513-bdc5-9c4d27aae375',
+    name: 'Zone A — Main Entry Plaza',
+    zoneType: ZoneType.ENTRY_EXIT,
+    polygon: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [81.841, 25.431],
+          [81.845, 25.431],
+          [81.845, 25.436],
+          [81.841, 25.436],
+          [81.841, 25.431],
+        ],
+      ],
+    },
+    maxCapacity: 2500,
+    currentDensity: 1420,
+    densityStatus: DensityStatus.GREEN,
+    isActive: true,
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'zone-b-ghat',
+    siteId: '0275fd8b-81a2-4513-bdc5-9c4d27aae375',
+    name: 'Zone B — Riverside Ghat Corridor',
+    zoneType: ZoneType.CORRIDOR,
+    polygon: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [81.846, 25.432],
+          [81.851, 25.432],
+          [81.851, 25.437],
+          [81.846, 25.437],
+          [81.846, 25.432],
+        ],
+      ],
+    },
+    maxCapacity: 4000,
+    currentDensity: 3840,
+    densityStatus: DensityStatus.RED,
+    isActive: true,
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'zone-c-corridor',
+    siteId: '0275fd8b-81a2-4513-bdc5-9c4d27aae375',
+    name: 'Zone C — Ghat Staircase (Chokepoint)',
+    zoneType: ZoneType.HIGH_RISK,
+    polygon: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [81.852, 25.433],
+          [81.856, 25.433],
+          [81.856, 25.439],
+          [81.852, 25.439],
+          [81.852, 25.433],
+        ],
+      ],
+    },
+    maxCapacity: 3000,
+    currentDensity: 2100,
+    densityStatus: DensityStatus.ORANGE,
+    isActive: true,
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'zone-d-assembly',
+    siteId: '0275fd8b-81a2-4513-bdc5-9c4d27aae375',
+    name: 'Zone D — Safe Assembly & North Exit',
+    zoneType: ZoneType.SAFE_ASSEMBLY,
+    polygon: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [81.842, 25.438],
+          [81.848, 25.438],
+          [81.848, 25.444],
+          [81.842, 25.444],
+          [81.842, 25.438],
+        ],
+      ],
+    },
+    maxCapacity: 5000,
+    currentDensity: 850,
+    densityStatus: DensityStatus.GREEN,
+    isActive: true,
+    updatedAt: new Date().toISOString(),
+  },
+];
+
 export default function AssetTrackingPage() {
   const { user } = useAuth();
   const siteId = user?.siteId || 'demo-site-prayagraj-01';
@@ -225,7 +320,7 @@ export default function AssetTrackingPage() {
     'all' | 'responder' | 'drone' | 'medical' | 'fire' | 'vehicle' | 'shuttle'
   >('all');
   const [mobileTab, setMobileTab] = useState<'roster' | 'map'>('roster');
-  const [zones, setZones] = useState<IZone[]>([]);
+  const [zones, setZones] = useState<IZone[]>(DEMO_DEFAULT_ZONES);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
   // Second Popup: Dispatch Directive Modal State
@@ -237,7 +332,7 @@ export default function AssetTrackingPage() {
 
   useEffect(() => {
     getZones(siteId).then((res) => {
-      if (res.success && res.data) setZones(res.data);
+      if (res.success && res.data && res.data.length > 0) setZones(res.data);
     });
 
     Promise.all([getParkingStatus(siteId), getShuttleStatus(siteId)]).catch(console.error);
