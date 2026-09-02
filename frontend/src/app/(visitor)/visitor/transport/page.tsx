@@ -7,7 +7,7 @@ import { IParkingStatus, IShuttleStatus, TransportStatus } from '@/shared/types'
 import { LanguageSwitcher } from '@/components/language';
 import { useLanguage } from '@/i18n';
 
-// Fallback Mock Data for Sangam Pilgrimage Transport
+// Fallback Mock Data for Sangam Pilgrimage Transport (Prayagraj, Uttar Pradesh)
 const DEMO_PARKING_LOTS = [
   {
     id: 'prk-001',
@@ -19,7 +19,7 @@ const DEMO_PARKING_LOTS = [
     recommended: true,
     fee: 'FREE PILGRIM PARKING',
     gate: 'Gate 4 North',
-    mapsUrl: 'https://maps.google.com/?q=25.4380,81.8420',
+    mapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=25.4380,81.8420+(West+Satellite+Parking+Prayagraj)&travelmode=driving',
     location: { latitude: 25.4380, longitude: 81.8420 },
   },
   {
@@ -32,7 +32,7 @@ const DEMO_PARKING_LOTS = [
     recommended: false,
     fee: 'FREE PILGRIM PARKING',
     gate: 'Gate 1 Plaza',
-    mapsUrl: 'https://maps.google.com/?q=25.4410,81.8450',
+    mapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=25.4410,81.8450+(Sangam+North+Gate+Parking+Prayagraj)&travelmode=driving',
     location: { latitude: 25.4410, longitude: 81.8450 },
   },
   {
@@ -45,7 +45,7 @@ const DEMO_PARKING_LOTS = [
     recommended: false,
     fee: 'FREE PILGRIM PARKING',
     gate: 'Gate 3 Riverfront',
-    mapsUrl: 'https://maps.google.com/?q=25.4300,81.8490',
+    mapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=25.4300,81.8490+(Arail+Ghat+Riverbank+Parking+Prayagraj)&travelmode=driving',
     location: { latitude: 25.4300, longitude: 81.8490 },
   },
   {
@@ -58,7 +58,7 @@ const DEMO_PARKING_LOTS = [
     recommended: false,
     fee: 'PERMIT ONLY',
     gate: 'Emergency Corridor',
-    mapsUrl: 'https://maps.google.com/?q=25.4340,81.8490',
+    mapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=25.4340,81.8490+(Prayagraj+Fort+Sangam+VIP+Parking)&travelmode=driving',
     location: { latitude: 25.4340, longitude: 81.8490 },
   },
 ];
