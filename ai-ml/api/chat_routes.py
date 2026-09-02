@@ -242,11 +242,15 @@ async def generate_weather_response(message: str, language: str) -> tuple[str, l
                 f"• 💨 **हवा की गति:** {wind_speed} km/h\n"
                 f"• ☁️ **स्थिति:** {condition}\n\n"
             )
-            if float(str(temp)) > 38:
-                reply += "⚠️ **चेतावनी:** अत्यधिक गर्मी! पर्याप्त पानी पिएं, छाया में रहें, और टोपी पहनें।"
-            elif float(str(temp)) < 10:
-                reply += "🧥 **सलाह:** ठंड है! गर्म कपड़े पहनें और गरम चाय/कॉफी लें।"
-            else:
+            try:
+                temp_f = float(str(temp))
+                if temp_f > 38:
+                    reply += "⚠️ **चेतावनी:** अत्यधिक गर्मी! पर्याप्त पानी पिएं, छाया में रहें, और टोपी पहनें।"
+                elif temp_f < 10:
+                    reply += "🧥 **सलाह:** ठंड है! गर्म कपड़े पहनें और गरम चाय/कॉफी लें।"
+                else:
+                    reply += "✅ मौसम तीर्थयात्रा के लिए अनुकूल है।"
+            except (ValueError, TypeError):
                 reply += "✅ मौसम तीर्थयात्रा के लिए अनुकूल है।"
         else:
             reply = (
@@ -256,11 +260,15 @@ async def generate_weather_response(message: str, language: str) -> tuple[str, l
                 f"• 💨 **Wind Speed:** {wind_speed} km/h\n"
                 f"• ☁️ **Condition:** {condition}\n\n"
             )
-            if float(str(temp)) > 38:
-                reply += "⚠️ **Heat Warning:** Stay hydrated, seek shade, and wear a hat."
-            elif float(str(temp)) < 10:
-                reply += "🧥 **Cold Advisory:** Wear warm layers and carry hot beverages."
-            else:
+            try:
+                temp_f = float(str(temp))
+                if temp_f > 38:
+                    reply += "⚠️ **Heat Warning:** Stay hydrated, seek shade, and wear a hat."
+                elif temp_f < 10:
+                    reply += "🧥 **Cold Advisory:** Wear warm layers and carry hot beverages."
+                else:
+                    reply += "✅ Weather is favorable for pilgrimage activities."
+            except (ValueError, TypeError):
                 reply += "✅ Weather is favorable for pilgrimage activities."
     else:
         if language == "hi":
@@ -549,11 +557,11 @@ async def chat_endpoint(req: ChatRequest):
         elif intent == ChatIntent.WEATHER:
             reply, actions = await generate_weather_response(req.message, lang)
         elif intent == ChatIntent.TRANSPORT:
-            reply, actions = await generate_transport_response(req.message, lang)
+            reply, actions = generate_transport_response(req.message, lang)
         elif intent == ChatIntent.EMERGENCY:
-            reply, actions = await generate_emergency_response(req.message, lang)
+            reply, actions = generate_emergency_response(req.message, lang)
         elif intent == ChatIntent.NAVIGATION:
-            reply, actions = await generate_navigation_response(req.message, lang)
+            reply, actions = generate_navigation_response(req.message, lang)
         else:
             reply, actions = generate_general_response(req.message, lang)
 
