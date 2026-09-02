@@ -44,10 +44,12 @@ export class SafeSightGateway implements OnGatewayConnection, OnGatewayDisconnec
   }
 
   emitToSite(siteId: string, event: string, payload: any) {
+    // 1. Broadcast to all connected clients globally
+    this.server.emit(event, payload);
+
+    // 2. Also broadcast to specific site room if provided
     if (siteId && siteId !== 'all') {
       this.server.to(`site_${siteId}`).emit(event, payload);
-    } else {
-      this.server.emit(event, payload);
     }
   }
 

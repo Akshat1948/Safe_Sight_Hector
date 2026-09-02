@@ -14,8 +14,13 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function SosPage() {
-  const { sosRequests: requests, loading, updateSosStatus, isUpdatingSos } = useNotifications();
+  const { sosRequests: requests, loading, updateSosStatus, isUpdatingSos, refreshSos } = useNotifications();
   const [tab, setTab] = useState<'active' | 'resolved'>('active');
+
+  // Immediately fetch fresh SOS requests upon opening the console
+  React.useEffect(() => {
+    refreshSos();
+  }, [refreshSos]);
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     await updateSosStatus(id, newStatus);
@@ -57,8 +62,12 @@ export default function SosPage() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border-subtle pb-4">
             <div>
-              <h1 className="font-headline-md text-headline-md font-bold text-on-surface">
-                SOS Distress Emergency Console
+              <h1 className="font-headline-md text-headline-md font-bold text-on-surface flex items-center gap-2">
+                <span>SOS Distress Emergency Console</span>
+                <span className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 rounded text-[10px] font-mono font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                  LIVE SYNC ACTIVE
+                </span>
               </h1>
               <p className="text-on-surface-variant font-body-base mt-1">
                 Real-time monitor and response queue for visitor 1-tap emergency distress calls.

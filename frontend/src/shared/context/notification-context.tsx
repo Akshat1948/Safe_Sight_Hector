@@ -77,7 +77,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
   }, []);
 
-  // Initial load
+  // Initial load & resilient real-time background sync (every 3s)
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -86,8 +86,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       if (isMounted) setLoading(false);
     });
 
+    const interval = setInterval(() => {
+      if (isMounted) {
+        refreshAlerts();
+        refreshSos();
+      }
+    }, 3000);
+
     return () => {
       isMounted = false;
+      clearInterval(interval);
     };
   }, [refreshAlerts, refreshSos]);
 
