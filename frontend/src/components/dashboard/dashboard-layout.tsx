@@ -20,7 +20,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [lockdownActive, setLockdownActive] = useState(false);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -98,16 +97,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [showProfileMenu]);
-
-  const handleEmergencyLockdown = () => {
-    const confirm = window.confirm(
-      'EMERGENCY LOCKDOWN PROTOCOL\n\nAre you sure you want to broadcast site-wide lockdown alerts and restrict sector access?'
-    );
-    if (confirm) {
-      setLockdownActive(true);
-      router.push('/dashboard/alerts?lockdown=true');
-    }
-  };
 
   return (
     <div className="font-body-base min-h-screen h-screen overflow-hidden flex bg-background text-text-main antialiased select-none">
@@ -523,20 +512,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               <span className="w-2 h-2 rounded-full bg-[#677D6A] mr-1.5 animate-pulse"></span>
               <span>Status</span>
-            </button>
-
-            {/* Emergency Lockdown Button */}
-            <button
-              onClick={handleEmergencyLockdown}
-              className={`h-8 flex items-center gap-1 px-2.5 sm:px-3 rounded transition-all text-xs font-bold shadow-md cursor-pointer whitespace-nowrap shrink-0 ${
-                lockdownActive
-                  ? 'bg-status-critical text-white animate-pulse shadow-status-critical/30'
-                  : 'bg-error text-on-error hover:bg-error/90 shadow-error/20'
-              }`}
-              title="Trigger Site Emergency Lockdown Protocol"
-            >
-              <span className="material-symbols-outlined text-[14px]">lock</span>
-              <span>Lockdown</span>
             </button>
 
             {/* Profile Avatar with Dropdown */}
