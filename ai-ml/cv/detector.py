@@ -31,7 +31,8 @@ class PersonDetector:
         annotated_img = image.copy()
         
         try:
-            results = self.model(image, classes=[0], conf=confidence, verbose=False)
+            h, w = image.shape[:2]
+            results = self.model(image, classes=[0], conf=confidence, imgsz=640, verbose=False)
             
             detections = []
             if len(results) > 0:
@@ -43,7 +44,16 @@ class PersonDetector:
                     conf = float(box.conf[0])
                     
                     detections.append(BoundingBox(
-                        x1=x1, y1=y1, x2=x2, y2=y2, confidence=conf, label="person"
+                        x1=x1,
+                        y1=y1,
+                        x2=x2,
+                        y2=y2,
+                        norm_x1=x1 / max(w, 1),
+                        norm_y1=y1 / max(h, 1),
+                        norm_x2=x2 / max(w, 1),
+                        norm_y2=y2 / max(h, 1),
+                        confidence=conf,
+                        label="person"
                     ))
                     
                     cv2.rectangle(annotated_img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
@@ -59,7 +69,9 @@ class PersonDetector:
                 total_persons=len(detections),
                 detections=detections,
                 annotated_image_base64=encoded_image,
-                processing_time_ms=processing_time
+                processing_time_ms=processing_time,
+                img_width=w,
+                img_height=h
             )
             
         except Exception as e:

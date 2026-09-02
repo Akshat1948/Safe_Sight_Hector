@@ -170,14 +170,22 @@ class BoundingBox(BaseModel):
     y1: float
     x2: float
     y2: float
+    norm_x1: Optional[float] = None
+    norm_y1: Optional[float] = None
+    norm_x2: Optional[float] = None
+    norm_y2: Optional[float] = None
     confidence: float
     label: str = "person"
+    zone_id: Optional[str] = None
+    zone_name: Optional[str] = None
 
 class DetectionResult(BaseModel):
     total_persons: int
     detections: list[BoundingBox]
     annotated_image_base64: Optional[str] = None
     processing_time_ms: float
+    img_width: Optional[int] = None
+    img_height: Optional[int] = None
     model_version: str = "yolov8n"
 
 class ZoneDetectionResult(BaseModel):

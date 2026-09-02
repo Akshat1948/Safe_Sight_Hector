@@ -5,6 +5,10 @@ export interface BoundingBox {
   y1: number;
   x2: number;
   y2: number;
+  norm_x1?: number;
+  norm_y1?: number;
+  norm_x2?: number;
+  norm_y2?: number;
   confidence: number;
   label: string;
   zone_id?: string;

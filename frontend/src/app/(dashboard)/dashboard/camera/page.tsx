@@ -57,7 +57,7 @@ export default function CameraPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageFileName, setImageFileName] = useState<string | null>(null);
   
-  const [confidence, setConfidence] = useState<number>(0.35);
+  const [confidence, setConfidence] = useState<number>(0.25);
   const [autoSyncToBackend, setAutoSyncToBackend] = useState(false);
   const [showZoneGrid, setShowZoneGrid] = useState(true);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -236,7 +236,7 @@ export default function CameraPage() {
     }
   };
 
-  // Draw overlay on canvas
+  // Draw overlay on canvas with normalized coordinates
   const drawOverlay = useCallback((
     detections: BoundingBox[],
     videoWidth: number,
@@ -284,10 +284,14 @@ export default function CameraPage() {
       });
     }
 
-    // 2. Draw Detected Person Bounding Boxes
+    // 2. Draw Detected Person Bounding Boxes using Normalized Coordinates
     detections.forEach((det, idx) => {
-      const boxWidth = det.x2 - det.x1;
-      const boxHeight = det.y2 - det.y1;
+      const x1 = det.norm_x1 !== undefined ? det.norm_x1 * videoWidth : det.x1;
+      const y1 = det.norm_y1 !== undefined ? det.norm_y1 * videoHeight : det.y1;
+      const x2 = det.norm_x2 !== undefined ? det.norm_x2 * videoWidth : det.x2;
+      const y2 = det.norm_y2 !== undefined ? det.norm_y2 * videoHeight : det.y2;
+      const boxWidth = Math.max(10, x2 - x1);
+      const boxHeight = Math.max(10, y2 - y1);
 
       // Glow effect for person boxes
       ctx.shadowColor = '#22c55e';
@@ -296,7 +300,7 @@ export default function CameraPage() {
       ctx.lineWidth = 2.5;
 
       // Box
-      ctx.strokeRect(det.x1, det.y1, boxWidth, boxHeight);
+      ctx.strokeRect(x1, y1, boxWidth, boxHeight);
       ctx.shadowBlur = 0; // reset glow
 
       // Label background
@@ -305,15 +309,15 @@ export default function CameraPage() {
       const textWidth = ctx.measureText(label).width;
 
       ctx.fillStyle = '#22c55ecc';
-      ctx.fillRect(det.x1, Math.max(0, det.y1 - 20), textWidth + 12, 20);
+      ctx.fillRect(x1, Math.max(0, y1 - 20), textWidth + 12, 20);
 
       // Label text
       ctx.fillStyle = '#ffffff';
-      ctx.fillText(label, det.x1 + 6, Math.max(14, det.y1 - 6));
+      ctx.fillText(label, x1 + 6, Math.max(14, y1 - 6));
 
       // Tracking dot at feet location
-      const feetX = (det.x1 + det.x2) / 2;
-      const feetY = det.y2;
+      const feetX = (x1 + x2) / 2;
+      const feetY = y2;
       ctx.beginPath();
       ctx.arc(feetX, feetY, 4, 0, 2 * Math.PI);
       ctx.fillStyle = '#ef4444';
@@ -330,14 +334,19 @@ export default function CameraPage() {
     const video = videoRef.current;
     if (video.videoWidth === 0) return;
 
+    const vw = video.videoWidth || 640;
+    const vh = video.videoHeight || 480;
+    const targetWidth = Math.min(640, vw);
+    const targetHeight = Math.round((vh / vw) * targetWidth);
+
     const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
     const base64Data = dataUrl.split(',')[1];
 
     try {
@@ -355,7 +364,7 @@ export default function CameraPage() {
           setZoneCounts(counts);
         }
 
-        drawOverlay(res.data.detections, video.videoWidth, video.videoHeight);
+        drawOverlay(res.data.detections, vw, vh);
       }
     } catch (err) {
       console.error('Paused frame detection error:', err);
@@ -371,13 +380,18 @@ export default function CameraPage() {
       return; // Do not loop while paused
     }
 
+    const vw = video.videoWidth || 640;
+    const vh = video.videoHeight || 480;
+    const targetWidth = Math.min(640, vw);
+    const targetHeight = Math.round((vh / vw) * targetWidth);
+
     const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
     const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
     const base64Data = dataUrl.split(',')[1];
 
@@ -396,8 +410,8 @@ export default function CameraPage() {
           setZoneCounts(counts);
         }
 
-        // Draw live overlay
-        drawOverlay(res.data.detections, video.videoWidth, video.videoHeight);
+        // Draw live overlay with scaled coordinates
+        drawOverlay(res.data.detections, vw, vh);
 
         // Calculate FPS
         frameCountRef.current += 1;
@@ -855,7 +869,16 @@ export default function CameraPage() {
               </h3>
               {liveDetections.length === 0 ? (
                 <div className="text-center py-4 text-xs font-telemetry-md text-on-surface-variant">
-                  No people in frame
+                  {videoSrc || isWebcamActive ? (
+                    <div>
+                      <p>No people in frame</p>
+                      <p className="text-[10px] text-primary/80 mt-1">
+                        Tip: Slide Sensitivity to 15%–25% for distant crowds
+                      </p>
+                    </div>
+                  ) : (
+                    'No active feed'
+                  )}
                 </div>
               ) : (
                 <div className="flex flex-col gap-1.5">
