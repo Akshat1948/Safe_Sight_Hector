@@ -57,6 +57,8 @@ class ChatResponse(BaseModel):
 
 INTENT_KEYWORDS: dict[ChatIntent, list[str]] = {
     ChatIntent.CROWD: [
+        "भीड़", "भीड", "भीड़", "जनसंख्या", "लोग", "घाट", "संगम", "क्राउड", "पब्लिक",
+        "कैसी", "कितनी", "स्थिति", "सुरक्षित", "खतरा", "जाम", "सेक्टर", "क्षमता",
         "crowd", "bheed", "bhid", "rush", "density", "packed", "congestion",
         "overcrowded", "kitni bheed", "zone", "safe", "danger", "red zone",
         "green zone", "headcount", "people", "log", "kitne log", "jam",
@@ -64,12 +66,17 @@ INTENT_KEYWORDS: dict[ChatIntent, list[str]] = {
         "sangam", "ghat", "sector", "area", "crowded",
     ],
     ChatIntent.WEATHER: [
+        "मौसम", "बारिश", "वर्षा", "तापमान", "गर्मी", "ठंड", "सर्दी", "धूप",
+        "बादल", "तूफान", "हवा", "ताप", "छाता", "पूर्वानुमान",
         "weather", "mausam", "rain", "barish", "temperature", "temp",
         "humidity", "wind", "fog", "cold", "hot", "garmi", "sardi",
         "thand", "dhoop", "sun", "cloud", "badal", "storm", "toofan",
         "forecast", "umbrella", "chhatri",
     ],
     ChatIntent.TRANSPORT: [
+        "परिवहन", "पार्किंग", "बस", "नाव", "नौका", "गाड़ी", "गाडी", "वाहन",
+        "शटल", "ऑटो", "रिक्शा", "ट्रेन", "किराया", "मार्ग", "समय", "सीट",
+        "टिकट", "कार", "बाइक",
         "bus", "shuttle", "parking", "park", "boat", "ferry", "naav",
         "auto", "rickshaw", "taxi", "cab", "train", "route", "rasta",
         "transport", "vehicle", "gaadi", "car", "bike", "cycle",
@@ -77,6 +84,9 @@ INTENT_KEYWORDS: dict[ChatIntent, list[str]] = {
         "seat", "ticket", "fare",
     ],
     ChatIntent.EMERGENCY: [
+        "आपातकाल", "आपातकालीन", "मदद", "बचाओ", "सहायता", "एम्बुलेंस", "पुलिस",
+        "अस्पताल", "डॉक्टर", "खो", "लापता", "चोरी", "हमला", "दुर्घटना", "चोट",
+        "प्राथमिक", "डूब",
         "emergency", "sos", "help", "ambulance", "police", "fire",
         "medical", "hospital", "doctor", "lost", "child", "missing",
         "theft", "stolen", "attack", "injury", "hurt", "bachao",
@@ -84,6 +94,9 @@ INTENT_KEYWORDS: dict[ChatIntent, list[str]] = {
         "1077", "drown", "drowning",
     ],
     ChatIntent.NAVIGATION: [
+        "कहाँ", "कहा", "किधर", "रास्ता", "दिशा", "स्थान", "नक्शा",
+        "शौचालय", "टॉयलेट", "बाथरूम", "खाना", "भोजन", "लंगर", "अन्नक्षेत्र",
+        "प्रसाद", "पानी", "जल", "मंदिर", "प्रवेश", "निकास", "गेट", "द्वार", "खोया",
         "where", "kahan", "direction", "navigate", "map", "location",
         "find", "reach", "how to go", "kaise jaaye", "way", "path",
         "entry", "exit", "gate", "toilet", "washroom", "bathroom",
@@ -91,6 +104,7 @@ INTENT_KEYWORDS: dict[ChatIntent, list[str]] = {
         "medical camp", "lost and found",
     ],
     ChatIntent.GREETING: [
+        "नमस्ते", "नमस्कार", "प्रणाम", "जय", "राम", "धन्यवाद", "शुक्रिया", "हेलो", "हाय",
         "hello", "hi", "hey", "namaste", "namaskar", "pranam",
         "good morning", "good evening", "good night", "jai",
         "hare", "ram ram", "jai shri ram", "radhe radhe",
@@ -340,9 +354,9 @@ def generate_emergency_response(message: str, language: str) -> tuple[str, list[
     msg_lower = message.lower()
 
     # Check for specific emergency types
-    is_medical = any(w in msg_lower for w in ["medical", "hospital", "doctor", "hurt", "injury", "ambulance", "108"])
-    is_police = any(w in msg_lower for w in ["police", "theft", "stolen", "attack", "112"])
-    is_lost = any(w in msg_lower for w in ["lost", "child", "missing", "kho gaya", "bachcha"])
+    is_medical = any(w in msg_lower for w in ["medical", "hospital", "doctor", "hurt", "injury", "ambulance", "108", "इलाज", "दवा", "अस्पताल", "चोट", "एम्बुलेंस", "बीमार", "स्वास्थ्य"])
+    is_police = any(w in msg_lower for w in ["police", "theft", "stolen", "attack", "112", "पुलिस", "चोरी", "सुरक्षा", "थाना", "झगड़ा"])
+    is_lost = any(w in msg_lower for w in ["lost", "child", "missing", "kho gaya", "bachcha", "खो", "लापता", "बच्चा", "गुम", "गायब"])
 
     if language == "hi":
         reply = "🚨 **आपातकालीन सहायता**\n\n"
@@ -424,9 +438,9 @@ def generate_navigation_response(message: str, language: str) -> tuple[str, list
     msg_lower = message.lower()
 
     # Detect what they're looking for
-    is_toilet = any(w in msg_lower for w in ["toilet", "washroom", "bathroom", "shauchalay", "restroom"])
-    is_food = any(w in msg_lower for w in ["food", "khana", "bhojan", "restaurant", "prasad", "langar"])
-    is_medical = any(w in msg_lower for w in ["medical", "hospital", "clinic", "dawai", "medicine"])
+    is_toilet = any(w in msg_lower for w in ["toilet", "washroom", "bathroom", "shauchalay", "restroom", "शौचालय", "टॉयलेट", "बाथरूम", "टायलेट"])
+    is_food = any(w in msg_lower for w in ["food", "khana", "bhojan", "restaurant", "prasad", "langar", "खाना", "भोजन", "लंगर", "अन्नक्षेत्र", "प्रसाद", "नाश्ता", "पानी", "जल", "भूख"])
+    is_medical = any(w in msg_lower for w in ["medical", "hospital", "clinic", "dawai", "medicine", "अस्पताल", "दवा", "चिकित्सा", "मेडिकल", "क्लिनिक"])
 
     if language == "hi":
         if is_toilet:
@@ -547,7 +561,9 @@ async def chat_endpoint(req: ChatRequest):
     """
     try:
         intent = classify_intent(req.message)
-        lang = req.language if req.language in ("en", "hi") else "en"
+        # Auto-detect Devanagari Hindi or respect explicit language parameter
+        has_devanagari = bool(re.search(r'[\u0900-\u097F]', req.message))
+        lang = "hi" if (req.language == "hi" or has_devanagari) else "en"
 
         if intent == ChatIntent.GREETING:
             reply = GREETING_RESPONSES.get(lang, GREETING_RESPONSES["en"])

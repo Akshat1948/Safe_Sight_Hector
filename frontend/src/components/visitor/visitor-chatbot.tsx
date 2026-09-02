@@ -25,21 +25,21 @@ const ML_API_BASE = 'http://localhost:8000/ml';
 // ─── Quick Suggestion Chips ────────────────────────────────────────
 
 const QUICK_SUGGESTIONS_EN = [
-  { label: '📊 Crowd Status', message: 'How is the crowd right now?' },
-  { label: '🌤️ Weather', message: "What's the weather like?" },
-  { label: '🚌 Transport', message: 'Where can I park and get a bus?' },
-  { label: '🚨 Emergency', message: 'I need emergency help' },
+  { label: '📊 Crowd Status', message: 'How is the crowd density right now?' },
+  { label: '🌤️ Weather', message: "What's the weather and temperature?" },
+  { label: '🚌 Transport', message: 'Where can I park and get a shuttle bus?' },
+  { label: '🚨 Emergency', message: 'I need emergency medical or police help' },
   { label: '🚻 Washroom', message: 'Where is the nearest toilet?' },
-  { label: '🍽️ Food', message: 'Where can I find food?' },
+  { label: '🍽️ Food', message: 'Where can I find food and Annakshetra?' },
 ];
 
 const QUICK_SUGGESTIONS_HI = [
-  { label: '📊 भीड़ की स्थिति', message: 'अभी भीड़ कैसी है?' },
-  { label: '🌤️ मौसम', message: 'मौसम कैसा है?' },
-  { label: '🚌 परिवहन', message: 'पार्किंग और बस कहाँ मिलेगी?' },
-  { label: '🚨 आपातकाल', message: 'मुझे आपातकालीन मदद चाहिए' },
+  { label: '📊 भीड़ की स्थिति', message: 'संगम पर भीड़ की स्थिति क्या है?' },
+  { label: '🌤️ मौसम', message: 'प्रयागराज का मौसम और तापमान कैसा है?' },
+  { label: '🚌 परिवहन', message: 'पार्किंग और बस सेवा की जानकारी दें' },
+  { label: '🚨 आपातकाल', message: 'आपातकालीन सहायता और एम्बुलेंस चाहिए' },
   { label: '🚻 शौचालय', message: 'निकटतम शौचालय कहाँ है?' },
-  { label: '🍽️ भोजन', message: 'खाना कहाँ मिलेगा?' },
+  { label: '🍽️ भोजन', message: 'भोजन और अन्नक्षेत्र कहाँ मिलेगा?' },
 ];
 
 // ─── Simple Markdown Renderer ──────────────────────────────────────
@@ -335,26 +335,21 @@ export default function VisitorChatbot() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* ── Quick Suggestion Chips ──────────────────────────── */}
-          {messages.length <= 1 && (
-            <div className="px-3 py-2 bg-white border-t border-slate-100 shrink-0">
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                {isHindi ? 'जल्दी पूछें' : 'Quick Ask'}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {suggestions.map((s, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => sendMessage(s.message)}
-                    disabled={isLoading}
-                    className="text-[11px] font-medium px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-cyan-50 text-slate-700 hover:text-cyan-700 border border-slate-200 hover:border-cyan-300 transition-colors disabled:opacity-50"
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
+          {/* ── Quick Suggestion Chips (Always available) ── */}
+          <div className="px-3 py-1.5 bg-slate-50 border-t border-slate-200 shrink-0 overflow-x-auto no-scrollbar">
+            <div className="flex gap-1.5 whitespace-nowrap">
+              {suggestions.map((s, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => sendMessage(s.message)}
+                  disabled={isLoading}
+                  className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-700 border border-slate-200 hover:border-cyan-300 transition-all shadow-2xs disabled:opacity-50 shrink-0"
+                >
+                  {s.label}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
 
           {/* ── Input Area ──────────────────────────────────────── */}
           <div className="px-3 py-3 bg-white border-t border-slate-200 shrink-0">
