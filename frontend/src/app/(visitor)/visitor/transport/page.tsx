@@ -19,7 +19,7 @@ const DEMO_PARKING_LOTS = [
     recommended: true,
     fee: 'FREE PILGRIM PARKING',
     gate: 'Gate 4 North',
-    mapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=25.4380,81.8420+(West+Satellite+Parking+Prayagraj)&travelmode=driving',
+    mapsUrl: 'https://www.google.com/maps/place/Kumbh+Mela+Area,+Prayagraj,+Uttar+Pradesh/@25.4380,81.8420,15z',
     location: { latitude: 25.4380, longitude: 81.8420 },
   },
   {
@@ -32,7 +32,7 @@ const DEMO_PARKING_LOTS = [
     recommended: false,
     fee: 'FREE PILGRIM PARKING',
     gate: 'Gate 1 Plaza',
-    mapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=25.4410,81.8450+(Sangam+North+Gate+Parking+Prayagraj)&travelmode=driving',
+    mapsUrl: 'https://www.google.com/maps/place/Triveni+Sangam,+Prayagraj,+Uttar+Pradesh/@25.4300,81.8824,15z',
     location: { latitude: 25.4410, longitude: 81.8450 },
   },
   {
@@ -45,7 +45,7 @@ const DEMO_PARKING_LOTS = [
     recommended: false,
     fee: 'FREE PILGRIM PARKING',
     gate: 'Gate 3 Riverfront',
-    mapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=25.4300,81.8490+(Arail+Ghat+Riverbank+Parking+Prayagraj)&travelmode=driving',
+    mapsUrl: 'https://www.google.com/maps/place/Arail+Ghat,+Prayagraj,+Uttar+Pradesh/@25.4240,81.8750,15z',
     location: { latitude: 25.4300, longitude: 81.8490 },
   },
   {
@@ -58,7 +58,7 @@ const DEMO_PARKING_LOTS = [
     recommended: false,
     fee: 'PERMIT ONLY',
     gate: 'Emergency Corridor',
-    mapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=25.4340,81.8490+(Prayagraj+Fort+Sangam+VIP+Parking)&travelmode=driving',
+    mapsUrl: 'https://www.google.com/maps/place/Allahabad+Fort,+Prayagraj,+Uttar+Pradesh/@25.4290,81.8790,15z',
     location: { latitude: 25.4340, longitude: 81.8490 },
   },
 ];
