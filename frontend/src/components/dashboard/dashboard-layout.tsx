@@ -306,7 +306,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </Link>
             </li>
 
-            {/* AI Vision / Camera */}
+            {/* Crowd Monitoring / Camera */}
             <li>
               <Link
                 href="/dashboard/camera"
@@ -319,9 +319,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               >
                 <div className="flex items-center min-w-0">
                   <span className="material-symbols-outlined mr-3 text-[20px] shrink-0">
-                    videocam
+                    groups
                   </span>
-                  <span className="font-sans text-[13px] font-medium truncate">AI Vision</span>
+                  <span className="font-sans text-[13px] font-medium truncate">Crowd Monitoring</span>
                 </div>
               </Link>
             </li>

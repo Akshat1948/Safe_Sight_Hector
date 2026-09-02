@@ -482,9 +482,9 @@ export default function CameraPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-subtle pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-2xl">videocam</span>
+              <span className="material-symbols-outlined text-primary text-2xl">groups</span>
               <h1 className="font-headline-md text-headline-md font-bold text-on-surface">
-                CCTV AI Vision & Real-Time Crowd Detection
+                Crowd Monitoring & Real-Time Detection
               </h1>
             </div>
             <p className="text-on-surface-variant font-body-base text-xs mt-1">
