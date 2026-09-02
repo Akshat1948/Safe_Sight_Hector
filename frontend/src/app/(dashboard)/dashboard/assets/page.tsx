@@ -228,6 +228,11 @@ export default function AssetTrackingPage() {
   const [zones, setZones] = useState<IZone[]>([]);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
+  // Second Popup: Dispatch Directive Modal State
+  const [isDispatchModalOpen, setIsDispatchModalOpen] = useState(false);
+  const [selectedZoneName, setSelectedZoneName] = useState('');
+  const [dispatchInstruction, setDispatchInstruction] = useState('');
+
   useEffect(() => {
     getZones(siteId).then((res) => {
       if (res.success && res.data) setZones(res.data);
@@ -236,22 +241,66 @@ export default function AssetTrackingPage() {
     Promise.all([getParkingStatus(siteId), getShuttleStatus(siteId)]).catch(console.error);
   }, [siteId]);
 
+  const availableZones =
+    zones && zones.length > 0
+      ? zones.map((z) => ({ id: z.id, name: z.name }))
+      : [
+          { id: 'zone-a', name: 'Zone A — Main Entry Plaza' },
+          { id: 'zone-b', name: 'Zone B — Riverside Ghat Corridor' },
+          { id: 'zone-c', name: 'Zone C — Ghat Staircase (Chokepoint)' },
+          { id: 'zone-d', name: 'Zone D — Safe Assembly & North Exit' },
+          { id: 'zone-pontoon', name: 'Pontoon Bridge #2 Link' },
+          { id: 'zone-depot', name: 'Depot Alpha Logistics Hub' },
+        ];
+
   const filteredAssets = assets.filter((asset) => {
     if (activeFilter === 'all') return true;
     return asset.category === activeFilter;
   });
 
-  const handleIssueOrders = () => {
+  const handleOpenDispatchModal = () => {
+    if (!selectedZoneName) {
+      setSelectedZoneName(availableZones[0]?.name || 'Zone A — Main Entry Plaza');
+    }
+    setIsDispatchModalOpen(true);
+  };
+
+  const handleConfirmDispatch = () => {
+    const targetZone = selectedZoneName || availableZones[0]?.name || 'Zone A — Main Entry Plaza';
+    const directive = dispatchInstruction.trim()
+      ? dispatchInstruction.trim()
+      : `High-priority tactical deployment to ${targetZone}`;
+
+    setAssets((prev) =>
+      prev.map((a) => {
+        if (a.id === selectedAsset.id) {
+          const updated: AssetItem = {
+            ...a,
+            status: 'DEPLOYED',
+            assignment: `${targetZone} (${directive.length > 24 ? directive.slice(0, 22) + '...' : directive})`,
+            metricLabel: 'DISPATCH STATUS',
+            metricValue: 'EN ROUTE (LIVE)',
+          };
+          setSelectedAsset(updated);
+          return updated;
+        }
+        return a;
+      })
+    );
+
     const verb =
       selectedAsset.category === 'medical'
-        ? 'Emergency medical priority dispatch'
+        ? '🚑 Emergency Ambulance Dispatched'
         : selectedAsset.category === 'fire'
-        ? 'Fire response & water deployment order'
+        ? '🚒 Fire Brigade Tender Dispatched'
         : selectedAsset.category === 'drone'
-        ? 'Aerial flight vector update'
-        : 'Tactical mission directive';
-    setActionNotice(`${verb} transmitted to ${selectedAsset.name}`);
-    setTimeout(() => setActionNotice(null), 3500);
+        ? '🛸 Drone Rerouted to Sector'
+        : '🚨 Tactical Unit Dispatched';
+
+    setActionNotice(`${verb} ➔ ${targetZone}: "${directive}"`);
+    setIsDispatchModalOpen(false);
+    setDispatchInstruction('');
+    setTimeout(() => setActionNotice(null), 4500);
   };
 
   const handleCommsLink = () => {
@@ -424,6 +473,7 @@ export default function AssetTrackingPage() {
                     key={asset.id}
                     onClick={() => {
                       setSelectedAsset(asset);
+                      setIsDispatchModalOpen(false);
                       // On mobile, automatically show map when asset selected
                       if (window.innerWidth < 768) {
                         setMobileTab('map');
@@ -570,108 +620,217 @@ export default function AssetTrackingPage() {
               zoom={16}
             />
 
-            {/* Tactical Detail Overlay */}
-            <div className="absolute bottom-3 left-3 right-3 sm:bottom-6 sm:left-6 sm:right-6 lg:right-auto lg:w-[380px] bg-surface/95 backdrop-blur-md border border-primary/50 rounded-lg p-3 sm:p-4 shadow-xl shadow-text-main/5 z-[400]">
-              <div className="flex justify-between items-start mb-2 sm:mb-3 border-b border-border-subtle pb-2">
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+            {/* Tactical Detail Overlay / Second Dispatch Directive Modal Popup */}
+            {!isDispatchModalOpen ? (
+              <div className="absolute bottom-3 left-3 right-3 sm:bottom-6 sm:left-6 sm:right-6 lg:right-auto lg:w-[380px] bg-surface/95 backdrop-blur-md border border-primary/50 rounded-lg p-3 sm:p-4 shadow-xl shadow-text-main/5 z-[400] transition-all animate-in fade-in">
+                <div className="flex justify-between items-start mb-2 sm:mb-3 border-b border-border-subtle pb-2">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                          selectedAsset.category === 'medical'
+                            ? 'bg-red-500/20 text-red-500 border border-red-500/40'
+                            : selectedAsset.category === 'fire'
+                            ? 'bg-orange-500/20 text-orange-500 border border-orange-500/40'
+                            : selectedAsset.category === 'drone'
+                            ? 'bg-cyan-500/20 text-cyan-500 border border-cyan-500/40'
+                            : 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/40'
+                        }`}
+                      >
+                        {selectedAsset.category}
+                      </span>
+                      <h3 className="font-headline-md text-sm sm:text-base font-bold text-primary">
+                        {selectedAsset.name}
+                      </h3>
+                    </div>
+                    <p className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mt-0.5">
+                      {selectedAsset.type}
+                    </p>
+                  </div>
+                  <span className="px-2 py-0.5 bg-primary-container/20 border border-primary-container text-primary font-label-caps text-[9px] sm:text-[10px] rounded font-bold">
+                    {selectedAsset.status}
+                  </span>
+                </div>
+
+                <div className="space-y-2.5 text-xs">
+                  <div>
+                    <div className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mb-0.5 flex items-center gap-1 uppercase">
+                      <span className="material-symbols-outlined text-[12px]">my_location</span>
+                      COORDINATES & SECTOR
+                    </div>
+                    <div className="font-telemetry-md text-[11px] text-text-main bg-surface-container p-1.5 rounded border border-border-subtle font-mono tracking-wider flex justify-between items-center">
+                      <span>{selectedAsset.coordinates[0].toFixed(4)}° N, {selectedAsset.coordinates[1].toFixed(4)}° E</span>
+                      <span className="text-[10px] text-on-surface-variant font-sans truncate max-w-[150px]">{selectedAsset.assignment}</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-surface-container/60 p-1.5 rounded border border-border-subtle">
+                      <div className="font-label-caps text-[9px] text-on-surface-variant uppercase">
+                        VELOCITY / STATUS
+                      </div>
+                      <div className="font-telemetry-md text-xs sm:text-sm text-text-main font-bold">
+                        {selectedAsset.speed || '38 km/h'}
+                      </div>
+                    </div>
+                    <div className="bg-surface-container/60 p-1.5 rounded border border-border-subtle">
+                      <div className="font-label-caps text-[9px] text-on-surface-variant uppercase">
+                        {selectedAsset.metricLabel}
+                      </div>
+                      <div
+                        className={`font-telemetry-md text-xs sm:text-sm font-bold ${
+                          selectedAsset.category === 'medical'
+                            ? 'text-red-500'
+                            : selectedAsset.category === 'fire'
+                            ? 'text-orange-500'
+                            : 'text-primary'
+                        }`}
+                      >
+                        {selectedAsset.metricValue}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-1.5 border-t border-border-subtle flex gap-2">
+                    <button
+                      onClick={handleCommsLink}
+                      className="flex-1 bg-surface border border-border-subtle text-primary font-body-bold text-xs py-1.5 sm:py-2 rounded hover:bg-surface-container transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">headset_mic</span>
+                      Radio Link
+                    </button>
+                    <button
+                      onClick={handleOpenDispatchModal}
+                      className={`flex-1 text-white font-body-bold text-xs py-1.5 sm:py-2 rounded transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1 ${
                         selectedAsset.category === 'medical'
-                          ? 'bg-red-500/20 text-red-500 border border-red-500/40'
+                          ? 'bg-red-600 hover:bg-red-700'
                           : selectedAsset.category === 'fire'
-                          ? 'bg-orange-500/20 text-orange-500 border border-orange-500/40'
+                          ? 'bg-orange-600 hover:bg-orange-700'
                           : selectedAsset.category === 'drone'
-                          ? 'bg-cyan-500/20 text-cyan-500 border border-cyan-500/40'
-                          : 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/40'
+                          ? 'bg-cyan-600 hover:bg-cyan-700'
+                          : 'bg-primary hover:bg-primary-container'
                       }`}
                     >
-                      {selectedAsset.category}
-                    </span>
-                    <h3 className="font-headline-md text-sm sm:text-base font-bold text-primary">
-                      {selectedAsset.name}
-                    </h3>
-                  </div>
-                  <p className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mt-0.5">
-                    {selectedAsset.type}
-                  </p>
-                </div>
-                <span className="px-2 py-0.5 bg-primary-container/20 border border-primary-container text-primary font-label-caps text-[9px] sm:text-[10px] rounded font-bold">
-                  {selectedAsset.status}
-                </span>
-              </div>
-
-              <div className="space-y-2.5 text-xs">
-                <div>
-                  <div className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mb-0.5 flex items-center gap-1 uppercase">
-                    <span className="material-symbols-outlined text-[12px]">my_location</span>
-                    COORDINATES & SECTOR
-                  </div>
-                  <div className="font-telemetry-md text-[11px] text-text-main bg-surface-container p-1.5 rounded border border-border-subtle font-mono tracking-wider flex justify-between items-center">
-                    <span>{selectedAsset.coordinates[0].toFixed(4)}° N, {selectedAsset.coordinates[1].toFixed(4)}° E</span>
-                    <span className="text-[10px] text-on-surface-variant font-sans">{selectedAsset.assignment}</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-surface-container/60 p-1.5 rounded border border-border-subtle">
-                    <div className="font-label-caps text-[9px] text-on-surface-variant uppercase">
-                      VELOCITY / STATUS
-                    </div>
-                    <div className="font-telemetry-md text-xs sm:text-sm text-text-main font-bold">
-                      {selectedAsset.speed || '38 km/h'}
-                    </div>
-                  </div>
-                  <div className="bg-surface-container/60 p-1.5 rounded border border-border-subtle">
-                    <div className="font-label-caps text-[9px] text-on-surface-variant uppercase">
-                      {selectedAsset.metricLabel}
-                    </div>
-                    <div
-                      className={`font-telemetry-md text-xs sm:text-sm font-bold ${
-                        selectedAsset.category === 'medical'
-                          ? 'text-red-500'
-                          : selectedAsset.category === 'fire'
-                          ? 'text-orange-500'
-                          : 'text-primary'
-                      }`}
-                    >
-                      {selectedAsset.metricValue}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-1.5 border-t border-border-subtle flex gap-2">
-                  <button
-                    onClick={handleCommsLink}
-                    className="flex-1 bg-surface border border-border-subtle text-primary font-body-bold text-xs py-1.5 sm:py-2 rounded hover:bg-surface-container transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1"
-                  >
-                    <span className="material-symbols-outlined text-sm">headset_mic</span>
-                    Radio Link
-                  </button>
-                  <button
-                    onClick={handleIssueOrders}
-                    className={`flex-1 text-white font-body-bold text-xs py-1.5 sm:py-2 rounded transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1 ${
-                      selectedAsset.category === 'medical'
-                        ? 'bg-red-600 hover:bg-red-700'
+                      <span className="material-symbols-outlined text-sm">send</span>
+                      {selectedAsset.category === 'medical'
+                        ? 'Dispatch EMS'
                         : selectedAsset.category === 'fire'
-                        ? 'bg-orange-600 hover:bg-orange-700'
+                        ? 'Dispatch Fire'
                         : selectedAsset.category === 'drone'
-                        ? 'bg-cyan-600 hover:bg-cyan-700'
-                        : 'bg-primary hover:bg-primary-container'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-sm">send</span>
-                    {selectedAsset.category === 'medical'
-                      ? 'Dispatch EMS'
-                      : selectedAsset.category === 'fire'
-                      ? 'Dispatch Fire'
-                      : selectedAsset.category === 'drone'
-                      ? 'Flight Vector'
-                      : 'Issue Orders'}
-                  </button>
+                        ? 'Flight Vector'
+                        : 'Dispatch Asset'}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              /* Second Popup: Dispatch Directive Modal with Exact Matching UI and Dimensions */
+              <div className="absolute bottom-3 left-3 right-3 sm:bottom-6 sm:left-6 sm:right-6 lg:right-auto lg:w-[380px] bg-surface/95 backdrop-blur-md border-2 border-primary rounded-lg p-3 sm:p-4 shadow-2xl shadow-primary/20 z-[400] transition-all animate-in fade-in zoom-in-95">
+                <div className="flex justify-between items-start mb-2 sm:mb-3 border-b border-border-subtle pb-2">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                          selectedAsset.category === 'medical'
+                            ? 'bg-red-500/20 text-red-500 border border-red-500/40'
+                            : selectedAsset.category === 'fire'
+                            ? 'bg-orange-500/20 text-orange-500 border border-orange-500/40'
+                            : selectedAsset.category === 'drone'
+                            ? 'bg-cyan-500/20 text-cyan-500 border border-cyan-500/40'
+                            : 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/40'
+                        }`}
+                      >
+                        {selectedAsset.category}
+                      </span>
+                      <h3 className="font-headline-md text-sm sm:text-base font-bold text-primary flex items-center gap-1">
+                        <span className="material-symbols-outlined text-base">near_me</span>
+                        Dispatch Directive
+                      </h3>
+                    </div>
+                    <p className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mt-0.5">
+                      Transmitting orders to <span className="text-text-main font-bold">{selectedAsset.name}</span>
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsDispatchModalOpen(false)}
+                    className="p-1 text-on-surface-variant hover:text-text-main rounded-md hover:bg-surface-container transition-colors cursor-pointer"
+                    title="Close"
+                  >
+                    <span className="material-symbols-outlined text-base">close</span>
+                  </button>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  {/* Field 1: Target Zone Dropdown Menu */}
+                  <div>
+                    <label className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mb-1 flex items-center gap-1 uppercase font-bold">
+                      <span className="material-symbols-outlined text-[13px] text-primary">pin_drop</span>
+                      Target Destination Zone
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={selectedZoneName}
+                        onChange={(e) => setSelectedZoneName(e.target.value)}
+                        className="w-full bg-surface-container border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary rounded p-2 pr-8 text-xs font-telemetry-md text-text-main appearance-none cursor-pointer outline-none shadow-xs"
+                      >
+                        {availableZones.map((z) => (
+                          <option key={z.id} value={z.name} className="bg-surface text-text-main">
+                            {z.name}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-base">
+                        expand_more
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Field 2: Tactical Instructions / Description Box */}
+                  <div>
+                    <label className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mb-1 flex items-center gap-1 uppercase font-bold">
+                      <span className="material-symbols-outlined text-[13px] text-primary">edit_note</span>
+                      Tactical Instructions & Directives
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={dispatchInstruction}
+                      onChange={(e) => setDispatchInstruction(e.target.value)}
+                      placeholder={`Enter deployment orders, priority level, route details, or emergency protocol for ${selectedAsset.name}...`}
+                      className="w-full bg-surface-container border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary rounded p-2 text-xs font-telemetry-md text-text-main placeholder:text-on-surface-variant/60 resize-none outline-none shadow-xs"
+                    />
+                  </div>
+
+                  {/* Action Buttons: Cancel and Transmit Dispatch */}
+                  <div className="pt-1.5 border-t border-border-subtle flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsDispatchModalOpen(false)}
+                      className="flex-1 bg-surface border border-border-subtle text-secondary font-body-bold text-xs py-2 rounded hover:bg-surface-container transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">arrow_back</span>
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleConfirmDispatch}
+                      className={`flex-1 text-white font-body-bold text-xs py-2 rounded transition-colors shadow-md cursor-pointer flex items-center justify-center gap-1.5 ${
+                        selectedAsset.category === 'medical'
+                          ? 'bg-red-600 hover:bg-red-700'
+                          : selectedAsset.category === 'fire'
+                          ? 'bg-orange-600 hover:bg-orange-700'
+                          : selectedAsset.category === 'drone'
+                          ? 'bg-cyan-600 hover:bg-cyan-700'
+                          : 'bg-primary hover:bg-primary-container'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-sm">send</span>
+                      Confirm Dispatch
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
