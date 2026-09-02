@@ -7,14 +7,8 @@ export interface BoundingBox {
   y2: number;
   confidence: number;
   label: string;
-}
-
-export interface DetectionResult {
-  total_persons: number;
-  detections: BoundingBox[];
-  annotated_image_base64: string | null;
-  processing_time_ms: number;
-  model_version: string;
+  zone_id?: string;
+  zone_name?: string;
 }
 
 export interface ZoneDetectionResult {
@@ -24,6 +18,18 @@ export interface ZoneDetectionResult {
   max_capacity: number;
   density_percentage: number;
   density_status: string;
+  color?: string;
+}
+
+export interface DetectionResult {
+  total_persons: number;
+  detections: BoundingBox[];
+  zone_breakdown?: ZoneDetectionResult[];
+  annotated_image_base64: string | null;
+  processing_time_ms: number;
+  model_version: string;
+  img_width?: number;
+  img_height?: number;
 }
 
 export interface VisionAnalysisResponse {
@@ -34,7 +40,10 @@ export interface VisionAnalysisResponse {
   timestamp: string;
 }
 
-export async function detectFromImage(file: File, confidence = 0.35): Promise<{ success: boolean; data?: DetectionResult; message: string }> {
+export async function detectFromImage(
+  file: File,
+  confidence = 0.35
+): Promise<{ success: boolean; data?: DetectionResult; message: string }> {
   const formData = new FormData();
   formData.append('file', file);
   try {
@@ -48,12 +57,16 @@ export async function detectFromImage(file: File, confidence = 0.35): Promise<{ 
   }
 }
 
-export async function detectFromBase64(imageBase64: string, confidence = 0.35): Promise<{ success: boolean; data?: DetectionResult; message: string }> {
+export async function detectFromBase64(
+  imageBase64: string,
+  confidence = 0.35,
+  autoUpdate = false
+): Promise<{ success: boolean; data?: DetectionResult; message: string }> {
   try {
     const res = await fetch(`${ML_API_BASE}/vision/detect-base64`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image_base64: imageBase64, confidence }),
+      body: JSON.stringify({ image_base64: imageBase64, confidence, auto_update: autoUpdate }),
     });
     return res.json();
   } catch {
@@ -61,7 +74,10 @@ export async function detectFromBase64(imageBase64: string, confidence = 0.35): 
   }
 }
 
-export async function analyzeZones(file: File, autoUpdate = false): Promise<{ success: boolean; data?: VisionAnalysisResponse; message: string }> {
+export async function analyzeZones(
+  file: File,
+  autoUpdate = false
+): Promise<{ success: boolean; data?: VisionAnalysisResponse; message: string }> {
   const formData = new FormData();
   formData.append('file', file);
   try {
