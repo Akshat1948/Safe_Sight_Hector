@@ -257,7 +257,10 @@ export default function MapView({
 
       polygon.bindPopup(popupContent);
 
-      polygon.on('click', () => {
+      polygon.on('click', (e: any) => {
+        if (onMapClick && e.latlng) {
+          onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng });
+        }
         setActiveZoneDetails(zone);
         if (onSelectZone) {
           onSelectZone(zone.id);
@@ -297,7 +300,10 @@ export default function MapView({
       });
 
       const marker = L.marker(centerPoint, { icon: labelIcon });
-      marker.on('click', () => {
+      marker.on('click', (e: any) => {
+        if (onMapClick && e.latlng) {
+          onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng });
+        }
         polygon.openPopup();
         setActiveZoneDetails(zone);
         if (onSelectZone) onSelectZone(zone.id);
@@ -338,6 +344,11 @@ export default function MapView({
         });
 
         const incMarker = L.marker([lat, lng], { icon: incIcon });
+        incMarker.on('click', (e: any) => {
+          if (onMapClick && e.latlng) {
+            onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng });
+          }
+        });
         incMarker.bindPopup(`
           <div style="font-family: system-ui, sans-serif; padding: 4px;">
             <strong style="color: ${isCritical ? '#dc2626' : '#ea580c'};">${inc.severity.toUpperCase()} INCIDENT</strong>
@@ -392,6 +403,11 @@ export default function MapView({
         });
 
         const marker = L.marker(m.coordinates, { icon: assetIcon, zIndexOffset: 500 });
+        marker.on('click', (e: any) => {
+          if (onMapClick && e.latlng) {
+            onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng });
+          }
+        });
         if (m.label) {
           marker.bindPopup(`
             <div style="font-family: system-ui, sans-serif; padding: 4px;">
@@ -452,7 +468,7 @@ export default function MapView({
       `);
       layerGroupRef.current.addLayer(waypointMarker);
     }
-  }, [displayZones, incidents, selectedZoneId, showHeatmap, onSelectZone, customMarkers, targetWaypoint]);
+  }, [displayZones, incidents, selectedZoneId, showHeatmap, onSelectZone, customMarkers, targetWaypoint, onMapClick]);
 
   // Handle map click event for point-on-map coordinate picking
   useEffect(() => {
