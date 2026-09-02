@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/i18n';
+import { SosEmergencyModal } from './sos-emergency-modal';
 
 // ─── Types ─────────────────────────────────────────────────────────
 
@@ -99,6 +100,7 @@ function renderSimpleMarkdown(text: string): React.ReactNode[] {
 export default function VisitorChatbot() {
   const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+  const [isSosModalOpen, setIsSosModalOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -184,13 +186,12 @@ export default function VisitorChatbot() {
           id: `bot-${Date.now()}`,
           role: 'bot',
           content: isHindi
-            ? '⚠️ सर्वर से जुड़ने में असमर्थ। कृपया बाद में प्रयास करें।\n\n📞 तत्काल सहायता: **108** (एम्बुलेंस) | **112** (पुलिस)'
-            : "⚠️ Unable to connect to the server. Please try again later.\n\n📞 Immediate help: **108** (Ambulance) | **112** (Police)",
+            ? '⚠️ सर्वर से जुड़ने में असमर्थ।\n\n🚨 आपातकालीन सहायता के लिए नीचे SOS बटन दबाएं।'
+            : "⚠️ Unable to connect to the server.\n\n🚨 For immediate emergency assistance, please tap the SOS button below.",
           timestamp: new Date(),
           intent: 'error',
           quickActions: [
-            { label: '📞 Call 108', action: 'call', value: '108' },
-            { label: '📞 Call 112', action: 'call', value: '112' },
+            { label: '🚨 Trigger SOS Dispatch', action: 'sos', value: 'trigger_sos' },
           ],
         };
         setMessages((prev) => [...prev, fallbackMsg]);
@@ -207,12 +208,24 @@ export default function VisitorChatbot() {
     } else if (action.action === 'call') {
       window.location.href = `tel:${action.value}`;
     } else if (action.action === 'sos') {
-      // Trigger the SOS button on the page
-      const sosBtn = document.querySelector('[data-sos-trigger]') as HTMLButtonElement;
+      // 1. Dispatch custom event for SOS button on visitor portal
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('safesight:trigger-sos', {
+            detail: { message: 'Emergency SOS requested via AI Saathi Chatbot' },
+          })
+        );
+      }
+
+      // 2. Click the portal SOS button directly if present in DOM
+      const sosBtn = (document.getElementById('safesight-main-sos-btn') ||
+        document.querySelector('[data-sos-trigger]')) as HTMLElement;
+
       if (sosBtn) {
         sosBtn.click();
       } else {
-        window.location.href = 'tel:108';
+        // 3. If no SOS button on the page (e.g. /visitor/transport), open emergency modal directly
+        setIsSosModalOpen(true);
       }
     }
   };
@@ -387,6 +400,13 @@ export default function VisitorChatbot() {
           </div>
         </div>
       )}
+
+      {/* Standalone SOS Emergency Dispatch Modal (if opened directly from chatbot) */}
+      <SosEmergencyModal
+        isOpen={isSosModalOpen}
+        onClose={() => setIsSosModalOpen(false)}
+        siteId="0275fd8b-81a2-4513-bdc5-9c4d27aae375"
+      />
     </>
   );
 }

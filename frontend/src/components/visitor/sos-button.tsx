@@ -20,6 +20,20 @@ export default function SOSButton({ siteId, className = '', onSosDispatched }: S
   const [message, setMessage] = useState('');
   const [contactPhone, setContactPhone] = useState('');
 
+  // Listen for global trigger events (e.g. from AI Chatbot or quick actions)
+  React.useEffect(() => {
+    const handleGlobalSos = (e: any) => {
+      setIsOpen(true);
+      if (e?.detail?.message) {
+        setMessage(e.detail.message);
+      }
+    };
+    window.addEventListener('safesight:trigger-sos', handleGlobalSos);
+    return () => {
+      window.removeEventListener('safesight:trigger-sos', handleGlobalSos);
+    };
+  }, []);
+
   const handleTriggerSOS = async () => {
     setIsSubmitting(true);
     setSosStatus('idle');
@@ -84,8 +98,10 @@ export default function SOSButton({ siteId, className = '', onSosDispatched }: S
         <div className="absolute -inset-3 sm:-inset-4 bg-red-600/30 rounded-full animate-ping opacity-75" />
         <div className="absolute -inset-1.5 sm:-inset-2 bg-red-600/40 rounded-full animate-pulse opacity-90" />
         <button
+          id="safesight-main-sos-btn"
+          data-sos-trigger="true"
           onClick={() => setIsOpen(true)}
-          className="relative h-24 w-24 sm:h-28 sm:w-28 rounded-full bg-gradient-to-br from-red-500 via-red-600 to-rose-700 text-white font-extrabold shadow-2xl flex flex-col items-center justify-center transition-transform hover:scale-105 active:scale-95 border-4 border-white/20 focus:outline-none"
+          className="relative h-24 w-24 sm:h-28 sm:w-28 rounded-full bg-gradient-to-br from-red-500 via-red-600 to-rose-700 text-white font-extrabold shadow-2xl flex flex-col items-center justify-center transition-transform hover:scale-105 active:scale-95 border-4 border-white/20 focus:outline-none cursor-pointer"
         >
           <span className="text-2xl sm:text-3xl font-black tracking-wider">{t('sos')}</span>
           <span className="text-[9px] sm:text-[10px] font-mono tracking-widest uppercase opacity-90">{t('one_tap_help')}</span>

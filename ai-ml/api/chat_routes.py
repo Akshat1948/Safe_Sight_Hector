@@ -425,9 +425,14 @@ def generate_emergency_response(message: str, language: str) -> tuple[str, list[
             )
         reply += "\n⚡ **Need immediate help?** Tap the SOS button below!"
 
-    actions.append(QuickAction(label="🚨 Trigger SOS", action="sos", value="trigger_sos"))
-    actions.append(QuickAction(label="📞 Call 108", action="call", value="108"))
-    actions.append(QuickAction(label="📞 Call 112", action="call", value="112"))
+    if language == "hi":
+        actions.append(QuickAction(label="🚨 आपातकालीन SOS भेजें", action="sos", value="trigger_sos"))
+        actions.append(QuickAction(label="📞 कॉल 108", action="call", value="108"))
+        actions.append(QuickAction(label="📞 कॉल 112", action="call", value="112"))
+    else:
+        actions.append(QuickAction(label="🚨 Trigger SOS Dispatch", action="sos", value="trigger_sos"))
+        actions.append(QuickAction(label="📞 Call 108", action="call", value="108"))
+        actions.append(QuickAction(label="📞 Call 112", action="call", value="112"))
 
     return reply, actions
 
