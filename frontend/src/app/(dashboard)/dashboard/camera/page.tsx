@@ -53,11 +53,14 @@ export default function CameraPage() {
   const [isLiveDetectionActive, setIsLiveDetectionActive] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const [videoFileName, setVideoFileName] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageFileName, setImageFileName] = useState<string | null>(null);
   
   const [confidence, setConfidence] = useState<number>(0.35);
   const [autoSyncToBackend, setAutoSyncToBackend] = useState(false);
   const [showZoneGrid, setShowZoneGrid] = useState(true);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   const [liveDetections, setLiveDetections] = useState<BoundingBox[]>([]);
   const [totalHeadcount, setTotalHeadcount] = useState(0);
@@ -71,7 +74,6 @@ export default function CameraPage() {
   const [processingTime, setProcessingTime] = useState<number>(0);
   const [fps, setFps] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
-  const [isProcessingFrame, setIsProcessingFrame] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -86,14 +88,40 @@ export default function CameraPage() {
   const stopMedia = useCallback(() => {
     isLoopRunningRef.current = false;
     setIsLiveDetectionActive(false);
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
+    if (videoRef.current) {
+      if (videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach((track) => track.stop());
+        videoRef.current.srcObject = null;
+      }
+      videoRef.current.pause();
     }
     setIsWebcamActive(false);
     setIsVideoPlaying(false);
   }, []);
+
+  // Complete Reset / Remove Media
+  const clearCurrentMedia = useCallback(() => {
+    stopMedia();
+    setVideoSrc(null);
+    setVideoFileName(null);
+    setSelectedImage(null);
+    setImageFileName(null);
+    setLiveDetections([]);
+    setTotalHeadcount(0);
+    setZoneCounts({ 'zone-a': 0, 'zone-b': 0, 'zone-c': 0, 'zone-d': 0 });
+    setProcessingTime(0);
+    setFps(0);
+    setError(null);
+    
+    if (videoFileInputRef.current) videoFileInputRef.current.value = '';
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    
+    if (overlayCanvasRef.current) {
+      const ctx = overlayCanvasRef.current.getContext('2d');
+      if (ctx) ctx.clearRect(0, 0, overlayCanvasRef.current.width, overlayCanvasRef.current.height);
+    }
+  }, [stopMedia]);
 
   useEffect(() => {
     return () => {
@@ -103,10 +131,7 @@ export default function CameraPage() {
 
   // Start Webcam
   const startWebcam = async () => {
-    stopMedia();
-    setVideoSrc(null);
-    setSelectedImage(null);
-    setError(null);
+    clearCurrentMedia();
     setSourceMode('webcam');
 
     try {
@@ -117,7 +142,6 @@ export default function CameraPage() {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
         setIsWebcamActive(true);
-        // Start continuous live detection automatically on camera start
         setIsLiveDetectionActive(true);
       }
     } catch (err) {
@@ -127,14 +151,10 @@ export default function CameraPage() {
   };
 
   // Handle Video File Upload
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    stopMedia();
-    setSelectedImage(null);
+  const loadVideoFile = (file: File) => {
+    clearCurrentMedia();
     setSourceMode('video');
-    setError(null);
+    setVideoFileName(file.name);
 
     const url = URL.createObjectURL(file);
     setVideoSrc(url);
@@ -151,14 +171,20 @@ export default function CameraPage() {
     }
   };
 
-  // Handle Image Upload
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (file) {
+      loadVideoFile(file);
+    }
+    // Reset input value so same file can be re-selected if desired
+    e.target.value = '';
+  };
 
-    stopMedia();
+  // Handle Image Upload
+  const loadImageFile = async (file: File) => {
+    clearCurrentMedia();
     setSourceMode('image');
-    setError(null);
+    setImageFileName(file.name);
 
     const reader = new FileReader();
     reader.onload = async (event) => {
@@ -185,6 +211,28 @@ export default function CameraPage() {
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      loadImageFile(file);
+    }
+    e.target.value = '';
+  };
+
+  // Drag & Drop on Video Container
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    if (file.type.startsWith('video/')) {
+      loadVideoFile(file);
+    } else if (file.type.startsWith('image/')) {
+      loadImageFile(file);
+    }
   };
 
   // Draw overlay on canvas
@@ -224,11 +272,13 @@ export default function CameraPage() {
         ctx.setLineDash([]);
 
         // Zone Tag / Header Banner
-        ctx.fillStyle = `${zone.color}cc`;
-        ctx.fillRect(x + 8, y + 8, ctx.measureText(zone.name).width + 30, 22);
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = `${zone.color}dd`;
+        const tagText = `${zone.name} (${zoneCounts[zone.id] || 0})`;
         ctx.font = 'bold 11px system-ui, sans-serif';
-        ctx.fillText(zone.name, x + 14, y + 23);
+        const textWidth = ctx.measureText(tagText).width;
+        ctx.fillRect(x + 8, y + 8, textWidth + 16, 22);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(tagText, x + 14, y + 23);
       });
     }
 
@@ -270,7 +320,7 @@ export default function CameraPage() {
       ctx.lineWidth = 1.5;
       ctx.stroke();
     });
-  }, [showZoneGrid]);
+  }, [showZoneGrid, zoneCounts]);
 
   // Main Continuous Live Frame Processing Loop
   const processLiveFrame = useCallback(async () => {
@@ -323,11 +373,11 @@ export default function CameraPage() {
       }
     } catch (err) {
       console.error('Frame detection error:', err);
-    }
-
-    // Schedule next frame if loop still active
-    if (isLoopRunningRef.current) {
-      setTimeout(processLiveFrame, 120); // ~8-10 FPS live YOLO stream
+    } finally {
+      // Keep continuous loop running reliably
+      if (isLoopRunningRef.current) {
+        setTimeout(processLiveFrame, 120); // ~8-10 FPS live YOLO stream
+      }
     }
   }, [confidence, autoSyncToBackend, drawOverlay]);
 
@@ -386,25 +436,25 @@ export default function CameraPage() {
             <button
               onClick={() => videoFileInputRef.current?.click()}
               className={`px-3 py-1.5 rounded text-xs font-body-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                sourceMode === 'video'
+                sourceMode === 'video' && videoSrc
                   ? 'bg-primary text-white shadow-sm'
                   : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
               <span className="material-symbols-outlined text-sm">movie</span>
-              Upload Video
+              {videoSrc ? 'Change Video' : 'Upload Video'}
             </button>
 
             <button
               onClick={() => fileInputRef.current?.click()}
               className={`px-3 py-1.5 rounded text-xs font-body-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                sourceMode === 'image'
+                sourceMode === 'image' && selectedImage
                   ? 'bg-primary text-white shadow-sm'
                   : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
               <span className="material-symbols-outlined text-sm">image</span>
-              Upload Photo
+              {selectedImage ? 'Change Photo' : 'Upload Photo'}
             </button>
 
             <input
@@ -438,11 +488,11 @@ export default function CameraPage() {
           <div className="lg:col-span-8 flex flex-col gap-4">
             <div className="hud-panel rounded-xl overflow-hidden flex flex-col">
               {/* Stream Title Bar */}
-              <div className="p-3 bg-surface border-b border-border-subtle flex items-center justify-between">
+              <div className="p-3 bg-surface border-b border-border-subtle flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className={`w-2.5 h-2.5 rounded-full ${isLiveDetectionActive ? 'bg-red-500 animate-ping' : 'bg-gray-400'}`}></span>
                   <span className="font-label-caps text-xs font-bold text-on-surface uppercase tracking-wider">
-                    {sourceMode === 'webcam' ? 'Live Camera Feed' : sourceMode === 'video' ? 'CCTV Video Stream' : 'Snapshot Analysis'}
+                    {sourceMode === 'webcam' ? 'Live Camera Feed' : sourceMode === 'video' ? `CCTV: ${videoFileName || 'Video Stream'}` : `Photo: ${imageFileName || 'Snapshot'}`}
                   </span>
                   {isLiveDetectionActive && (
                     <span className="px-2 py-0.5 bg-red-600/20 border border-red-500 text-red-400 rounded text-[10px] font-mono font-bold animate-pulse">
@@ -459,7 +509,7 @@ export default function CameraPage() {
                       onChange={(e) => setShowZoneGrid(e.target.checked)}
                       className="rounded border-border-subtle text-primary"
                     />
-                    Show Sector Grid
+                    Sector Grid
                   </label>
 
                   <label className="flex items-center gap-1.5 text-xs text-on-surface-variant cursor-pointer font-telemetry-md">
@@ -469,13 +519,32 @@ export default function CameraPage() {
                       onChange={(e) => setAutoSyncToBackend(e.target.checked)}
                       className="rounded border-border-subtle text-primary"
                     />
-                    Sync to Mission Control
+                    Sync Mission Control
                   </label>
+
+                  {/* Remove / Clear Button in Top Bar */}
+                  {(videoSrc || selectedImage || isWebcamActive) && (
+                    <button
+                      onClick={clearCurrentMedia}
+                      title="Remove current media and reset"
+                      className="p-1 px-2 text-[11px] bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded font-body-bold transition-colors cursor-pointer flex items-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-xs">delete</span>
+                      Remove
+                    </button>
+                  )}
                 </div>
               </div>
 
-              {/* Video & Canvas Container */}
-              <div className="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+              {/* Video & Canvas Container with Drag and Drop */}
+              <div
+                onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
+                onDragLeave={() => setIsDraggingOver(false)}
+                onDrop={handleDrop}
+                className={`relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden transition-all ${
+                  isDraggingOver ? 'ring-4 ring-primary ring-inset' : ''
+                }`}
+              >
                 {/* Hidden Capture Canvas */}
                 <canvas ref={canvasRef} className="hidden" />
 
@@ -484,6 +553,7 @@ export default function CameraPage() {
                   ref={videoRef}
                   playsInline
                   muted
+                  controls={sourceMode === 'video'}
                   loop={sourceMode === 'video'}
                   className={`w-full h-full object-contain ${sourceMode === 'image' ? 'hidden' : 'block'}`}
                 />
@@ -503,17 +573,25 @@ export default function CameraPage() {
                   className="absolute inset-0 w-full h-full object-contain pointer-events-none z-10"
                 />
 
+                {/* Drag Overlay State */}
+                {isDraggingOver && (
+                  <div className="absolute inset-0 bg-primary/20 backdrop-blur-xs flex flex-col items-center justify-center text-white z-20 pointer-events-none">
+                    <span className="material-symbols-outlined text-5xl animate-bounce">upload_file</span>
+                    <span className="font-body-bold text-sm mt-2">Drop Video or Image to Test</span>
+                  </div>
+                )}
+
                 {/* Empty State Prompt */}
                 {!isWebcamActive && !videoSrc && !selectedImage && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-on-surface-variant">
                     <span className="material-symbols-outlined text-6xl text-primary/60 mb-3 animate-pulse">
                       videocam
                     </span>
-                    <h3 className="font-body-bold text-base text-on-surface">No Active Feed</h3>
+                    <h3 className="font-body-bold text-base text-on-surface">No Active Video or Camera</h3>
                     <p className="text-xs text-on-surface-variant font-telemetry-md max-w-sm mt-1 mb-4">
-                      Click below to activate your live webcam, upload CCTV video footage, or test with a crowd photo.
+                      Upload a CCTV crowd video, drag & drop a file here, or start your live webcam.
                     </p>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap items-center justify-center gap-2">
                       <button
                         onClick={startWebcam}
                         className="px-4 py-2 bg-primary text-white rounded font-body-bold text-xs hover:bg-primary/90 transition-colors shadow-sm cursor-pointer flex items-center gap-1.5"
@@ -526,14 +604,21 @@ export default function CameraPage() {
                         className="px-4 py-2 bg-surface-container border border-border-subtle text-on-surface rounded font-body-bold text-xs hover:bg-surface-container-high transition-colors cursor-pointer flex items-center gap-1.5"
                       >
                         <span className="material-symbols-outlined text-sm">movie</span>
-                        Upload Video
+                        Choose Video File
+                      </button>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-4 py-2 bg-surface-container border border-border-subtle text-on-surface rounded font-body-bold text-xs hover:bg-surface-container-high transition-colors cursor-pointer flex items-center gap-1.5"
+                      >
+                        <span className="material-symbols-outlined text-sm">image</span>
+                        Choose Photo
                       </button>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Bottom Stream Controls */}
+              {/* Bottom Stream Controls Toolbar */}
               <div className="p-3 bg-surface border-t border-border-subtle flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   {(isWebcamActive || isVideoPlaying) && (
@@ -548,17 +633,29 @@ export default function CameraPage() {
                       <span className="material-symbols-outlined text-sm">
                         {isLiveDetectionActive ? 'pause' : 'play_arrow'}
                       </span>
-                      {isLiveDetectionActive ? 'Pause Live Detect' : 'Resume Live Detect'}
+                      {isLiveDetectionActive ? 'Pause Detection' : 'Resume Detection'}
                     </button>
                   )}
 
+                  {/* Change Video Button */}
+                  {sourceMode === 'video' && videoSrc && (
+                    <button
+                      onClick={() => videoFileInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-primary/20 text-primary border border-primary/40 hover:bg-primary/30 rounded text-xs font-body-bold transition-colors cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span className="material-symbols-outlined text-sm">file_upload</span>
+                      Change Video
+                    </button>
+                  )}
+
+                  {/* Remove Video / Reset Button */}
                   {(isWebcamActive || videoSrc || selectedImage) && (
                     <button
-                      onClick={stopMedia}
-                      className="px-3 py-1.5 bg-surface-container border border-border-subtle hover:bg-surface-container-high text-on-surface rounded text-xs font-body-bold transition-colors cursor-pointer flex items-center gap-1.5"
+                      onClick={clearCurrentMedia}
+                      className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded text-xs font-body-bold transition-colors cursor-pointer flex items-center gap-1.5"
                     >
-                      <span className="material-symbols-outlined text-sm">stop</span>
-                      Stop Feed
+                      <span className="material-symbols-outlined text-sm">close</span>
+                      Remove & Reset
                     </button>
                   )}
                 </div>
