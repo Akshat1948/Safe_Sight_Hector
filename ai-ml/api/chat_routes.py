@@ -160,11 +160,47 @@ async def fetch_weather_data(site_id: str = "0275fd8b-81a2-4513-bdc5-9c4d27aae37
     return {}
 
 
-# ─── Response Generators ───────────────────────────────────────────
+# ─── Multilingual Assistance & Helpline Dictionaries ──────────────
+
+ASSISTANCE_FOOTERS: dict[str, str] = {
+    "en": "\n\n💡 *Need extra assistance? Contact:* 24×7 Kumbh Helpline **1920** | Control Room **+91-532-2500000**",
+    "hi": "\n\n💡 *अतिरिक्त सहायता के लिए संपर्क करें:* 24×7 कुंभ हेल्पलाइन **1920** | कंट्रोल रूम **0532-2500000**",
+    "bn": "\n\n💡 *অতিরিক্ত সহায়তার জন্য যোগাযোগ করুন:* ২৪×৭ কুম্ভ হেল্পলাইন **১৯২০** | কন্ট্রোল রুম **০৫৩২-২৫০০০০০**",
+    "or": "\n\n💡 *ଅଧିକ ସହାୟତା ପାଇଁ ଯୋଗାଯୋଗ କରନ୍ତୁ:* ୨୪×୭ କୁମ୍ଭ ହେଲ୍ପଲାଇନ **୧୯୨୦** | କଣ୍ଟ୍ରୋଲ ରୁମ **୦୫୩୨-୨୫୦୦୦୦୦**",
+    "mr": "\n\n💡 *अधिक मदतीसाठी संपर्क साधा:* २४×७ कुंभ हेल्पलाइन **१९२०** | नियंत्रण कक्ष **०५३२-२५०००००**",
+    "kn": "\n\n💡 *ಹೆಚ್ಚಿನ ಸಹಾಯಕ್ಕಾಗಿ ಸಂಪರ್ಕಿಸಿ:* 24×7 ಕುಂಭ ಸಹಾಯವಾಣಿ **1920** | ನಿಯಂತ್ರಣ ಕೊಠಡಿ **0532-2500000**",
+    "ta": "\n\n💡 *கூடுதல் உதவிக்கு தொடர்பு கொள்ளவும்:* 24×7 கும்ப் உதவி எண் **1920** | கட்டுப்பாட்டு அறை **0532-2500000**",
+    "te": "\n\n💡 *మరింత సహాయం కోసం సంప్రదించండి:* 24×7 కుంభ్ హెల్ప్‌లైన్ **1920** | నియంత్రణ గది **0532-2500000**",
+    "gu": "\n\n💡 *વધારાની સહાય માટે સંપર્ક કરો:* 24×7 કુંભ હેલ્પલાઇન **1920** | કંટ્રોલ રૂમ **0532-2500000**",
+    "pa": "\n\n💡 *ਹੋਰ ਸਹਾਇਤਾ ਲਈ ਸੰਪਰਕ ਕਰੋ:* 24×7 ਕੁੰਭ ਹੈਲਪਲਾਈਨ **1920** | ਕੰਟਰੋਲ ਰੂਮ **0532-2500000**",
+    "ml": "\n\n💡 *കൂടുതൽ സഹായത്തിന് ബന്ധപ്പെടുക:* 24×7 കുംഭ ഹെൽപ്പ് ലൈൻ **1920** | കൺട്രോൾ റൂം **0532-2500000**",
+    "ur": "\n\n💡 *مزید مدد کے لیے رابطہ کریں:* 24×7 کمبھ ہیلپ لائن **1920** | کنٹرول روم **0532-2500000**",
+    "as": "\n\n💡 *অতিৰিক্ত সহায়ৰ বাবে যোগাযোগ কৰক:* ২৪×৭ কুম্ভ হেল্পলাইন **১৯২০** | নিয়ন্ত্ৰণ কক্ষ **০৫৩২-২৫০০০০০**",
+}
+
+HELPLINE_LABELS: dict[str, str] = {
+    "en": "📞 Helpline 1920",
+    "hi": "📞 हेल्पलाइन 1920",
+    "bn": "📞 হেল্পলাইন ১৯২০",
+    "or": "📞 ହେଲ୍ପଲାଇନ ୧୯୨୦",
+    "mr": "📞 हेल्पलाइन १९२०",
+    "kn": "📞 ಸಹಾಯವಾಣಿ 1920",
+    "ta": "📞 உதவி எண் 1920",
+    "te": "📞 హెల్ప్‌లైన్ 1920",
+    "gu": "📞 હેલ્પલાઇન 1920",
+    "pa": "📞 ਹੈਲਪਲਾਈਨ 1920",
+    "ml": "📞 ഹെൽപ്പ് ലൈൻ 1920",
+    "ur": "📞 ہیلپ لائن 1920",
+    "as": "📞 হেল্পলাইন ১৯২০",
+}
 
 GREETING_RESPONSES = {
     "en": "🙏 Namaste! I'm **SafeSight Saathi**, your AI pilgrim safety assistant for Maha Kumbh Mela 2026, Prayagraj.\n\nI can help you with:\n• 📊 **Crowd density** — check which ghats are safe\n• 🌤️ **Weather** — live forecasts & alerts\n• 🚌 **Transport** — bus, boat & parking info\n• 🚨 **Emergency** — SOS, ambulance, police\n• 📍 **Navigation** — find gates, toilets, food stalls\n\nHow can I help you today?",
     "hi": "🙏 नमस्ते! मैं **SafeSight साथी** हूं, महा कुंभ मेला 2026, प्रयागराज में आपका AI तीर्थयात्री सुरक्षा सहायक।\n\nमैं आपकी मदद कर सकता हूं:\n• 📊 **भीड़ की स्थिति** — कौन सा घाट सुरक्षित है\n• 🌤️ **मौसम** — लाइव पूर्वानुमान और अलर्ट\n• 🚌 **परिवहन** — बस, नाव और पार्किंग की जानकारी\n• 🚨 **आपातकाल** — SOS, एम्बुलेंस, पुलिस\n• 📍 **नेविगेशन** — गेट, शौचालय, भोजन स्टॉल खोजें\n\nआज मैं आपकी कैसे मदद कर सकता हूं?",
+    "bn": "🙏 নমস্কার! আমি **SafeSight Saathi**, মহা কুম্ভমেলা ২০২৬, প্রয়াগরাজে আপনার এআই তীর্থযাত্রী সুরক্ষা সহকারী।\n\nআমি আপনাকে সাহায্য করতে পারি:\n• 📊 **ভিড়ের অবস্থা** — কোন ঘাট নিরাপদ\n• 🌤️ **আবহাওয়া** — লাইভ পূর্বাভাস ও সতর্কতা\n• 🚌 **পরিবহন** — বাস, নৌকা ও পার্কিং\n• 🚨 **জরুরি সেবা** — এসওএস, অ্যাম্বুলেন্স, পুলিশ\n• 📍 **নেভিগেশন** — গেট, শৌচাগার, খাদ্যকেন্দ্র\n\nআজ আপনাকে কীভাবে সাহায্য করতে পারি?",
+    "or": "🙏 ନମସ୍କାର! ମୁଁ **SafeSight Saathi**, ମହା କୁମ୍ଭମେଳା ୨୦୨୬, ପ୍ରୟାଗରାଜରେ ଆପଣଙ୍କ AI ତୀର୍ଥଯାତ୍ରୀ ସୁରକ୍ଷା ସହାୟକ।\n\nମୁଁ ଆପଣଙ୍କୁ ସାହାଯ୍ୟ କରିପାରିବି:\n• 📊 **ଭିଡ଼ ସ୍ଥିତି** — କେଉଁ ଘାଟ ନିରାପଦ\n• 🌤️ **ପାଣିପାଗ** — ଲାଇଭ୍ ପୂର୍ବାନୁମାନ\n• 🚌 **ପରିବହନ** — ବସ୍, ଡଙ୍ଗା ଓ ପାର୍କିଂ\n• 🚨 **ଜରୁରୀକାଳୀନ** — SOS, ଆମ୍ବୁଲାନ୍ସ, ପୋଲିସ\n• 📍 **ଦିଗନିର୍ଦ୍ଦେଶ** — ଗେଟ୍, ଶୌଚାଳୟ, ଖାଦ୍ୟ କେନ୍ଦ୍ର\n\nଆଜି ମୁଁ ଆପଣଙ୍କୁ କିପରି ସାହାଯ୍ୟ କରିପାରିବି?",
+    "mr": "🙏 नमस्कार! मी **SafeSight साथी** आहे, महा कुंभमेळा २०२६, प्रयागराज येथे आपला AI तीर्थयात्री सुरक्षा सहाय्यक.\n\nमी आपल्याला मदत करू शकतो:\n• 📊 **गर्दीची स्थिती** — कोणता घाट सुरक्षित आहे\n• 🌤️ **हवामान** — थेट अंदाज आणि इशारे\n• 🚌 **वाहतूक** — बस, बोट आणि पार्किंग\n• 🚨 **आपत्कालीन** — SOS, रुग्णवाहिका, पोलीस\n• 📍 **मार्गदर्शन** — प्रवेशद्वार, स्वच्छतागृह, अन्नछत्र\n\nआज मी आपली काय मदत करू शकतो?",
+    "kn": "🙏 ನಮಸ್ಕಾರ! ನಾನು **SafeSight ಸಾಥಿ**, ಮಹಾ ಕುಂಭಮೇಳ 2026, ಪ್ರಯಾಗ್‌ರಾಜ್‌ನಲ್ಲಿ ನಿಮ್ಮ AI ಯಾತ್ರಿಕರ ಸುರಕ್ಷತಾ ಸಹಾಯಕ.\n\nನಾನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ:\n• 📊 **ಜನದಟ್ಟಣೆ ವಿವರ** — ಯಾವ ಘಾಟ್ ಸುರಕ್ಷಿತ\n• 🌤️ **ಹವಾಮಾನ** — ಲೈವ್ ಮುನ್ಸೂಚನೆ\n• 🚌 **ಸಾರಿಗೆ** — ಬಸ್, ದೋಣಿ ಮತ್ತು ಪಾರ್ಕಿಂಗ್\n• 🚨 **ತುರ್ತು ಸೇವೆ** — SOS, ಆಂಬ್ಯುಲೆನ್ಸ್, ಪೊಲೀಸ್\n• 📍 **ಮಾರ್ಗದರ್ಶನ** — ಗೇಟ್, ಶೌಚಾಲಯ, ಆಹಾರ ಕೇಂದ್ರ\n\nಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?",
 }
 
 
@@ -569,9 +605,42 @@ async def chat_endpoint(req: ChatRequest):
     """
     try:
         intent = classify_intent(req.message)
-        # Auto-detect Devanagari Hindi or respect explicit language parameter
+        # Auto-detect script or respect portal language parameter
         has_devanagari = bool(re.search(r'[\u0900-\u097F]', req.message))
-        lang = "hi" if (req.language == "hi" or has_devanagari) else "en"
+        has_bengali = bool(re.search(r'[\u0980-\u09FF]', req.message))
+        has_odia = bool(re.search(r'[\u0B00-\u0B7F]', req.message))
+        has_kannada = bool(re.search(r'[\u0C80-\u0CFF]', req.message))
+        has_tamil = bool(re.search(r'[\u0B80-\u0BFF]', req.message))
+        has_telugu = bool(re.search(r'[\u0C00-\u0C7F]', req.message))
+        has_gujarati = bool(re.search(r'[\u0A80-\u0AFF]', req.message))
+        has_punjabi = bool(re.search(r'[\u0A00-\u0A7F]', req.message))
+        has_malayalam = bool(re.search(r'[\u0D00-\u0D7F]', req.message))
+        has_urdu = bool(re.search(r'[\u0600-\u06FF]', req.message))
+
+        if req.language and req.language in ASSISTANCE_FOOTERS:
+            lang = req.language
+        elif has_bengali:
+            lang = "bn"
+        elif has_odia:
+            lang = "or"
+        elif has_kannada:
+            lang = "kn"
+        elif has_tamil:
+            lang = "ta"
+        elif has_telugu:
+            lang = "te"
+        elif has_gujarati:
+            lang = "gu"
+        elif has_punjabi:
+            lang = "pa"
+        elif has_malayalam:
+            lang = "ml"
+        elif has_urdu:
+            lang = "ur"
+        elif has_devanagari:
+            lang = "hi"
+        else:
+            lang = "en"
 
         if intent == ChatIntent.GREETING:
             reply = GREETING_RESPONSES.get(lang, GREETING_RESPONSES["en"])
@@ -592,19 +661,15 @@ async def chat_endpoint(req: ChatRequest):
         else:
             reply, actions = generate_general_response(req.message, lang)
 
-        # Append extra assistance helpline message to the end of every chat reply
-        if lang == "hi":
-            assistance_footer = "\n\n💡 *अतिरिक्त सहायता के लिए संपर्क करें:* 24×7 कुंभ हेल्पलाइन **1920** | कंट्रोल रूम **0532-2500000**"
-        else:
-            assistance_footer = "\n\n💡 *Need extra assistance? Contact:* 24×7 Kumbh Helpline **1920** | Control Room **+91-532-2500000**"
-
-        if "1920" not in reply:
+        # Append extra assistance helpline message in the exact active language
+        assistance_footer = ASSISTANCE_FOOTERS.get(lang, ASSISTANCE_FOOTERS["en"])
+        if "1920" not in reply and "১৯২০" not in reply and "୧୯୨୦" not in reply:
             reply = reply.strip() + assistance_footer
 
         # Ensure 24x7 Helpline button is available on EVERY response
         has_helpline = any(a.value in ("1920", "+915322500000", "05322500000") for a in actions)
         if not has_helpline:
-            helpline_label = "📞 Helpline 1920" if lang == "en" else "📞 हेल्पलाइन 1920"
+            helpline_label = HELPLINE_LABELS.get(lang, HELPLINE_LABELS["en"])
             actions.append(QuickAction(label=helpline_label, action="call", value="1920"))
 
         return {
