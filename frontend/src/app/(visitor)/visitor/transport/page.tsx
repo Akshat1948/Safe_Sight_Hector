@@ -6,6 +6,7 @@ import { getParkingStatus, getShuttleStatus } from '@/shared/api/transport.api';
 import { IParkingStatus, IShuttleStatus, TransportStatus } from '@/shared/types';
 import { LanguageSwitcher } from '@/components/language';
 import { useLanguage } from '@/i18n';
+import VisitorChatbot from '@/components/visitor/visitor-chatbot';
 
 // Fallback Mock Data for Sangam Pilgrimage Transport (Prayagraj, Uttar Pradesh)
 const DEMO_PARKING_LOTS = [
@@ -742,6 +743,9 @@ export default function VisitorTransportPage() {
           </div>
         </div>
       )}
+
+      {/* SafeSight Saathi — AI Chatbot */}
+      <VisitorChatbot />
     </div>
   );
 }

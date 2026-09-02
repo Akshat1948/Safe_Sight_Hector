@@ -52,6 +52,9 @@ app.include_router(translation_router, prefix="/ml")
 from api.vision_routes import router as vision_router
 app.include_router(vision_router, prefix="/ml")
 
+# SafeSight Saathi — AI Visitor Chatbot
+from api.chat_routes import router as chat_router
+app.include_router(chat_router, prefix="/ml")
 
 
 @app.get("/ml/health")

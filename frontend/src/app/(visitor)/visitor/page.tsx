@@ -13,6 +13,7 @@ import WeatherAlertModal, { WeatherBroadcastAlert } from '@/components/visitor/w
 import { useLanguage } from '@/i18n';
 import { getZones } from '@/shared/api';
 import { IZone, AlertSeverity } from '@/shared/types';
+import VisitorChatbot from '@/components/visitor/visitor-chatbot';
 
 export default function VisitorPortalPage() {
   const [zones, setZones] = useState<IZone[]>([]);
@@ -236,6 +237,9 @@ export default function VisitorPortalPage() {
       <footer className="mt-12 sm:mt-16 border-t border-slate-200 text-center py-6 px-4 text-[11px] sm:text-xs text-slate-500 font-sans bg-white">
         SafeSight Platform · Smart India Hackathon 2026 · AI-Powered Crowd Safety
       </footer>
+
+      {/* SafeSight Saathi — AI Chatbot */}
+      <VisitorChatbot />
     </div>
   );
 }
